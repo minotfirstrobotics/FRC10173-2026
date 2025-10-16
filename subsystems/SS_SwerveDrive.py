@@ -15,8 +15,8 @@ class SS_SwerveDrive(commands2.SubsystemBase):
         super().__init__()
         self._joystick = driver_joystick
         self._max_angular_rate = rotationsToRadians(constants.SWERVE_DEFAULT_NOT_GENERATED["MAX_ROTATION_SPEED"]) # .75 was recommended
-        self._max_speed = TunerConstants.speed_at_12_volts
-        self._slow_speed = TunerConstants.speed_at_3_volts
+        self._max_speed = TunerConstants.speed_at_12_volts * 2/3
+        self._slow_speed = TunerConstants.speed_at_3_volts * 2/3
         self._logger = Telemetry(self._max_speed)
 
         # Initialize swerve drive configurations
@@ -54,30 +54,30 @@ class SS_SwerveDrive(commands2.SubsystemBase):
         )
 
         pov_speed = constants.SWERVE_DEFAULT_NOT_GENERATED["MAX_POV_SPEED"]
-        (self._joystick.start() and self._joystick.pov(0)).whileTrue(
-            self.drivetrain.apply_request(
-                lambda: self._drive_robot_centered.with_velocity_x(pov_speed).with_velocity_y(0)
-            )
-        )
-        (self._joystick.start() and self._joystick.pov(180)).whileTrue(
-            self.drivetrain.apply_request(
-                lambda: self._drive_robot_centered.with_velocity_x(-pov_speed).with_velocity_y(0)
-            )
-        )
-        (self._joystick.start() and self._joystick.pov(90)).whileTrue(
-            self.drivetrain.apply_request(
-                lambda: self._drive_robot_centered.with_velocity_x(0).with_velocity_y(pov_speed)
-            )
-        )
-        (self._joystick.start() and self._joystick.pov(270)).whileTrue(
-            self.drivetrain.apply_request(
-                lambda: self._drive_robot_centered.with_velocity_x(0).with_velocity_y(-pov_speed)
-            )
-        )
+        # (self._joystick.start() and self._joystick.pov(0)).whileTrue(
+        #     self.drivetrain.apply_request(
+        #         lambda: self._drive_robot_centered.with_velocity_x(pov_speed).with_velocity_y(0)
+        #     )
+        # )
+        # (self._joystick.start() and self._joystick.pov(180)).whileTrue(
+        #     self.drivetrain.apply_request(
+        #         lambda: self._drive_robot_centered.with_velocity_x(-pov_speed).with_velocity_y(0)
+        #     )
+        # )
+        # (self._joystick.start() and self._joystick.pov(90)).whileTrue(
+        #     self.drivetrain.apply_request(
+        #         lambda: self._drive_robot_centered.with_velocity_x(0).with_velocity_y(pov_speed)
+        #     )
+        # )
+        # (self._joystick.start() and self._joystick.pov(270)).whileTrue(
+        #     self.drivetrain.apply_request(
+        #         lambda: self._drive_robot_centered.with_velocity_x(0).with_velocity_y(-pov_speed)
+        #     )
+        # )
 
         # Resets the rotation of the robot pose to 0 from the ForwardPerspectiveValue.OPERATOR_PERSPECTIVE perspective. 
         # This makes the current orientation of the robot X forward for field-centric maneuvers.
-        (self._joystick.back() & self._joystick.start()).onTrue(
+        self._joystick.back().onTrue( # & self._joystick.start()
             self.drivetrain.runOnce(lambda: self.drivetrain.seed_field_centric())
         )
 
@@ -87,25 +87,25 @@ class SS_SwerveDrive(commands2.SubsystemBase):
         Trigger(DriverStation.isDisabled).whileTrue(
             self.drivetrain.apply_request(lambda: idle).ignoringDisable(True)
         )
-        (self._joystick.back() & self._joystick.b()).whileTrue( # brake
-            self.drivetrain.apply_request(lambda: self._brake)
-        )
-        (self._joystick.back() & self._joystick.a()).whileTrue( # point wheels at direction
-            self.drivetrain.apply_request(
-                lambda: self._point_wheels_at_direction.with_module_direction(
-                    Rotation2d(-self._joystick.getLeftY(), -self._joystick.getLeftX())
-                )
-            )
-        )
-        (self._joystick.start() & self._joystick.a()).whileTrue( # sys_id_dynamic forward
-            self.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kForward)
-        )
-        (self._joystick.start() & self._joystick.b()).whileTrue( # sys_id_dynamic reverse
-            self.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kReverse)
-        )
-        (self._joystick.start() & self._joystick.y()).whileTrue( # sys_id_quasistatic forward
-            self.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kForward)
-        )
-        (self._joystick.start() & self._joystick.x()).whileTrue( # sys_id_quasistatic reverse
-            self.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kReverse)
-        )
+        # (self._joystick.back() & self._joystick.b()).whileTrue( # brake
+        #     self.drivetrain.apply_request(lambda: self._brake)
+        # )
+        # (self._joystick.back() & self._joystick.a()).whileTrue( # point wheels at direction
+        #     self.drivetrain.apply_request(
+        #         lambda: self._point_wheels_at_direction.with_module_direction(
+        #             Rotation2d(-self._joystick.getLeftY(), -self._joystick.getLeftX())
+        #         )
+        #     )
+        # )
+        # (self._joystick.start() & self._joystick.a()).whileTrue( # sys_id_dynamic forward
+        #     self.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kForward)
+        # )
+        # (self._joystick.start() & self._joystick.b()).whileTrue( # sys_id_dynamic reverse
+        #     self.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kReverse)
+        # )
+        # (self._joystick.start() & self._joystick.y()).whileTrue( # sys_id_quasistatic forward
+        #     self.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kForward)
+        # )
+        # (self._joystick.start() & self._joystick.x()).whileTrue( # sys_id_quasistatic reverse
+        #     self.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kReverse)
+        # )
