@@ -47,13 +47,10 @@ class RobotContainer:
         # self.driver_joystick.a().onFalse(self.ss_180_servo.run_to_min_position_command())
         # self.driver_joystick.b().onFalse(self.ss_180_servo.run_to_max_position_command())
         # self.driver_joystick.y().onFalse(self.ss_180_servo.run_to_A_position_command())
-        
-        self.driver_joystick.rightBumper().whileTrue(self.ss_winch_servo.adjust_servo_ahead_command())
-        self.driver_joystick.leftBumper().whileTrue(self.ss_winch_servo.adjust_servo_reverse_command())
 
         # self.driver_joystick.povUp().whileTrue(self.ss_encoded_motor.run_forward_command())
-        self.driver_joystick.povUp().onTrue(self.ss_encoded_motor.go_to_destination_B_command())          #works
-        self.driver_joystick.povDown().onTrue(self.ss_encoded_motor.go_to_destination_A_command())        #works
+        self.driver_joystick.povUp().onTrue(self.ss_encoded_motor.go_to_destination_B_command())          #works Level 1
+        self.driver_joystick.povDown().onTrue(self.ss_encoded_motor.go_to_destination_A_command())        #works Level 0
         self.driver_joystick.povLeft().onTrue(self.ss_encoded_motor.stop_motor_command())
 
         # shooter
@@ -61,8 +58,9 @@ class RobotContainer:
         self.driver_joystick.leftBumper().whileTrue(self.ss_general_motor.run_reverse_command2())
 
     def engineer_controller_bindings(self) -> None:
-        self.engineer_joystick.rightBumper().whileTrue(self.ss_general_motor.run_forward_command2())
-        self.engineer_joystick.leftBumper().whileTrue(self.ss_general_motor.run_reverse_command2())
+        #whacker
+        self.engineer_joystick.rightBumper().onTrue(self.ss_winch_servo.adjust_servo_ahead_command()) #works SERVO
+        self.engineer_joystick.leftBumper().onTrue(self.ss_winch_servo.adjust_servo_reverse_command()) #works SERVO
 
 
 
