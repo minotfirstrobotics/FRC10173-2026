@@ -17,7 +17,7 @@ class RobotContainer:
         self.initialize_subsystems()
         self.initialize_swerve_drive()
         self.driver_controller_bindings()
-        self.engineer_controller_bindings
+        self.engineer_controller_bindings()
 
 
     def initialize_subsystems(self) -> None:
