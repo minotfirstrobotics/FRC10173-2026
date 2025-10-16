@@ -21,7 +21,7 @@ class SS_GeneralServo(commands2.Subsystem):
         self.min_position = pos_min
         self.max_position = pos_max
         self.position_A = pos_A
-        self.set_destination(self.position_A)
+        # self.set_destination(self.position_A)
 
     def periodic(self): # Special function called periodically by the robot
         wpilib.SmartDashboard.putNumber(self.dashboard_position_text, self.position)
