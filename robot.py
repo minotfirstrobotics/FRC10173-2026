@@ -52,9 +52,13 @@ class RobotContainer:
         self.driver_joystick.leftBumper().whileTrue(self.ss_winch_servo.adjust_servo_reverse_command())
 
         # self.driver_joystick.povUp().whileTrue(self.ss_encoded_motor.run_forward_command())
-        self.driver_joystick.povUp().onTrue(self.ss_encoded_motor.go_to_destination_B_command())
-        self.driver_joystick.povDown().onTrue(self.ss_encoded_motor.go_to_destination_A_command())
+        self.driver_joystick.povUp().onTrue(self.ss_encoded_motor.go_to_destination_B_command())          #works
+        self.driver_joystick.povDown().onTrue(self.ss_encoded_motor.go_to_destination_A_command())        #works
         self.driver_joystick.povLeft().onTrue(self.ss_encoded_motor.stop_motor_command())
+
+        # shooter
+        self.driver_joystick.rightBumper().whileTrue(self.ss_general_motor.run_forward_command2())
+        self.driver_joystick.leftBumper().whileTrue(self.ss_general_motor.run_reverse_command2())
 
     def engineer_controller_bindings(self) -> None:
         self.engineer_joystick.rightBumper().whileTrue(self.ss_general_motor.run_forward_command2())

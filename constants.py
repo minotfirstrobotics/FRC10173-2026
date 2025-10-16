@@ -1,6 +1,6 @@
 PWM_CHANNELS = {
     "GENERAL_MOTOR": 0,
-    "180_SERVO": 8,
+    "180_SERVO": 8, #wrong?? channel 7 goes to climber
     "WINCH_SERVO": 1,
 }
 
