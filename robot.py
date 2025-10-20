@@ -49,9 +49,9 @@ class RobotContainer:
         # self.driver_joystick.y().onFalse(self.ss_180_servo.run_to_A_position_command())
 
         # self.driver_joystick.povUp().whileTrue(self.ss_encoded_motor.run_forward_command())
-        self.driver_joystick.povUp().onTrue(self.ss_encoded_motor.go_to_destination_B_command())          #works Level 1
+        self.driver_joystick.povUp().onTrue(self.ss_encoded_motor.go_to_destination_C_command())          #works Level 1
         self.driver_joystick.povDown().onTrue(self.ss_encoded_motor.go_to_destination_A_command())        #works Level 0
-        self.driver_joystick.povLeft().onTrue(self.ss_encoded_motor.stop_motor_command())
+        self.driver_joystick.povLeft().onTrue(self.ss_encoded_motor.go_to_destination_B_command())
 
         # shooter
         self.driver_joystick.rightBumper().whileTrue(self.ss_general_motor.run_forward_command2())

@@ -14,8 +14,9 @@ class SS_EncodedMotor(commands2.Subsystem):
         self.is_running = False
 
         self.speed_cap = 1
-        self.destination_A = 10
+        self.destination_A = 13
         self.destination_B = 40
+        self.destination_C = 62
 
 
     def periodic(self): # Special function called periodically by the robot
@@ -58,9 +59,15 @@ class SS_EncodedMotor(commands2.Subsystem):
     def run_to_destination_B_command(self):
         return commands2.cmd.runOnce(lambda: self.run_to_destination(self.destination_B), self)
     
+    def go_to_destination_C_command(self):  
+        return commands2.cmd.runOnce(lambda: self.run_to_destination(self.destination_C), self)
+    
     def go_to_destination_A_command(self):
         return commands2.cmd.runOnce(lambda: self.go_to_destination(self.destination_A), self)
     
     def go_to_destination_B_command(self):  
         return commands2.cmd.runOnce(lambda: self.go_to_destination(self.destination_B), self)
+    
+    def go_to_destination_C_command(self):
+        return commands2.cmd.runOnce(lambda: self.go_to_destination(self.destination_C), self) 
     
