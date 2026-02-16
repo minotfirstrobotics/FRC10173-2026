@@ -33,10 +33,6 @@ class SS_EncodedMotor(commands2.Subsystem):
         self.is_running = False
         self.motor.stopMotor()
 
-    def run_to_destination(self, destination):
-        self.is_running = True
-        self.motor.set(self.speed_cap)
-
     def go_to_destination(self, destination):
         self.controller.setReference(destination, 
                                      SparkBase.ControlType.kPosition, 
@@ -52,12 +48,6 @@ class SS_EncodedMotor(commands2.Subsystem):
     def stop_motor_command(self):
         return commands2.cmd.runOnce(self.stop_motor, self)
 
-    def run_to_destination_A_command(self):
-        return commands2.cmd.runOnce(lambda: self.run_to_destination(self.destination_A), self)
-    
-    def run_to_destination_B_command(self):
-        return commands2.cmd.runOnce(lambda: self.run_to_destination(self.destination_B), self)
-    
     def go_to_destination_A_command(self):
         return commands2.cmd.runOnce(lambda: self.go_to_destination(self.destination_A), self)
     
