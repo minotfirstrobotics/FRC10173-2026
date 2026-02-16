@@ -5,7 +5,8 @@
 * pip install pynetworktables
 * pip install robotpy-pathplannerlib
 * pip install robotpy-rev
+* pip install photonlibpy (unused so far)
 
 # Python Commands
 * robotpy deploy
-* py -3 -m robotpy sync (when a new module/module/library)
+* py -3 -m robotpy sync (whenever a new module/module/library)

@@ -1,7 +1,7 @@
 import wpilib
 import commands2
 import constants
-from rev import *
+# from rev import *
 
 class SS_EncodedMotor(commands2.Subsystem):
     def __init__(self):
