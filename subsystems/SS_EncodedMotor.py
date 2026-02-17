@@ -1,12 +1,12 @@
 import wpilib
 import commands2
 import constants
-# from rev import *
+import rev
 
 class SS_EncodedMotor(commands2.Subsystem):
     def __init__(self):
         super().__init__()
-        self.motor = SparkMax(constants.CAN_CHANNELS["ENCODED_MOTOR"], SparkLowLevel.MotorType.kBrushless)
+        self.motor = rev.CANSparkMax(constants.CAN_CHANNELS["ENCODED_MOTOR"], rev.SparkLowLevel.MotorType.kBrushless)
         self.controller = self.motor.getClosedLoopController()
         self.encoder = self.motor.getEncoder()
         self.position = 0
@@ -35,10 +35,10 @@ class SS_EncodedMotor(commands2.Subsystem):
 
     def go_to_destination(self, destination):
         self.controller.setReference(destination, 
-                                     SparkBase.ControlType.kPosition, 
-                                     ClosedLoopSlot.kSlot0, 
+                                     rev.SparkBase.ControlType.kPosition, 
+                                     rev.ClosedLoopSlot.kSlot0, 
                                      0, 
-                                     SparkClosedLoopController.ArbFFUnits.kVoltage)
+                                     rev.SparkClosedLoopController.ArbFFUnits.kVoltage)
 
 
     ## Commands
