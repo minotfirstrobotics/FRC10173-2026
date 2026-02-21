@@ -1,13 +1,9 @@
 import constants
 import typing
 import commands2
-import commands2.cmd
 from wpilib import SmartDashboard, Timer
 from pathplannerlib.auto import AutoBuilder
 from commands2.button import CommandXboxController
-from subsystems.SS_GeneralMotor import SS_GeneralMotor
-from subsystems.SS_GeneralServo import SS_GeneralServo
-from subsystems.SS_EncodedMotor import SS_EncodedMotor
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
 
 
@@ -30,31 +26,16 @@ class RobotContainer:
 
 
     def initialize_subsystems(self) -> None:
-        self.ss_general_motor = SS_GeneralMotor()
-        self.ss_encoded_motor = SS_EncodedMotor()
-        self.ss_winch_servo = SS_GeneralServo(constants.PWM_CHANNELS["WINCH_SERVO"],
-                                              constants.DASHBOARD_TITLES["WINCH_SERVO_POSITION"],
-                                              pw_min=600, pw_center=1500, pw_max=2400) # HS-785HB
-        self.ss_180_servo = SS_GeneralServo(constants.PWM_CHANNELS["180_SERVO"],
-                                            constants.DASHBOARD_TITLES["180_SERVO_POSITION"],
-                                            pw_min=1000, pw_center=1500, pw_max=2000,
-                                            pos_min=0, pos_max=1) # SG-5010
+        pass
 
 
     def controller_bindings(self) -> None:
-        # swerve drive bindings are contained in the SS_SwerveDrive class
-        self.joystick.x().whileTrue(self.ss_general_motor.run_forward_command2())
-        self.joystick.y().whileTrue(self.ss_general_motor.run_reverse_command2())
-        # self.joystick.a().onFalse(self.ss_180_servo.run_to_min_position_command())
-        # self.joystick.b().onFalse(self.ss_180_servo.run_to_max_position_command())
-        # self.joystick.y().onFalse(self.ss_180_servo.run_to_A_position_command())
-        self.joystick.rightBumper().whileTrue(self.ss_winch_servo.adjust_servo_ahead_command())
-        self.joystick.leftBumper().whileTrue(self.ss_winch_servo.adjust_servo_reverse_command())
-        # self.joystick.povUp().whileTrue(self.ss_encoded_motor.run_forward_command())
-        self.joystick.povUp().onTrue(self.ss_encoded_motor.go_to_destination_B_command())
-        self.joystick.povDown().onTrue(self.ss_encoded_motor.go_to_destination_A_command())
-        self.joystick.povLeft().onTrue(self.ss_encoded_motor.stop_motor_command())
-
+        # joystick bindings for movement are contained in the SS_SwerveDrive class
+        self._joystick.pov(0).whileTrue(self.ss_swerve_drive.pov_move(1, 0))
+        self._joystick.pov(180).whileTrue(self.ss_swerve_drive.pov_move(-1, 0))
+        self._joystick.pov(90).whileTrue(self.ss_swerve_drive.pov_move(0, 1))
+        self._joystick.pov(270).whileTrue(self.ss_swerve_drive.pov_move(0, -1))
+        
 
 class MyRobot(commands2.TimedCommandRobot):
     autonomousCommand: typing.Optional[commands2.Command] = None

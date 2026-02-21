@@ -54,3 +54,11 @@ class SS_EncodedMotor(commands2.Subsystem):
     def go_to_destination_B_command(self):  
         return commands2.cmd.runOnce(lambda: self.go_to_destination(self.destination_B), self)
     
+
+## Usage:
+    # from subsystems.SS_EncodedMotor import SS_EncodedMotor
+    # self.ss_encoded_motor = SS_EncodedMotor()
+    # self.joystick.povUp().whileTrue(self.ss_encoded_motor.run_forward_command())
+    # self.joystick.povUp().onTrue(self.ss_encoded_motor.go_to_destination_B_command())
+    # self.joystick.povDown().onTrue(self.ss_encoded_motor.go_to_destination_A_command())
+    # self.joystick.povLeft().onTrue(self.ss_encoded_motor.stop_motor_command())

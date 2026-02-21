@@ -9,4 +9,4 @@
 
 # Python Commands
 * robotpy deploy
-* py -3 -m robotpy sync (whenever a new module/module/library)
+* py -3 -m robotpy sync (whenever adding/removing module/library)

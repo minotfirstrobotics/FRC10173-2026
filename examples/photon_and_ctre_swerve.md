@@ -1,4 +1,4 @@
-Integrating PhotonVision with a CTR Electronics Phoenix 6 Swerve Drive using Python in FRC involves using PhotonLib to get vision measurements and feeding them into the CTRE Swerve API's built-in  method. This allows for field-oriented driving that corrects for encoder drift. [1]  
+<!-- Integrating PhotonVision with a CTR Electronics Phoenix 6 Swerve Drive using Python in FRC involves using PhotonLib to get vision measurements and feeding them into the CTRE Swerve API's built-in  method. This allows for field-oriented driving that corrects for encoder drift. [1]  
 1. Project Setup 
 
 • Generate Code: Use the Swerve Project Generator in Phoenix Tuner X to create the base Python swerve project. 
@@ -7,28 +7,30 @@ Integrating PhotonVision with a CTR Electronics Phoenix 6 Swerve Drive using Pyt
 
 2. Python Implementation Steps 
 A. Initialize Camera (in  or Subsystem) 
-# example code
+# example code -->
 from photonlibpy.photonCamera import PhotonCamera
 from photonlibpy.photonPoseEstimator import PhotonPoseEstimator, PoseStrategy
 from robotpy_apriltag import AprilTagFieldLayout, AprilTagFields
 import wpilib
 
-# ... inside your drivetrain subsystem
-self.camera = PhotonCamera("YourCameraName")
-# Load AprilTag layout (e.g., 2025 field)
-self.apriltagField = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded)
-# Robot-to-camera transform (e.g., 10 inches forward, 5 inches up)
-self.cameraToRobot = Transform3d(...) 
+class drivetrain_subsystem:
+    def __init__(self):
+        # ... inside your drivetrain subsystem
+        self.camera = PhotonCamera("YourCameraName")
+        # Load AprilTag layout (e.g., 2025 field)
+        self.apriltagField = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded)
+        # Robot-to-camera transform (e.g., 10 inches forward, 5 inches up)
+        self.cameraToRobot = Transform3d(...) 
 
-self.photonEstimator = PhotonPoseEstimator(
-    self.apriltagField,
-    PoseStrategy.MULTI_TAG_PNP_ON_COVARIANCE,
-    self.camera,
-    self.cameraToRobot
-)
+        self.photonEstimator = PhotonPoseEstimator(
+            self.apriltagField,
+            PoseStrategy.MULTI_TAG_PNP_ON_COVARIANCE,
+            self.camera,
+            self.cameraToRobot
+        )
 
-B. Add Vision Data to Drivetrain (Periodic)The CTRE Phoenix 6 Swerve API has built-in pose estimation that allows adding vision updates. [5]  
-# Example code inside your SwerveDrivetrain's periodic method
+<!-- B. Add Vision Data to Drivetrain (Periodic)The CTRE Phoenix 6 Swerve API has built-in pose estimation that allows adding vision updates. [5]  
+# Example code inside your SwerveDrivetrain's periodic method -->
 def periodic(self):
     # 1. Update Drivetrain Odometry
     # self.swerveDrive.updateOdometry(...) # Handled by Phoenix 6
@@ -46,7 +48,7 @@ def periodic(self):
                 timestamp
             )
 
-3. Key Tips & Best Practices 
+<!-- 3. Key Tips & Best Practices 
 
 • Time Synchronization: Use  when feeding measurements to ensure the vision data is correlated with the correct robot position, preventing jerky movement. 
 • Standard Deviations: Adjust the measurement standard deviations () to trust vision less when far away or with only one tag. 
@@ -74,4 +76,4 @@ AI responses may include mistakes.
 [11] https://docs.photonvision.org/en/latest/docs/examples/poseest.html
 [12] https://www.chiefdelphi.com/t/example-for-phoenix-pro-v6-swerve/439841
 [13] https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/mechanisms/swerve/swerve-builder-api.html
-
+ -->
