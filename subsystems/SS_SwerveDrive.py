@@ -40,37 +40,39 @@ class SS_SwerveDrive(commands2.SubsystemBase):
         self.drivetrain.register_telemetry(
             lambda state: self._logger.telemeterize(state)
         )
+        # TODO this is the method to add vision to the swerve drive
+        # self.drivetrain.add_vision_measurement(vision_robot_pose: Pose2d, timestamp: units.second, vision_measurement_std_devs: tuple[float, float, float] | None = None)
 
 
     def swerve_bindings(self) -> None:
         self.drivetrain.setDefaultCommand(
             self.drivetrain.apply_request(lambda: (
                 self._drive_field_centered
-                    .with_velocity_x(-self._joystick.getLeftY() * self._max_speed)
-                    .with_velocity_y(-self._joystick.getLeftX() * self._max_speed)
-                    .with_rotational_rate(-self._joystick.getRightX() * self._max_angular_rate)
+                    .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
+                    .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
+                    .with_rotational_rate(-self._joystick.getRightX() * abs(self._joystick.getRightX()) * self._max_angular_rate)
             ))
         )
 
-        pov_speed = constants.SWERVE_DEFAULT_NOT_GENERATED["MAX_POV_SPEED"]
+        _pov_speed = constants.SWERVE_DEFAULT_NOT_GENERATED["MAX_POV_SPEED"]
         (self._joystick.start() and self._joystick.pov(0)).whileTrue(
             self.drivetrain.apply_request(
-                lambda: self._drive_robot_centered.with_velocity_x(pov_speed).with_velocity_y(0)
+                lambda: self._drive_robot_centered.with_velocity_x(_pov_speed).with_velocity_y(0)
             )
         )
         (self._joystick.start() and self._joystick.pov(180)).whileTrue(
             self.drivetrain.apply_request(
-                lambda: self._drive_robot_centered.with_velocity_x(-pov_speed).with_velocity_y(0)
+                lambda: self._drive_robot_centered.with_velocity_x(-_pov_speed).with_velocity_y(0)
             )
         )
         (self._joystick.start() and self._joystick.pov(90)).whileTrue(
             self.drivetrain.apply_request(
-                lambda: self._drive_robot_centered.with_velocity_x(0).with_velocity_y(pov_speed)
+                lambda: self._drive_robot_centered.with_velocity_x(0).with_velocity_y(_pov_speed)
             )
         )
         (self._joystick.start() and self._joystick.pov(270)).whileTrue(
             self.drivetrain.apply_request(
-                lambda: self._drive_robot_centered.with_velocity_x(0).with_velocity_y(-pov_speed)
+                lambda: self._drive_robot_centered.with_velocity_x(0).with_velocity_y(-_pov_speed)
             )
         )
 
