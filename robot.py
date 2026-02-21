@@ -1,89 +1,65 @@
-#!/usr/bin/env python3
-#
-# Copyright (c) FIRST and other WPILib contributors.
-# Open Source Software; you can modify and/or share it under the terms of
-# the WPILib BSD license file in the root directory of this project.
-#
-
-import wpilib
-import commands2
+import constants
 import typing
+import commands2
+import wpilib
+from wpilib import SmartDashboard, Timer
+# from pathplannerlib.auto import AutoBuilder
+from commands2.button import CommandXboxController
+from subsystems.SS_SwerveDrive import SS_SwerveDrive
 
-from robotcontainer import RobotContainer
 
-from phoenix6 import HootAutoReplay
+class RobotContainer:
+    def __init__(self) -> None:
+        self.joystick = CommandXboxController(0)
+        self.initialize_swerve_drive()
+        self.initialize_subsystems()
+        self.controller_bindings()
 
+
+    def initialize_swerve_drive(self) -> None:
+        self.ss_swerve_drive = SS_SwerveDrive(self.joystick)
+#        self._auto_chooser = AutoBuilder.buildAutoChooser(constants.SWERVE_DEFAULT_NOT_GENERATED["DEFAULT_AUTONOMOUS"])
+        # SmartDashboard.putData(constants.SWERVE_DEFAULT_NOT_GENERATED["DEFAULT_AUTONOMOUS"], self._auto_chooser)
+
+
+    def getAutonomousCommand(self) -> commands2.Command:
+        return self._auto_chooser.getSelected()
+
+
+    def initialize_subsystems(self) -> None:
+        pass
+
+
+    def controller_bindings(self) -> None:
+        # joystick bindings for movement are contained in the SS_SwerveDrive class
+        self.joystick.pov(0).whileTrue(self.ss_swerve_drive.pov_move(1, 0))
+        self.joystick.pov(180).whileTrue(self.ss_swerve_drive.pov_move(-1, 0))
+        self.joystick.pov(90).whileTrue(self.ss_swerve_drive.pov_move(0, 1))
+        self.joystick.pov(270).whileTrue(self.ss_swerve_drive.pov_move(0, -1))
+        
 
 class MyRobot(commands2.TimedCommandRobot):
-    """
-    Command v2 robots are encouraged to inherit from TimedCommandRobot, which
-    has an implementation of robotPeriodic which runs the scheduler for you
-    """
-
     autonomousCommand: typing.Optional[commands2.Command] = None
 
-    def robotInit(self) -> None:
-        """
-        This function is run when the robot is first started up and should be used for any
-        initialization code.
-        """
-
-        # Instantiate our RobotContainer.  This will perform all our button bindings, and put our
-        # autonomous chooser on the dashboard.
+    def robotInit(self) -> None: # Should this be __init__?
         self.container = RobotContainer()
 
-        # log and replay timestamp and joystick data
-        self._time_and_joystick_replay = (
-            HootAutoReplay()
-            .with_timestamp_replay()
-            .with_joystick_replay()
-        )
-
-    def robotPeriodic(self) -> None:
-        """This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
-        that you want ran during disabled, autonomous, teleoperated and test.
-
-        This runs after the mode specific periodic functions, but before LiveWindow and
-        SmartDashboard integrated updating."""
-
-        self._time_and_joystick_replay.update()
-        # Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
-        # commands, running already-scheduled commands, removing finished or interrupted commands,
-        # and running subsystem periodic() methods.  This must be called from the robot's periodic
-        # block in order for anything in the Command-based framework to work.
-        commands2.CommandScheduler.getInstance().run()
-
-    def disabledInit(self) -> None:
-        """This function is called once each time the robot enters Disabled mode."""
-        pass
-
-    def disabledPeriodic(self) -> None:
-        """This function is called periodically when disabled"""
-        pass
+    def robotPeriodic(self) -> None: # Called every 20 ms
+        # TODO commands2.CommandScheduler.getInstance().run()
+        SmartDashboard.putNumber("Match Time", Timer.getMatchTime());
 
     def autonomousInit(self) -> None:
-        """This autonomous runs the autonomous command selected by your RobotContainer class."""
         self.autonomousCommand = self.container.getAutonomousCommand()
-
         if self.autonomousCommand:
-            commands2.CommandScheduler.getInstance().schedule(self.autonomousCommand)
-
-    def autonomousPeriodic(self) -> None:
-        """This function is called periodically during autonomous"""
-        pass
+            self.autonomousCommand.schedule()
 
     def teleopInit(self) -> None:
-        # This makes sure that the autonomous stops running when
-        # teleop starts running. If you want the autonomous to
-        # continue until interrupted by another command, remove
-        # this line or comment it out.
         if self.autonomousCommand:
-            commands2.CommandScheduler.getInstance().cancel(self.autonomousCommand)
-
-    def teleopPeriodic(self) -> None:
-        """This function is called periodically during operator control"""
-        pass
+            self.autonomousCommand.cancel()
 
     def testInit(self) -> None:
-        # Cancels all running commands at the start of test mode
         commands2.CommandScheduler.getInstance().cancelAll()
+
+
+# TODO if __name__ == "__main__":
+#     wpilib.run(MyRobot)
