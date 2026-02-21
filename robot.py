@@ -31,10 +31,10 @@ class RobotContainer:
 
     def controller_bindings(self) -> None:
         # joystick bindings for movement are contained in the SS_SwerveDrive class
-        self._joystick.pov(0).whileTrue(self.ss_swerve_drive.pov_move(1, 0))
-        self._joystick.pov(180).whileTrue(self.ss_swerve_drive.pov_move(-1, 0))
-        self._joystick.pov(90).whileTrue(self.ss_swerve_drive.pov_move(0, 1))
-        self._joystick.pov(270).whileTrue(self.ss_swerve_drive.pov_move(0, -1))
+        self.joystick.pov(0).whileTrue(self.ss_swerve_drive.pov_move(1, 0))
+        self.joystick.pov(180).whileTrue(self.ss_swerve_drive.pov_move(-1, 0))
+        self.joystick.pov(90).whileTrue(self.ss_swerve_drive.pov_move(0, 1))
+        self.joystick.pov(270).whileTrue(self.ss_swerve_drive.pov_move(0, -1))
         
 
 class MyRobot(commands2.TimedCommandRobot):
