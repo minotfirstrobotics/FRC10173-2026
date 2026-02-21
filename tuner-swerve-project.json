@@ -6,7 +6,7 @@
             "ModuleName": "Front Left",
             "ModuleId": 0,
             "Encoder": {
-                "Id": 1,
+                "Id": 48,
                 "Name": "Front Left",
                 "Model": "CANCoder vers. H",
                 "CANbus": "AFBA8B9D394C4853202020500B2718FF",
@@ -14,7 +14,7 @@
                 "SelectedMotorType": null
             },
             "SteerMotor": {
-                "Id": 2,
+                "Id": 45,
                 "Name": "Front Left Steer",
                 "Model": "Talon FX",
                 "CANbus": "AFBA8B9D394C4853202020500B2718FF",
@@ -27,7 +27,7 @@
                 }
             },
             "DriveMotor": {
-                "Id": 3,
+                "Id": 59,
                 "Name": "Front Left Drive",
                 "Model": "Talon FX",
                 "CANbus": "AFBA8B9D394C4853202020500B2718FF",
@@ -55,7 +55,7 @@
             "ModuleName": "Front Right",
             "ModuleId": 1,
             "Encoder": {
-                "Id": 0,
+                "Id": 29,
                 "Name": "Front Right",
                 "Model": "CANCoder vers. H",
                 "CANbus": "AFBA8B9D394C4853202020500B2718FF",
@@ -63,7 +63,7 @@
                 "SelectedMotorType": null
             },
             "SteerMotor": {
-                "Id": 0,
+                "Id": 32,
                 "Name": "Front Right Steer",
                 "Model": "Talon FX",
                 "CANbus": "AFBA8B9D394C4853202020500B2718FF",
@@ -76,7 +76,7 @@
                 }
             },
             "DriveMotor": {
-                "Id": 1,
+                "Id": 56,
                 "Name": "Front Right Drive",
                 "Model": "Talon FX",
                 "CANbus": "AFBA8B9D394C4853202020500B2718FF",
@@ -102,7 +102,7 @@
         },
         {
             "ModuleName": "Back Left",
-            "ModuleId": 2,
+            "ModuleId": 20,
             "Encoder": {
                 "Id": 3,
                 "Name": "Back Left",
@@ -112,7 +112,7 @@
                 "SelectedMotorType": null
             },
             "SteerMotor": {
-                "Id": 6,
+                "Id": 55,
                 "Name": "Back Left Steer",
                 "Model": "Talon FX",
                 "CANbus": "AFBA8B9D394C4853202020500B2718FF",
@@ -125,7 +125,7 @@
                 }
             },
             "DriveMotor": {
-                "Id": 7,
+                "Id": 18,
                 "Name": "Back Left Drive",
                 "Model": "Talon FX",
                 "CANbus": "AFBA8B9D394C4853202020500B2718FF",
@@ -153,7 +153,7 @@
             "ModuleName": "Back Right",
             "ModuleId": 3,
             "Encoder": {
-                "Id": 2,
+                "Id": 37,
                 "Name": "Back Right",
                 "Model": "CANCoder vers. H",
                 "CANbus": "AFBA8B9D394C4853202020500B2718FF",
@@ -161,7 +161,7 @@
                 "SelectedMotorType": null
             },
             "SteerMotor": {
-                "Id": 4,
+                "Id": 14,
                 "Name": "Back Right Steer",
                 "Model": "Talon FX",
                 "CANbus": "AFBA8B9D394C4853202020500B2718FF",
@@ -174,7 +174,7 @@
                 }
             },
             "DriveMotor": {
-                "Id": 5,
+                "Id": 51,
                 "Name": "Back Right Drive",
                 "Model": "Talon FX",
                 "CANbus": "AFBA8B9D394C4853202020500B2718FF",
@@ -201,7 +201,7 @@
     ],
     "SwerveOptions": {
         "Gyro": {
-            "Id": 1,
+            "Id": 27,
             "Name": "Pigeon 2 (Device ID 1)",
             "Model": "Pigeon 2",
             "CANbus": "AFBA8B9D394C4853202020500B2718FF",
