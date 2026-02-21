@@ -17,7 +17,7 @@ class SS_SwerveDrive(commands2.SubsystemBase):
         super().__init__()
         self._joystick = joystick
         self._max_angular_rate = rotationsToRadians(constants.SWERVE_DEFAULT_NOT_GENERATED["MAX_ROTATION_SPEED"]) # .75 was recommended
-        self._max_speed = TunerConstants.speed_at_12_volts * .25
+        self._max_speed = TunerConstants.speed_at_12_volts * .1
         self._pov_speed = constants.SWERVE_DEFAULT_NOT_GENERATED["MAX_POV_SPEED"]
         self._filter = SlewRateLimiter(0.5)
         self._logger = Telemetry(self._max_speed)
@@ -26,7 +26,7 @@ class SS_SwerveDrive(commands2.SubsystemBase):
         self._drive_field_centered = (
             swerve.requests.FieldCentric()
             .with_deadband(self._max_speed * 0.1)
-            .with_rotational_deadband(self._max_angular_rate * 0.1)
+            .with_rotational_deadband(self._max_angular_rate * 0.25)
             .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE)
         )
         self._drive_robot_centered = (
@@ -58,9 +58,9 @@ class SS_SwerveDrive(commands2.SubsystemBase):
         self.drivetrain.setDefaultCommand(
             self.drivetrain.apply_request(lambda: (
                 self._drive_field_centered
-                    .with_velocity_x(self.filter.calculate(-self._joystick.getLeftY() * self._max_speed))
-                    .with_velocity_y(self.filter.calculate(-self._joystick.getLeftX() * self._max_speed))
-                    .with_rotational_rate(self.filter.calculate(-self._joystick.getRightX() * self._max_angular_rate))
+                    .with_velocity_x(-self._joystick.getLeftY() * self._max_speed)
+                    .with_velocity_y(-self._joystick.getLeftX() * self._max_speed)
+                    .with_rotational_rate(-self._joystick.getRightX() * self._max_angular_rate)
             ))
         )
 
