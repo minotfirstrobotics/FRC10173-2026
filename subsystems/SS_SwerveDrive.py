@@ -2,13 +2,15 @@ import commands2
 import constants
 from wpilib import DriverStation
 from wpimath.geometry import Rotation2d
+from wpimath.filter import SlewRateLimiter
 from wpimath.units import rotationsToRadians
 from phoenix6 import swerve
 from telemetry import Telemetry
 from generated.tuner_constants import TunerConstants
 from commands2.button import Trigger
 from commands2.sysid import SysIdRoutine
-
+from wpimath.filter import SlewRateLimiter
+# Creates a SlewRateLimiter that limits the rate of change of the signal to 0.5 units per second
 
 class SS_SwerveDrive(commands2.SubsystemBase):
     def __init__(self, joystick) -> None:
@@ -16,6 +18,7 @@ class SS_SwerveDrive(commands2.SubsystemBase):
         self._joystick = joystick
         self._max_angular_rate = rotationsToRadians(constants.SWERVE_DEFAULT_NOT_GENERATED["MAX_ROTATION_SPEED"]) # .75 was recommended
         self._max_speed = TunerConstants.speed_at_12_volts
+        self._filter = SlewRateLimiter(0.5)
         self._logger = Telemetry(self._max_speed)
 
         # Initialize swerve drive configurations
@@ -48,9 +51,9 @@ class SS_SwerveDrive(commands2.SubsystemBase):
         self.drivetrain.setDefaultCommand(
             self.drivetrain.apply_request(lambda: (
                 self._drive_field_centered
-                    .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
-                    .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
-                    .with_rotational_rate(-self._joystick.getRightX() * abs(self._joystick.getRightX()) * self._max_angular_rate)
+                    .with_velocity_x(self._filter.calculate(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed))
+                    .with_velocity_y(self._filter.calculate(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed))
+                    .with_rotational_rate(self._filter.calculate(-self._joystick.getRightX() * abs(self._joystick.getRightX()) * self._max_angular_rate))
             ))
         )
 
