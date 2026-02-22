@@ -1,26 +1,3 @@
-###################################################################################
-# MIT License
-#
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-###################################################################################
-
 import commands2
 import wpilib
 import wpimath.geometry
@@ -42,12 +19,14 @@ class CameraPose(commands2.SubsystemBase):
         super().__init__()
         self.swerve_drive = swerve_drive
 
+        # Transform from robot to camera
         self.kRobotToCam = wpimath.geometry.Transform3d(
             wpimath.geometry.Translation3d(0.0, 0.0, 0.5),
             wpimath.geometry.Rotation3d.fromDegrees(0.0, 0.0, 0.0),
         )
 
-        self.cam = PhotonCamera("FrontCamera")
+        # Initialize the camera
+        self.cam = PhotonCamera("BackCamera")
         self.cam_pose_est = None
         self.last_pose = None
         self._field_loaded = False
@@ -56,8 +35,12 @@ class CameraPose(commands2.SubsystemBase):
         """Lazy load field layout to avoid blocking initialization"""
         if not self._field_loaded:
             try:
+                # Load the default field layout for AprilTags
+                field_layout = AprilTagFieldLayout.loadField(AprilTagField.kDefaultField)
                 self.cam_pose_est = PhotonPoseEstimator(
-                    AprilTagFieldLayout.loadField(AprilTagField.kDefaultField),
+                    field_layout,
+                    PhotonPoseEstimator.PoseStrategy.CLOSEST_TO_REFERENCE_POSE,
+                    self.cam,
                     self.kRobotToCam,
                 )
                 self._field_loaded = True
@@ -70,14 +53,16 @@ class CameraPose(commands2.SubsystemBase):
         if not self._field_loaded:
             self._load_field_layout()
             return
-        
+
+        # If the pose estimator is not initialized, skip processing
         if self.cam_pose_est is None:
             return
 
         try:
+            # Process all unread results from the camera
             for result in self.cam.getAllUnreadResults():
                 cam_est_pose = self.cam_pose_est.estimateCoprocMultiTagPose(result)
-                
+
                 if cam_est_pose is None:
                     cam_est_pose = self.cam_pose_est.estimateLowestAmbiguityPose(result)
 
@@ -93,11 +78,9 @@ class CameraPose(commands2.SubsystemBase):
             if self.last_pose is not None:
                 pose_translation = self.last_pose.translation()
                 pose_rotation = self.last_pose.rotation()
-                
-                SmartDashboard.putNumber("Vision/Pose X", pose_translation.X())
-                SmartDashboard.putNumber("Vision/Pose Y", pose_translation.Y())
-                SmartDashboard.putNumber("Vision/Pose Rotation", pose_rotation.degrees())
+
+                SmartDashboard.putNumber("Vision/Pose X (meters)", pose_translation.X())
+                SmartDashboard.putNumber("Vision/Pose Y (meters)", pose_translation.Y())
+                SmartDashboard.putNumber("Vision/Pose Rotation (degrees)", pose_rotation.degrees())
         except Exception as e:
             wpilib.reportError(f"Error in CameraPose periodic: {e}", printTraceback=True)
-
-
