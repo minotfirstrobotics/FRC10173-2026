@@ -3,9 +3,9 @@ import typing
 import commands2
 import wpilib
 from wpilib import SmartDashboard, Timer
-# from pathplannerlib.auto import AutoBuilder
 from commands2.button import CommandXboxController
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
+from subsystems.camera_pose import CameraPose
 
 
 class RobotContainer:
@@ -18,6 +18,8 @@ class RobotContainer:
 
     def initialize_swerve_drive(self) -> None:
         self.ss_swerve_drive = SS_SwerveDrive(self.joystick)
+        # Temporarily disabled until vision issues are resolved
+        # self.camera_pose = CameraPose(self.ss_swerve_drive)
 #        self._auto_chooser = AutoBuilder.buildAutoChooser(constants.SWERVE_DEFAULT_NOT_GENERATED["DEFAULT_AUTONOMOUS"])
         # SmartDashboard.putData(constants.SWERVE_DEFAULT_NOT_GENERATED["DEFAULT_AUTONOMOUS"], self._auto_chooser)
 
@@ -46,8 +48,8 @@ class MyRobot(commands2.TimedCommandRobot):
         self.container = RobotContainer()
 
     def robotPeriodic(self) -> None: # Called every 20 ms
-        # TODO commands2.CommandScheduler.getInstance().run()
-        SmartDashboard.putNumber("Match Time", Timer.getMatchTime());
+        commands2.CommandScheduler.getInstance().run()
+        SmartDashboard.putNumber("Match Time", Timer.getMatchTime())
 
     def autonomousInit(self) -> None:
         self.autonomousCommand = self.container.getAutonomousCommand()
