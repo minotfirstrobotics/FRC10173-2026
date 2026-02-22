@@ -47,7 +47,7 @@ class CameraPose(commands2.SubsystemBase):
             except Exception as e:
                 wpilib.reportError(f"Failed to load field layout: {e}", printTraceback=True)
 
-    def periodic(self) -> None:
+def periodic(self) -> None:
     """Called every 20ms by the CommandScheduler"""
 
     # Lazy load field layout
