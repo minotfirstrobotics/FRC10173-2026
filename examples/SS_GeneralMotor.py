@@ -48,4 +48,8 @@ class SS_GeneralMotor(commands2.Subsystem):
         return fancy_command
 
 
-    
+## Usage:
+    # from subsystems.SS_GeneralServo import SS_GeneralServo
+    # self.ss_general_motor = SS_GeneralMotor()
+    # self.joystick.x().whileTrue(self.ss_general_motor.run_forward_command2())
+    # self.joystick.y().whileTrue(self.ss_general_motor.run_reverse_command2())

@@ -1,12 +1,12 @@
 import wpilib
 import commands2
 import constants
-from rev import *
+import rev
 
 class SS_EncodedMotor(commands2.Subsystem):
     def __init__(self):
         super().__init__()
-        self.motor = SparkMax(constants.CAN_CHANNELS["ENCODED_MOTOR"], SparkLowLevel.MotorType.kBrushless)
+        self.motor = rev.CANSparkMax(constants.CAN_CHANNELS["ENCODED_MOTOR"], rev.SparkLowLevel.MotorType.kBrushless)
         self.controller = self.motor.getClosedLoopController()
         self.encoder = self.motor.getEncoder()
         self.position = 0
@@ -33,16 +33,12 @@ class SS_EncodedMotor(commands2.Subsystem):
         self.is_running = False
         self.motor.stopMotor()
 
-    def run_to_destination(self, destination):
-        self.is_running = True
-        self.motor.set(self.speed_cap)
-
     def go_to_destination(self, destination):
         self.controller.setReference(destination, 
-                                     SparkBase.ControlType.kPosition, 
-                                     ClosedLoopSlot.kSlot0, 
+                                     rev.SparkBase.ControlType.kPosition, 
+                                     rev.ClosedLoopSlot.kSlot0, 
                                      0, 
-                                     SparkClosedLoopController.ArbFFUnits.kVoltage)
+                                     rev.SparkClosedLoopController.ArbFFUnits.kVoltage)
 
 
     ## Commands
@@ -52,15 +48,17 @@ class SS_EncodedMotor(commands2.Subsystem):
     def stop_motor_command(self):
         return commands2.cmd.runOnce(self.stop_motor, self)
 
-    def run_to_destination_A_command(self):
-        return commands2.cmd.runOnce(lambda: self.run_to_destination(self.destination_A), self)
-    
-    def run_to_destination_B_command(self):
-        return commands2.cmd.runOnce(lambda: self.run_to_destination(self.destination_B), self)
-    
     def go_to_destination_A_command(self):
         return commands2.cmd.runOnce(lambda: self.go_to_destination(self.destination_A), self)
     
     def go_to_destination_B_command(self):  
         return commands2.cmd.runOnce(lambda: self.go_to_destination(self.destination_B), self)
     
+
+## Usage:
+    # from subsystems.SS_EncodedMotor import SS_EncodedMotor
+    # self.ss_encoded_motor = SS_EncodedMotor()
+    # self.joystick.povUp().whileTrue(self.ss_encoded_motor.run_forward_command())
+    # self.joystick.povUp().onTrue(self.ss_encoded_motor.go_to_destination_B_command())
+    # self.joystick.povDown().onTrue(self.ss_encoded_motor.go_to_destination_A_command())
+    # self.joystick.povLeft().onTrue(self.ss_encoded_motor.stop_motor_command())
