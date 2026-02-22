@@ -18,4 +18,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated camera transform configuration to position camera at center (0, 0) at 0.5m height, facing forward (0 degrees)
+  #### will be updated for real camera values in the future
 - Integrated `CameraPose` subsystem into `robot.py` `RobotContainer` initialization
