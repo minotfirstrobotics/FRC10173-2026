@@ -37,8 +37,8 @@ class SS_SwerveDrive(commands2.SubsystemBase):
         self._point_wheels_at_direction = swerve.requests.PointWheelsAt()
         self.drivetrain = TunerConstants.create_drivetrain()
 
-        self.swerve_bindings()
-        # self.adv_swerve_bindings()
+        self.heading_is_driver_controlled()
+        self.adv_swerve_bindings()
 
         # TODO i can't find register telemetry in the swerve module
         # self.drivetrain.register_telemetry(
@@ -54,7 +54,7 @@ class SS_SwerveDrive(commands2.SubsystemBase):
     #                  self._pov_speed * direction_x).with_velocity_y(self._pov_speed * direction_y)
     #         )
 
-    def swerve_bindings(self) -> None:
+    def heading_is_driver_controlled(self) -> bool:
         self.drivetrain.setDefaultCommand(
             self.drivetrain.apply_request(lambda: (
                 self._drive_field_centered
@@ -64,28 +64,25 @@ class SS_SwerveDrive(commands2.SubsystemBase):
             ))
         )
 
-
-    # def swerve_bindings(self) -> None:
-    #     self.drivetrain.setDefaultCommand(
-    #         self.drivetrain.apply_request(lambda: (
-    #             self._drive_field_centered
-    #                 .with_velocity_x(self._filter.calculate(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed))
-    #                 .with_velocity_y(self._filter.calculate(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed))
-    #                 .with_rotational_rate(self._filter.calculate(-self._joystick.getRightX() * abs(self._joystick.getRightX()) * self._max_angular_rate))
-    #         ))
-    #     )
-        # Resets the rotation of the robot pose to 0 from the ForwardPerspectiveValue.OPERATOR_PERSPECTIVE perspective. 
-        # This makes the current orientation of the robot X forward for field-centric maneuvers.
-        (self._joystick.back() & self._joystick.start()).onTrue(
-            self.drivetrain.runOnce(lambda: self.drivetrain.seed_field_centric())
-        )
-
+    def heading_is_auto_controlled(self) -> bool:
+        self.drivetrain.setDefaultCommand(
+            self.drivetrain.apply_request(lambda: (
+                self._drive_field_centered
+                    .with_velocity_x(self._filter.calculate(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed))
+                    .with_velocity_y(self._filter.calculate(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed))
+            ))
+        )         
 
 
     def adv_swerve_bindings(self) -> None:
         idle = swerve.requests.Idle()
         Trigger(DriverStation.isDisabled).whileTrue(
             self.drivetrain.apply_request(lambda: idle).ignoringDisable(True)
+        )
+        # Resets the rotation of the robot pose to 0 from the ForwardPerspectiveValue.OPERATOR_PERSPECTIVE perspective. 
+        # This makes the current orientation of the robot X forward for field-centric maneuvers.
+        (self._joystick.back() & self._joystick.start()).onTrue(
+            self.drivetrain.runOnce(lambda: self.drivetrain.seed_field_centric())
         )
         (self._joystick.back() & self._joystick.b()).whileTrue( # brake
             self.drivetrain.apply_request(lambda: self._brake)
