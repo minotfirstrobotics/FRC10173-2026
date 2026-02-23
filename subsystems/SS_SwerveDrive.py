@@ -1,16 +1,15 @@
 import commands2
 import constants
-from wpilib import DriverStation
-from wpimath.geometry import Rotation2d
 from wpimath.filter import SlewRateLimiter
 from wpimath.units import rotationsToRadians
 from phoenix6 import swerve
 from telemetry import Telemetry
 from generated.tuner_constants import TunerConstants
+from wpilib import DriverStation
+from wpimath.geometry import Rotation2d
 from commands2.button import Trigger
 from commands2.sysid import SysIdRoutine
-from wpimath.filter import SlewRateLimiter
-# Creates a SlewRateLimiter that limits the rate of change of the signal to 0.5 units per second
+
 
 class SS_SwerveDrive(commands2.SubsystemBase):
     def __init__(self, joystick) -> None:
@@ -38,7 +37,7 @@ class SS_SwerveDrive(commands2.SubsystemBase):
         self.drivetrain = TunerConstants.create_drivetrain()
 
         self.heading_is_driver_controlled()
-        self.adv_swerve_bindings()
+        # self.adv_swerve_bindings()
 
         # TODO i can't find register telemetry in the swerve module
         # self.drivetrain.register_telemetry(
@@ -47,12 +46,6 @@ class SS_SwerveDrive(commands2.SubsystemBase):
         # TODO this is an example method to add vision to the swerve drive
         # self.drivetrain.add_vision_measurement(vision_robot_pose: Pose2d, timestamp: units.second, vision_measurement_std_devs: tuple[float, float, float] | None = None)
 
-
-    # def pov_move(self, direction_x, direction_y) -> None:
-    #         self.drivetrain.apply_request(
-    #             lambda: self._drive_robot_centered.with_velocity_x(
-    #                  self._pov_speed * direction_x).with_velocity_y(self._pov_speed * direction_y)
-    #         )
 
     def heading_is_driver_controlled(self) -> bool:
         self.drivetrain.setDefaultCommand(
@@ -74,35 +67,42 @@ class SS_SwerveDrive(commands2.SubsystemBase):
         )         
 
 
-    def adv_swerve_bindings(self) -> None:
-        idle = swerve.requests.Idle()
-        Trigger(DriverStation.isDisabled).whileTrue(
-            self.drivetrain.apply_request(lambda: idle).ignoringDisable(True)
-        )
-        # Resets the rotation of the robot pose to 0 from the ForwardPerspectiveValue.OPERATOR_PERSPECTIVE perspective. 
-        # This makes the current orientation of the robot X forward for field-centric maneuvers.
-        (self._joystick.back() & self._joystick.start()).onTrue(
-            self.drivetrain.runOnce(lambda: self.drivetrain.seed_field_centric())
-        )
-        (self._joystick.back() & self._joystick.b()).whileTrue( # brake
-            self.drivetrain.apply_request(lambda: self._brake)
-        )
-        (self._joystick.back() & self._joystick.a()).whileTrue( # point wheels at direction
-            self.drivetrain.apply_request(
-                lambda: self._point_wheels_at_direction.with_module_direction(
-                    Rotation2d(-self._joystick.getLeftY(), -self._joystick.getLeftX())
-                )
-            )
-        )
-        (self._joystick.start() & self._joystick.a()).whileTrue( # sys_id_dynamic forward
-            self.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kForward)
-        )
-        (self._joystick.start() & self._joystick.b()).whileTrue( # sys_id_dynamic reverse
-            self.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kReverse)
-        )
-        (self._joystick.start() & self._joystick.y()).whileTrue( # sys_id_quasistatic forward
-            self.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kForward)
-        )
-        (self._joystick.start() & self._joystick.x()).whileTrue( # sys_id_quasistatic reverse
-            self.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kReverse)
-        )
+    # def pov_move(self, direction_x, direction_y) -> None:
+    #         self.drivetrain.apply_request(
+    #             lambda: self._drive_robot_centered.with_velocity_x(
+    #                  self._pov_speed * direction_x).with_velocity_y(self._pov_speed * direction_y)
+    #         )
+
+
+    # def adv_swerve_bindings(self) -> None:
+    #     idle = swerve.requests.Idle()
+    #     Trigger(DriverStation.isDisabled).whileTrue(
+    #         self.drivetrain.apply_request(lambda: idle).ignoringDisable(True)
+    #     )
+    #     # Resets the rotation of the robot pose to 0 from the ForwardPerspectiveValue.OPERATOR_PERSPECTIVE perspective. 
+    #     # This makes the current orientation of the robot X forward for field-centric maneuvers.
+    #     (self._joystick.back() & self._joystick.start()).onTrue(
+    #         self.drivetrain.runOnce(lambda: self.drivetrain.seed_field_centric())
+    #     )
+    #     (self._joystick.back() & self._joystick.b()).whileTrue( # brake
+    #         self.drivetrain.apply_request(lambda: self._brake)
+    #     )
+    #     (self._joystick.back() & self._joystick.a()).whileTrue( # point wheels at direction
+    #         self.drivetrain.apply_request(
+    #             lambda: self._point_wheels_at_direction.with_module_direction(
+    #                 Rotation2d(-self._joystick.getLeftY(), -self._joystick.getLeftX())
+    #             )
+    #         )
+    #     )
+    #     (self._joystick.start() & self._joystick.a()).whileTrue( # sys_id_dynamic forward
+    #         self.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kForward)
+    #     )
+    #     (self._joystick.start() & self._joystick.b()).whileTrue( # sys_id_dynamic reverse
+    #         self.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kReverse)
+    #     )
+    #     (self._joystick.start() & self._joystick.y()).whileTrue( # sys_id_quasistatic forward
+    #         self.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kForward)
+    #     )
+    #     (self._joystick.start() & self._joystick.x()).whileTrue( # sys_id_quasistatic reverse
+    #         self.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kReverse)
+    #     )
