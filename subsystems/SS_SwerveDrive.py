@@ -9,24 +9,22 @@ from telemetry import Telemetry
 from generated.tuner_constants import TunerConstants
 from commands2.button import Trigger
 from commands2.sysid import SysIdRoutine
-from wpimath.filter import SlewRateLimiter
-# Creates a SlewRateLimiter that limits the rate of change of the signal to 0.5 units per second
+
 
 class SS_SwerveDrive(commands2.SubsystemBase):
     def __init__(self, joystick) -> None:
         super().__init__()
         self._joystick = joystick
         self._max_angular_rate = rotationsToRadians(constants.SWERVE_DEFAULT_NOT_GENERATED["MAX_ROTATION_SPEED"]) # .75 was recommended
-        self._max_speed = TunerConstants.speed_at_12_volts * .1
+        self._max_speed = TunerConstants.speed_at_12_volts * constants.SWERVE_DEFAULT_NOT_GENERATED["MAX_DRIVE_SPEED_FACTOR"]
         self._pov_speed = constants.SWERVE_DEFAULT_NOT_GENERATED["MAX_POV_SPEED"]
-        self._filter = SlewRateLimiter(0.5)
         self._logger = Telemetry(self._max_speed)
 
         # Initialize swerve drive configurations
         self._drive_field_centered = (
             swerve.requests.FieldCentric()
             .with_deadband(self._max_speed * 0.1)
-            .with_rotational_deadband(self._max_angular_rate * 0.25)
+            .with_rotational_deadband(self._max_angular_rate * 0.1)
             .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE)
         )
         self._drive_robot_centered = (
@@ -54,26 +52,17 @@ class SS_SwerveDrive(commands2.SubsystemBase):
     #                  self._pov_speed * direction_x).with_velocity_y(self._pov_speed * direction_y)
     #         )
 
+
     def swerve_bindings(self) -> None:
         self.drivetrain.setDefaultCommand(
             self.drivetrain.apply_request(lambda: (
                 self._drive_field_centered
-                    .with_velocity_x(-self._joystick.getLeftY() * self._max_speed)
-                    .with_velocity_y(-self._joystick.getLeftX() * self._max_speed)
-                    .with_rotational_rate(-self._joystick.getRightX() * self._max_angular_rate)
+                    .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
+                    .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
+                    .with_rotational_rate(-self._joystick.getRightX() * abs(self._joystick.getRightX()) * self._max_angular_rate)
             ))
         )
 
-
-    # def swerve_bindings(self) -> None:
-    #     self.drivetrain.setDefaultCommand(
-    #         self.drivetrain.apply_request(lambda: (
-    #             self._drive_field_centered
-    #                 .with_velocity_x(self._filter.calculate(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed))
-    #                 .with_velocity_y(self._filter.calculate(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed))
-    #                 .with_rotational_rate(self._filter.calculate(-self._joystick.getRightX() * abs(self._joystick.getRightX()) * self._max_angular_rate))
-    #         ))
-    #     )
         # Resets the rotation of the robot pose to 0 from the ForwardPerspectiveValue.OPERATOR_PERSPECTIVE perspective. 
         # This makes the current orientation of the robot X forward for field-centric maneuvers.
         (self._joystick.back() & self._joystick.start()).onTrue(
