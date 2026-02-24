@@ -1,4 +1,4 @@
-import drivetrain
+"""import drivetrain
 import wpilib
 import wpimath.geometry
 from photonlibpy import PhotonCamera, PhotonPoseEstimator
@@ -12,7 +12,7 @@ kRobotToCam = wpimath.geometry.Transform3d(
 
 class MyRobot(wpilib.TimedRobot):
     def robotInit(self) -> None:
-        """Robot initialization function"""
+        #Robot initialization function
         self.controller = wpilib.XboxController(0)
         self.swerve = drivetrain.Drivetrain()
         self.cam = PhotonCamera("YOUR CAMERA NAME")
@@ -71,3 +71,4 @@ class MyRobot(wpilib.TimedRobot):
 ###################################################################################
 
 
+"""

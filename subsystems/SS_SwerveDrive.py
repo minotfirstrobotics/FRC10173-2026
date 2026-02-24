@@ -1,8 +1,7 @@
 import commands2
 import constants
-from wpimath.filter import SlewRateLimiter
 from wpimath.units import rotationsToRadians
-from phoenix6 import swerve
+from phoenix6 import swerve, SignalLogger
 from telemetry import Telemetry
 from generated.tuner_constants import TunerConstants
 from wpilib import DriverStation
@@ -10,19 +9,26 @@ from wpimath.geometry import Rotation2d
 from commands2.button import Trigger
 from commands2.sysid import SysIdRoutine
 
+#TODO add POV_move and adv_swerve_bindings back in after testing basic movement and heading control
 
-class SS_SwerveDrive(commands2.SubsystemBase):
+class SS_SwerveDrive(commands2.Subsystem):
     def __init__(self, joystick) -> None:
         super().__init__()
         self._joystick = joystick
         self._max_angular_rate = rotationsToRadians(constants.SWERVE_DEFAULT_NOT_GENERATED["MAX_ROTATION_SPEED"]) # .75 was recommended
-        self._max_speed = TunerConstants.speed_at_12_volts * constants.SWERVE_DEFAULT_NOT_GENERATED["MAX_DRIVE_SPEED_FACTOR"]
+        self._max_speed = constants.SWERVE_DEFAULT_NOT_GENERATED["MAX_DRIVE_SPEED_FACTOR"] * TunerConstants.speed_at_12_volts
         self._pov_speed = constants.SWERVE_DEFAULT_NOT_GENERATED["MAX_POV_SPEED"]
         self._logger = Telemetry(self._max_speed)
 
         # Initialize swerve drive configurations
         self._drive_field_centered = (
             swerve.requests.FieldCentric()
+            .with_deadband(self._max_speed * 0.1)
+            .with_rotational_deadband(self._max_angular_rate * 0.1)
+            .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE)
+        )
+        self._drive_facing_direction = (
+            swerve.requests.FieldCentricFacingAngle()
             .with_deadband(self._max_speed * 0.1)
             .with_rotational_deadband(self._max_angular_rate * 0.1)
             .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE)
@@ -46,7 +52,7 @@ class SS_SwerveDrive(commands2.SubsystemBase):
         # self.drivetrain.add_vision_measurement(vision_robot_pose: Pose2d, timestamp: units.second, vision_measurement_std_devs: tuple[float, float, float] | None = None)
 
 
-    def heading_is_driver_controlled(self) -> bool:
+    def heading_is_driver_controlled(self) -> None:
         self.drivetrain.setDefaultCommand(
             self.drivetrain.apply_request(lambda: (
                 self._drive_field_centered
@@ -56,14 +62,29 @@ class SS_SwerveDrive(commands2.SubsystemBase):
             ))
         )
 
-    def heading_is_auto_controlled(self) -> bool:
+    def heading_is_auto_controlled(self) -> None:
         self.drivetrain.setDefaultCommand(
             self.drivetrain.apply_request(lambda: (
-                self._drive_field_centered
+                self._drive_facing_direction
                     .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
                     .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
+                    .with_target_direction(Rotation2d(0, 1))      # Desired Heading (e.g., (0,1) = 90 deg)
+                    .with_heading_pid(1, 0, 0)              # PID for heading control
             ))
         )         
+
+    # def pov_move(self, direction_x, direction_y) -> None:
+    #         self.drivetrain.apply_request(
+    #             lambda: self._drive_robot_centered
+    #                 .with_velocity_x(self._pov_speed * direction_x)
+    #                 .with_velocity_y(self._pov_speed * direction_y)
+    #         )
+
+    def adv_swerve_bindings(self) -> None:
+        idle = swerve.requests.Idle()
+        Trigger(DriverStation.isDisabled).whileTrue(
+            self.drivetrain.apply_request(lambda: idle).ignoringDisable(True)
+        )
 
         # Resets the rotation of the robot pose to 0 from the ForwardPerspectiveValue.OPERATOR_PERSPECTIVE perspective. 
         # This makes the current orientation of the robot X forward for field-centric maneuvers.
@@ -71,19 +92,6 @@ class SS_SwerveDrive(commands2.SubsystemBase):
             self.drivetrain.runOnce(lambda: self.drivetrain.seed_field_centric())
         )
 
-
-    # def pov_move(self, direction_x, direction_y) -> None:
-    #         self.drivetrain.apply_request(
-    #             lambda: self._drive_robot_centered.with_velocity_x(
-    #                  self._pov_speed * direction_x).with_velocity_y(self._pov_speed * direction_y)
-    #         )
-
-
-    def adv_swerve_bindings(self) -> None:
-        idle = swerve.requests.Idle()
-        Trigger(DriverStation.isDisabled).whileTrue(
-            self.drivetrain.apply_request(lambda: idle).ignoringDisable(True)
-        )
         (self._joystick.back() & self._joystick.b()).whileTrue( # brake
             self.drivetrain.apply_request(lambda: self._brake)
         )
@@ -94,6 +102,9 @@ class SS_SwerveDrive(commands2.SubsystemBase):
                 )
             )
         )
+        (self._joystick.start() & self._joystick.leftBumper()).onTrue(SignalLogger.start)
+        (self._joystick.start() & self._joystick.rightBumper()).onTrue(SignalLogger.stop)
+
         (self._joystick.start() & self._joystick.a()).whileTrue( # sys_id_dynamic forward
             self.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kForward)
         )
