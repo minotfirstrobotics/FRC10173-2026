@@ -23,14 +23,14 @@ class SS_SwerveDrive(commands2.Subsystem):
         # Initialize swerve drive configurations
         self._drive_field_centered = (
             swerve.requests.FieldCentric()
-            .with_deadband(self._max_speed * 0.1)
-            .with_rotational_deadband(self._max_angular_rate * 0.1)
+            .with_deadband(self._max_speed * 0.05)
+            .with_rotational_deadband(self._max_angular_rate * 0.05)
             .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE)
         )
         self._drive_facing_direction = (
             swerve.requests.FieldCentricFacingAngle()
-            .with_deadband(self._max_speed * 0.1)
-            .with_rotational_deadband(self._max_angular_rate * 0.1)
+            .with_deadband(self._max_speed * 0.05)
+            .with_rotational_deadband(self._max_angular_rate * 0.05)
             .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE)
         )
         self._drive_robot_centered = (
@@ -57,7 +57,7 @@ class SS_SwerveDrive(commands2.Subsystem):
             self.drivetrain.apply_request(lambda: (
                 self._drive_field_centered
                     .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
-                    .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftY()) * self._max_speed)
+                    .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
                     .with_rotational_rate(-self._joystick.getRightX() * abs(self._joystick.getRightX() * self._max_angular_rate))
             ))
         )
@@ -73,12 +73,14 @@ class SS_SwerveDrive(commands2.Subsystem):
             ))
         )         
 
-    # def pov_move(self, direction_x, direction_y) -> None:
-    #         self.drivetrain.apply_request(
-    #             lambda: self._drive_robot_centered
-    #                 .with_velocity_x(self._pov_speed * direction_x)
-    #                 .with_velocity_y(self._pov_speed * direction_y)
-    #         )
+    def pov_move(self, direction_x, direction_y) -> None:
+        self.drivetrain.runOnce(
+            self.drivetrain.apply_request(
+                lambda: self._drive_robot_centered
+                    .with_velocity_x(self._pov_speed * direction_x)
+                    .with_velocity_y(self._pov_speed * direction_y)
+            )
+        )
 
     def adv_swerve_bindings(self) -> None:
         idle = swerve.requests.Idle()
