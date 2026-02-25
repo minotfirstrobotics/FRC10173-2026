@@ -1,12 +1,9 @@
-PWM_CHANNELS = {
-    "GENERAL_MOTOR": 0,
-    "180_SERVO": 8,
-    "WINCH_SERVO": 1,
-}
-
-CAN_CHANNELS = {
-    "ENCODED_MOTOR": 13
-}
+SWERVE_DEFAULT_NOT_GENERATED = {
+    "DEFAULT_AUTONOMOUS": "Tests",
+    "MAX_ROTATION_SPEED": 0.75, # radians per second
+    "MAX_POV_SPEED": 0.2, # percent
+    "MAX_DRIVE_SPEED_FACTOR": .5
+    }
 
 DASHBOARD_TITLES = {
     "AUTONOMOUS_MODE": "Autonomous Mode",
@@ -19,8 +16,14 @@ DASHBOARD_TITLES = {
     "ENCODED_MOTOR_POSITION": "Encoded Motor Position",
 }
 
-SWERVE_DEFAULT_NOT_GENERATED = {
-    "DEFAULT_AUTONOMOUS": "Tests",
-    "MAX_ROTATION_SPEED": 0.75, # radians per second
-    "MAX_POV_SPEED": 0.2, # percent
-    }
+PWM_CHANNELS = {
+    "GENERAL_MOTOR": 0,
+    "180_SERVO": 8,
+    "WINCH_SERVO": 1,
+}
+
+CAN_CHANNELS = {
+    "ENCODED_MOTOR": 13
+}
+
+
