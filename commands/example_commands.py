@@ -1,18 +1,18 @@
 # ## Example command definition
 # import commands2
-# from subsystems.shooter import ShooterSubsystem
+# from subsystems.ss_shooter import SS_ShooterSubsystem
 # import wpilib
 
-# class Shoot(commands2.Command):
-#     def __init__(self, shooter: ShooterSubsystem):
+# class ShootCommand(commands2.Command):
+#     def __init__(self, ss_shooter: ShooterSubsystem):
 #         super().__init__()
-#         self.shooter = shooter
-#         self.addRequirements(shooter) # Ensure no other command uses shooter
+#         self.ss_shooter = ss_shooter
+#         self.addRequirements(ss_shooter) # Ensure no other command uses ss_shooter
 #         self.timer = wpilib.Timer()
 
 #     def initialize(self):
 #         self.timer.restart()
-#         self.shooter.setSpeed(0.5) # Spin up
+#         self.ss_shooter.setSpeed(0.5) # Spin up
 
 #     def execute(self):
 #         pass # Command is running
@@ -21,7 +21,7 @@
 #         return self.timer.hasElapsed(2.0) # Finish after 2 seconds
 
 #     def end(self, interrupted):
-#         self.shooter.setSpeed(0) # Stop
+#         self.ss_shooter.setSpeed(0) # Stop
         
 
 
@@ -30,8 +30,8 @@
 # import commands2
 # from commands2 import SequentialCommandGroup, WaitCommand
 # # Assuming these are defined in other files
-# from commands.drive_forward import DriveForward
-# from commands.turn import Turn
+# from commands.drive_forward_command import DriveForwardCommand
+# from commands.turn_command import TurnCommand
 
 # class AutonomousSequence(SequentialCommandGroup):
 #     """
