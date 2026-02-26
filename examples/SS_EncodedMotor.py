@@ -6,7 +6,7 @@ import rev
 class SS_EncodedMotor(commands2.Subsystem):
     def __init__(self):
         super().__init__()
-        self.motor = rev.CANSparkMax(constants.CAN_CHANNELS["ENCODED_MOTOR"], rev.SparkLowLevel.MotorType.kBrushless)
+        self.motor = rev.SparkMax(constants.CAN_CHANNELS["ENCODED_MOTOR"], rev.SparkLowLevel.MotorType.kBrushless)
         self.controller = self.motor.getClosedLoopController()
         self.encoder = self.motor.getEncoder()
         self.position = 0
