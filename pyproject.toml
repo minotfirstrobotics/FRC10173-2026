@@ -26,11 +26,11 @@ components = [
 requires = [
     "phoenix6~=26.1",
     "photonlibpy",
-    "robotpy-commands-v2",
     "pynetworktables",
+    "robotpy-rev",
+    # "robotpy-pathplannerlib",
+    # "robotpy-commands-v2",
     # "robotpy-ctre",  # Phoenix 5
     # "robotpy-navx",
-    "robotpy-pathplannerlib",
     # "robotpy-playingwithfusion",
-    # "robotpy-rev",
     ]
