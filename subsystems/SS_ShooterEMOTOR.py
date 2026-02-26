@@ -3,12 +3,19 @@ import commands2
 import constants
 import rev
 
-class SS_EncodedMotor(commands2.Subsystem):
+class SS_ShooterEMOTOR(commands2.Subsystem):
     def __init__(self):
         super().__init__()
-        self.motor = rev.CANSparkMax(constants.CAN_CHANNELS["ENCODED_MOTOR"], rev.SparkLowLevel.MotorType.kBrushless)
+        self.motor = rev.CANSparkMax(constants.CAN_CHANNELS["SHOOTER_EMOTOR"], rev.SparkLowLevel.MotorType.kBrushless)
         self.controller = self.motor.getClosedLoopController()
         self.encoder = self.motor.getEncoder()
+
+        "Attempt PIDF control (tuning required)"
+        self.controller.setP(0.1)
+        self.controller.setI(0.0)
+        self.controller.setD(0.0)
+        self.controller.setFF(0.0)
+
         self.position = 0
         self.encoder.setPosition(self.position)
         self.is_running = False
@@ -20,18 +27,21 @@ class SS_EncodedMotor(commands2.Subsystem):
 
     def periodic(self): # Special function called periodically by the robot
         self.position = self.encoder.getPosition()
-        wpilib.SmartDashboard.putNumber(constants.DASHBOARD_TITLES["ENCODED_MOTOR_POSITION"], self.position)
-        wpilib.SmartDashboard.putBoolean(constants.DASHBOARD_TITLES["ENCODED_MOTOR_RUNNING"], self.is_running)
+        wpilib.SmartDashboard.putNumber(constants.DASHBOARD_TITLES["SHOOTER_EMOTOR_POSITION"], self.position)
+        wpilib.SmartDashboard.putBoolean(constants.DASHBOARD_TITLES["SHOOTER_EMOTOR_RUNNING"], self.is_running)
 
+    def set_speed(self, speed: float) -> None:
+        clamped = max(-1.0, min(1.0, float(speed)))
+        self.motor.set(clamped)
+        self.is_running = abs(clamped) > 1e-6
 
-    ## Methods
     def run_forward(self):
         self.is_running = True
-        self.motor.set(self.speed_cap)
+        self.set_speed(self.speed_cap)
 
     def stop_motor(self):
         self.is_running = False
-        self.motor.stopMotor()
+        self.set_speed(0)
 
     def go_to_destination(self, destination):
         self.controller.setReference(destination, 

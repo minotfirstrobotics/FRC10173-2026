@@ -11,13 +11,10 @@ from subsystems.SS_SwerveDrive import SS_SwerveDrive
 
 class RobotContainer:
     def __init__(self) -> None:
-<<<<<<< HEAD
         self.joystick = CommandXboxController(0)
         self.initialize_subsystems()
         self.initialize_swerve_drive()
-=======
         self.joystick = CommandXboxController(0) # must be before swerve drive subsystem
->>>>>>> 28a6554bc207a6a16b4c4f8aa915a5ae266b4f94
         self.initialize_subsystems()
         self.controller_bindings() # must be after subsystems are initialized to bind buttons to subsystem commands
         # self.auto_chooser = AutoBuilder.buildAutoChooser(constants.SWERVE_DEFAULT_NOT_GENERATED["DEFAULT_AUTONOMOUS"])
