@@ -52,6 +52,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         # self.drivetrain.add_vision_measurement(vision_robot_pose: Pose2d, timestamp: units.second, vision_measurement_std_devs: tuple[float, float, float] | None = None)
 
 
+    # Methods to control the swerve drive subsystem
     def heading_is_driver_controlled(self) -> None:
         self.drivetrain.setDefaultCommand(
             self.drivetrain.apply_request(lambda: (
@@ -74,12 +75,10 @@ class SS_SwerveDrive(commands2.Subsystem):
         )         
 
     def pov_move(self, direction_x, direction_y) -> None:
-        self.drivetrain.runOnce(
-            self.drivetrain.apply_request(
-                lambda: self._drive_robot_centered
-                    .with_velocity_x(self._pov_speed * direction_x)
-                    .with_velocity_y(self._pov_speed * direction_y)
-            )
+        self.drivetrain.apply_request(
+            lambda: self._drive_robot_centered
+                .with_velocity_x(direction_x * self._pov_speed)
+                .with_velocity_y(direction_y * self._pov_speed)
         )
 
     def adv_swerve_bindings(self) -> None:
@@ -119,3 +118,14 @@ class SS_SwerveDrive(commands2.Subsystem):
         (self._joystick.start() & self._joystick.x()).whileTrue( # sys_id_quasistatic reverse
             self.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kReverse)
         )
+
+
+    ## Commands
+    def heading_is_auto_controlled_command(self) -> commands2.Command:
+        return commands2.cmd.runOnce(self.heading_is_auto_controlled)
+    
+    def heading_is_driver_controlled_command(self) -> commands2.Command:
+        return commands2.cmd.runOnce(self.heading_is_driver_controlled)
+    
+    def pov_move_command(self, direction_x, direction_y) -> commands2.Command:
+        return commands2.cmd.runOnce(lambda: self.pov_move(direction_x, direction_y))

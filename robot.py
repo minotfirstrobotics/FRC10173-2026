@@ -11,26 +11,22 @@ from subsystems.SS_SwerveDrive import SS_SwerveDrive
 
 class RobotContainer:
     def __init__(self) -> None:
-        self.initialize_subsystems()
-        self.controller_bindings() # must be after subsystems are initialized to bind buttons to subsystem commands
+        """ 
+        Some inits must be in proper order: i.e. joystick -> swerve -> bindings
+        """
+        self.joystick = CommandXboxController(0)
+        self.ss_swerve_drive = SS_SwerveDrive(self.joystick)
+        self.controller_bindings()
         # self.auto_chooser = AutoBuilder.buildAutoChooser(constants.SWERVE_DEFAULT_NOT_GENERATED["DEFAULT_AUTONOMOUS"])
         # SmartDashboard.putData(constants.SWERVE_DEFAULT_NOT_GENERATED["DEFAULT_AUTONOMOUS"], self.auto_chooser)
 
-    def initialize_subsystems(self) -> None:
-        pass
-
     def controller_bindings(self) -> None:
-        """
-        must be after subsystems are initialized to bind buttons to subsystem commands
-        but before swerve drive init because it needs the joystick for default commands
-        """
-        self.joystick = CommandXboxController(0) # must be before swerve drive subsystem
-        self.joystick.a().onTrue(commands2.cmd.runOnce(self.ss_swerve_drive.heading_is_auto_controlled))
-        self.joystick.a().onFalse(commands2.cmd.runOnce(self.ss_swerve_drive.heading_is_driver_controlled))
-        self.joystick.pov(0).whileTrue(self.ss_swerve_drive.pov_move(1, 0))
-        self.joystick.pov(180).whileTrue(self.ss_swerve_drive.pov_move(-1, 0))
-        self.joystick.pov(90).whileTrue(self.ss_swerve_drive.pov_move(0, 1))
-        self.joystick.pov(270).whileTrue(self.ss_swerve_drive.pov_move(0, -1))
+        self.joystick.a().onTrue(self.ss_swerve_drive.heading_is_auto_controlled_command())
+        self.joystick.a().onFalse(self.ss_swerve_drive.heading_is_driver_controlled_command())
+        self.joystick.pov(0).whileTrue(self.ss_swerve_drive.pov_move_command(1, 0))
+        self.joystick.pov(180).whileTrue(self.ss_swerve_drive.pov_move_command(-1, 0))
+        self.joystick.pov(90).whileTrue(self.ss_swerve_drive.pov_move_command(0, 1))
+        self.joystick.pov(270).whileTrue(self.ss_swerve_drive.pov_move_command(0, -1))
 
 
 class MyRobot(commands2.TimedCommandRobot):
@@ -38,41 +34,38 @@ class MyRobot(commands2.TimedCommandRobot):
     Command v2 robots are encouraged to inherit from TimedCommandRobot, which
     has an implementation of robotPeriodic which runs the scheduler for you
     """
-    autonomousCommand: typing.Optional[commands2.Command] = None
 
     def robotInit(self) -> None:
         """
         This function is run when the robot is first started up and should be used for any
         initialization code.
-        """
 
-        # Instantiate our RobotContainer.  This will perform all our button bindings, and put our
-        # autonomous chooser on the dashboard.
+        Instantiate our RobotContainer.  This will perform all our button bindings, and put our
+        autonomous chooser on the dashboard.
+        """
+        self.autonomousCommand = None
         self.container = RobotContainer()
     
-    #     self._time_and_joystick_replay = (
-    #     HootAutoReplay()
-    #     .with_timestamp_replay()
-    #     .with_joystick_replay()
-    # )
+        # self._time_and_joystick_replay = (HootAutoReplay().with_timestamp_replay().with_joystick_replay() )
 
     def robotPeriodic(self) -> None: # Called every 20 ms
-        """This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
+        """
+        This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
         that you want ran during disabled, autonomous, teleoperated and test.
 
         This runs after the mode specific periodic functions, but before LiveWindow and
-        SmartDashboard integrated updating."""
+        SmartDashboard integrated updating.
 
-        # TODO commands2.CommandScheduler.getInstance().run()
+        Starts by running the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
+        commands, running already-scheduled commands, removing finished or interrupted commands,
+        and running subsystem periodic() methods.  This must be called from the robot's periodic
+        block in order for anything in the Command-based framework to work.
+        """
+        commands2.CommandScheduler.getInstance().run()
+
         SmartDashboard.putNumber("Match Time", Timer.getMatchTime());
 
         # self._time_and_joystick_replay.update() # using HootAutoReplay to log and replay timestamp and joystick data
-
-        """Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
-        commands, running already-scheduled commands, removing finished or interrupted commands,
-        and running subsystem periodic() methods.  This must be called from the robot's periodic
-        block in order for anything in the Command-based framework to work."""
-        commands2.CommandScheduler.getInstance().run()
 
     def disabledInit(self) -> None:
         """This function is called once each time the robot enters Disabled mode."""
