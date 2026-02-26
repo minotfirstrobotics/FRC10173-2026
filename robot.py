@@ -11,19 +11,24 @@ from subsystems.SS_SwerveDrive import SS_SwerveDrive
 
 class RobotContainer:
     def __init__(self) -> None:
-        self.joystick = CommandXboxController(0) # must be before swerve drive subsystem
         self.initialize_subsystems()
-        self.controller_bindings() # must be after subsystems are initialized to bind buttons to subsystem commands
+        self.controller_bindings()
+        self.ss_swerve_drive = SS_SwerveDrive(self.joystick)
         self.auto_chooser = AutoBuilder.buildAutoChooser(constants.SWERVE_DEFAULT_NOT_GENERATED["DEFAULT_AUTONOMOUS"])
         SmartDashboard.putData(constants.SWERVE_DEFAULT_NOT_GENERATED["DEFAULT_AUTONOMOUS"], self.auto_chooser)
 
     def initialize_subsystems(self) -> None:
-        self.ss_swerve_drive = SS_SwerveDrive(self.joystick)
+        pass
 
     def controller_bindings(self) -> None:
-        # joystick bindings for movement are contained in the SS_SwerveDrive class
+        """
+        must be after subsystems are initialized to bind buttons to subsystem commands
+        but before swerve drive init because it needs the joystick for default commands
+        """
+        self.joystick = CommandXboxController(0) # must be before swerve drive subsystem
         self.joystick.a().onTrue(commands2.cmd.runOnce(self.ss_swerve_drive.heading_is_auto_controlled))
         self.joystick.a().onFalse(commands2.cmd.runOnce(self.ss_swerve_drive.heading_is_driver_controlled))
+        # self.joystick.pov(0).whileTrue(self.ss_swerve_drive.pov_move(1, 0))
         # self.joystick.pov(0).whileTrue(self.ss_swerve_drive.pov_move(1, 0))
         # self.joystick.pov(180).whileTrue(self.ss_swerve_drive.pov_move(-1, 0))
         # self.joystick.pov(90).whileTrue(self.ss_swerve_drive.pov_move(0, 1))
