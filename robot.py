@@ -27,6 +27,8 @@ class RobotContainer:
         self.joystick.pov(180).whileTrue(self.ss_swerve_drive.pov_move_command(-1, 0))
         self.joystick.pov(90).whileTrue(self.ss_swerve_drive.pov_move_command(0, 1))
         self.joystick.pov(270).whileTrue(self.ss_swerve_drive.pov_move_command(0, -1))
+        (self.joystick.back() & self.joystick.b()).whileTrue(self.ss_swerve_drive.brake_command())
+        (self.joystick.back() & self.joystick.start()).onTrue(self.ss_swerve_drive.reset_field_oriented_perspective())
 
 
 class MyRobot(commands2.TimedCommandRobot):
