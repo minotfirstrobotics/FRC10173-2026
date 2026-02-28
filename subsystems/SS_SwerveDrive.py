@@ -4,8 +4,8 @@ from wpimath.units import rotationsToRadians
 from phoenix6 import swerve, SignalLogger
 from telemetry import Telemetry
 from generated.tuner_constants import TunerConstants
-from wpilib import DriverStation
-from wpimath.geometry import Rotation2d
+from wpilib import DriverStation, Timer, SmartDashboard
+from wpimath.geometry import Pose2d, Rotation2d
 from commands2.button import Trigger
 from commands2.sysid import SysIdRoutine
 
@@ -16,6 +16,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         self._max_angular_rate = rotationsToRadians(constants.SWERVE_DEFAULT_NOT_GENERATED["MAX_ROTATION_SPEED"]) # .75 was recommended
         self._max_speed = constants.SWERVE_DEFAULT_NOT_GENERATED["MAX_DRIVE_SPEED_FACTOR"] * TunerConstants.speed_at_12_volts
         self._pov_speed = constants.SWERVE_DEFAULT_NOT_GENERATED["MAX_POV_SPEED"]
+        self._latest_pose = Pose2d()
         self._logger = Telemetry(self._max_speed)
         self.drivetrain = TunerConstants.create_drivetrain() # does this need to after swerve configs?
         self.PIDF_sysID_tuning_bindings()
@@ -44,9 +45,35 @@ class SS_SwerveDrive(commands2.Subsystem):
         self.heading_is_driver_controlled()
 
         # TODO i can't find register telemetry in the swerve module
-        # self.drivetrain.register_telemetry(
-        #     lambda state: self._logger.telemeterize(state)
-        # )
+        # self.drivetrain.register_telemetry( lambda state: self._logger.telemeterize(state) )
+
+        """
+        self.estimator = SwerveDrive4PoseEstimator(
+            self.drivetrain.kinematics,            # SwerveDrive4Kinematics instance
+            self.drivetrain.get_rotation2d(),      # Rotation2d from gyro/drivetrain
+            self.drivetrain.get_module_positions(),# tuple[4] of SwerveModulePosition
+            Pose2d(),                              # initial pose
+            (0.1, 0.1, 0.1),                       # state std devs (x, y, theta)
+            (0.9, 0.9, 0.9),                       # vision std devs (x, y, theta)
+        )
+        """
+
+
+    def periodic(self) -> None:
+        pose = self.drivetrain.sample_pose_at(Timer.getFPGATimestamp())
+        if pose is not None:
+            self._latest_pose = pose
+
+        # Dashboard output
+        pose_translation = self._latest_pose.translation()
+        pose_rotation = self._latest_pose.rotation()
+        SmartDashboard.putNumber("Swerve/Pose X (meters)", pose_translation.X())
+        SmartDashboard.putNumber("Swerve/Pose Y (meters)", pose_translation.Y())
+        SmartDashboard.putNumber("Swerve/Pose Rotation (degrees)", pose_rotation.degrees())
+
+
+    def get_pose(self) -> Pose2d:
+        return self._latest_pose
 
 
     ## Methods to control the swerve drive subsystem

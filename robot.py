@@ -5,8 +5,10 @@ import wpilib
 from wpilib import SmartDashboard, Timer
 from phoenix6 import HootAutoReplay
 # from pathplannerlib.auto import AutoBuilder
+from wpimath.geometry import Pose2d, Rotation2d
 from commands2.button import CommandXboxController
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
+from subsystems.SS_CameraPose import SS_CameraPose
 
 
 class RobotContainer:
@@ -16,6 +18,7 @@ class RobotContainer:
         """
         self.joystick = CommandXboxController(0)
         self.ss_swerve_drive = SS_SwerveDrive(self.joystick)
+        self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
         self.controller_bindings()
         # self.auto_chooser = AutoBuilder.buildAutoChooser(constants.SWERVE_DEFAULT_NOT_GENERATED["DEFAULT_AUTONOMOUS"])
         # SmartDashboard.putData(constants.SWERVE_DEFAULT_NOT_GENERATED["DEFAULT_AUTONOMOUS"], self.auto_chooser)
@@ -50,7 +53,7 @@ class MyRobot(commands2.TimedCommandRobot):
     
         # self._time_and_joystick_replay = (HootAutoReplay().with_timestamp_replay().with_joystick_replay() )
 
-    def robotPeriodic(self) -> None: # Called every 20 ms
+    def robotPeriodic(self) -> None:
         """
         This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
         that you want ran during disabled, autonomous, teleoperated and test.
@@ -64,18 +67,20 @@ class MyRobot(commands2.TimedCommandRobot):
         block in order for anything in the Command-based framework to work.
         """
         commands2.CommandScheduler.getInstance().run()
-
         SmartDashboard.putNumber("Match Time", Timer.getMatchTime());
-
         # self._time_and_joystick_replay.update() # using HootAutoReplay to log and replay timestamp and joystick data
 
-    def disabledInit(self) -> None:
-        """This function is called once each time the robot enters Disabled mode."""
+    def teleopInit(self) -> None:
+        """This makes sure that the autonomous stops running when
+        teleop starts running. If you want the autonomous to
+        continue until interrupted by another command, remove
+        this line or comment it out. """
+        if self.autonomousCommand: self.autonomousCommand.cancel()
+
+    def teleopPeriodic(self) -> None:
+        """This function is called periodically during operator control"""
         pass
 
-    def disabledPeriodic(self) -> None:
-        """This function is called periodically when disabled"""
-        pass
 
     def autonomousInit(self) -> None:
         pass
@@ -87,17 +92,15 @@ class MyRobot(commands2.TimedCommandRobot):
         """This function is called periodically during autonomous"""
         pass
 
-    def teleopInit(self) -> None:
-        """This makes sure that the autonomous stops running when
-        teleop starts running. If you want the autonomous to
-        continue until interrupted by another command, remove
-        this line or comment it out. """
-        if self.autonomousCommand:
-            self.autonomousCommand.cancel()
 
-    def teleopPeriodic(self) -> None:
-        """This function is called periodically during operator control"""
+    def disabledInit(self) -> None:
+        """This function is called once each time the robot enters Disabled mode."""
         pass
+
+    def disabledPeriodic(self) -> None:
+        """This function is called periodically when disabled"""
+        pass
+
 
     def testInit(self) -> None:
         """Cancels all running commands at the start of test mode"""
