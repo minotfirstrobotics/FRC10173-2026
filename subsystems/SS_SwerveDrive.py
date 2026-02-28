@@ -47,18 +47,6 @@ class SS_SwerveDrive(commands2.Subsystem):
         # TODO i can't find register telemetry in the swerve module
         # self.drivetrain.register_telemetry( lambda state: self._logger.telemeterize(state) )
 
-        """
-        self.estimator = SwerveDrive4PoseEstimator(
-            self.drivetrain.kinematics,            # SwerveDrive4Kinematics instance
-            self.drivetrain.get_rotation2d(),      # Rotation2d from gyro/drivetrain
-            self.drivetrain.get_module_positions(),# tuple[4] of SwerveModulePosition
-            Pose2d(),                              # initial pose
-            (0.1, 0.1, 0.1),                       # state std devs (x, y, theta)
-            (0.9, 0.9, 0.9),                       # vision std devs (x, y, theta)
-        )
-        """
-
-
     def periodic(self) -> None:
         pose = self.drivetrain.sample_pose_at(Timer.getFPGATimestamp())
         if pose is not None:
