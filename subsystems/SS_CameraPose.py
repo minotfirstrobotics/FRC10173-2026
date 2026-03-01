@@ -39,10 +39,7 @@ class SS_CameraPose(commands2.Subsystem):
             try:
                 # Load the default field layout for AprilTags
                 field_layout = AprilTagFieldLayout.loadField(AprilTagField.kDefaultField)
-                self.cam_pose_est = PhotonPoseEstimator(
-                    field_layout,
-                    self.kRobotToCam,
-                )
+                self.cam_pose_est = PhotonPoseEstimator( field_layout, self.kRobotToCam, )
                 self._field_loaded = True
             except Exception as e:
                 wpilib.reportError(f"Failed to load field layout: {e}", printTrace=True)
@@ -76,8 +73,8 @@ class SS_CameraPose(commands2.Subsystem):
             pose3d = cam_est_pose.estimatedPose
     
             # Reject unrealistic height
-            if abs(pose3d.Z()) > 0.3:
-                return
+            # if abs(pose3d.Z()) > 0.3:
+            #     return
     
             # Scale trust based on tag count
             if len(result.targets) >= 2:
@@ -86,7 +83,7 @@ class SS_CameraPose(commands2.Subsystem):
                 std_devs = (0.8, 0.8, 1.5)
     
             # Inject into drivetrain pose estimator
-            self.add_vision_measurement(pose3d.toPose2d(), cam_est_pose.timestampSeconds, std_devs )
+            # self.add_vision_measurement(pose3d.toPose2d(), cam_est_pose.timestampSeconds, std_devs )
 
             self.last_pose = pose3d
     
@@ -94,9 +91,9 @@ class SS_CameraPose(commands2.Subsystem):
             pose_translation = pose3d.translation()
             pose_rotation = pose3d.rotation().toRotation2d()
     
-            SmartDashboard.putNumber("Vision/Pose X (meters)", pose_translation.X())
-            SmartDashboard.putNumber("Vision/Pose Y (meters)", pose_translation.Y())
-            SmartDashboard.putNumber("Vision/Pose Rotation (degrees)", pose_rotation.degrees())
+            SmartDashboard.putNumber("Vision/Vision Pose X (m)", pose_translation.X())
+            SmartDashboard.putNumber("Vision/Vision Pose Y (m)", pose_translation.Y())
+            SmartDashboard.putNumber("Vision/Vision Rotation (deg)", pose_rotation.degrees())
     
         except Exception as e:
             wpilib.reportError(f"Error in CameraPose periodic: {e}", printTrace=True)

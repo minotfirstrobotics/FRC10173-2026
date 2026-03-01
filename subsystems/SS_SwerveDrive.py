@@ -19,7 +19,10 @@ class SS_SwerveDrive(commands2.Subsystem):
         self._latest_pose = Pose2d()
         self._logger = Telemetry(self._max_speed)
         self.drivetrain = TunerConstants.create_drivetrain() # does this need to after swerve configs?
+
+        self.controller_bindings()
         self.PIDF_sysID_tuning_bindings()
+
         idle = swerve.requests.Idle() # Determine behavior when no other commands are running. 
         Trigger(DriverStation.isDisabled).whileTrue( # This is important to prevent unexpected robot movement when commands end.
             self.drivetrain.apply_request(lambda: idle).ignoringDisable(True)
@@ -47,6 +50,16 @@ class SS_SwerveDrive(commands2.Subsystem):
         # TODO i can't find register telemetry in the swerve module
         # self.drivetrain.register_telemetry( lambda state: self._logger.telemeterize(state) )
 
+    def controller_bindings(self) -> None:
+        self._joystick.a().onTrue(self.heading_is_auto_controlled_command())
+        self._joystick.a().onFalse(self.heading_is_driver_controlled_command())
+        self._joystick.pov(0).whileTrue(self.pov_move_command(1, 0))
+        self._joystick.pov(180).whileTrue(self.pov_move_command(-1, 0))
+        self._joystick.pov(90).whileTrue(self.pov_move_command(0, 1))
+        self._joystick.pov(270).whileTrue(self.pov_move_command(0, -1))
+        (self._joystick.back() & self._joystick.b()).whileTrue(self.brake_command())
+        (self._joystick.back() & self._joystick.start()).onTrue(self.reset_field_oriented_perspective())
+
     def periodic(self) -> None:
         pose = self.drivetrain.sample_pose_at(Timer.getFPGATimestamp())
         if pose is not None:
@@ -55,13 +68,9 @@ class SS_SwerveDrive(commands2.Subsystem):
         # Dashboard output
         pose_translation = self._latest_pose.translation()
         pose_rotation = self._latest_pose.rotation()
-        SmartDashboard.putNumber("Swerve/Pose X (meters)", pose_translation.X())
-        SmartDashboard.putNumber("Swerve/Pose Y (meters)", pose_translation.Y())
-        SmartDashboard.putNumber("Swerve/Pose Rotation (degrees)", pose_rotation.degrees())
-
-
-    def get_pose(self) -> Pose2d:
-        return self._latest_pose
+        SmartDashboard.putNumber("Swerve/Swerve Pose X (meters)", pose_translation.X())
+        SmartDashboard.putNumber("Swerve/Swerve Pose Y (meters)", pose_translation.Y())
+        SmartDashboard.putNumber("Swerve/Swerve Rotation (deg)", pose_rotation.degrees())
 
 
     ## Methods to control the swerve drive subsystem

@@ -19,19 +19,8 @@ class RobotContainer:
         self.joystick = CommandXboxController(0)
         self.ss_swerve_drive = SS_SwerveDrive(self.joystick)
         self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
-        self.controller_bindings()
         # self.auto_chooser = AutoBuilder.buildAutoChooser(constants.SWERVE_DEFAULT_NOT_GENERATED["DEFAULT_AUTONOMOUS"])
         # SmartDashboard.putData(constants.SWERVE_DEFAULT_NOT_GENERATED["DEFAULT_AUTONOMOUS"], self.auto_chooser)
-
-    def controller_bindings(self) -> None:
-        self.joystick.a().onTrue(self.ss_swerve_drive.heading_is_auto_controlled_command())
-        self.joystick.a().onFalse(self.ss_swerve_drive.heading_is_driver_controlled_command())
-        self.joystick.pov(0).whileTrue(self.ss_swerve_drive.pov_move_command(1, 0))
-        self.joystick.pov(180).whileTrue(self.ss_swerve_drive.pov_move_command(-1, 0))
-        self.joystick.pov(90).whileTrue(self.ss_swerve_drive.pov_move_command(0, 1))
-        self.joystick.pov(270).whileTrue(self.ss_swerve_drive.pov_move_command(0, -1))
-        (self.joystick.back() & self.joystick.b()).whileTrue(self.ss_swerve_drive.brake_command())
-        (self.joystick.back() & self.joystick.start()).onTrue(self.ss_swerve_drive.reset_field_oriented_perspective())
 
 
 class MyRobot(commands2.TimedCommandRobot):
