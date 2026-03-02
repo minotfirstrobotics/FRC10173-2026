@@ -39,7 +39,9 @@ class MyRobot(commands2.TimedCommandRobot):
         """
         self.autonomousCommand = None
         self.container = RobotContainer()
-    
+        self.localMatchTimer = Timer()
+
+
         # self._time_and_joystick_replay = (HootAutoReplay().with_timestamp_replay().with_joystick_replay() )
 
     def robotPeriodic(self) -> None:
@@ -56,14 +58,25 @@ class MyRobot(commands2.TimedCommandRobot):
         block in order for anything in the Command-based framework to work.
         """
         commands2.CommandScheduler.getInstance().run()
-        SmartDashboard.putNumber("Match Time", Timer.getMatchTime());
+        SmartDashboard.putNumber("Match Time", Timer.getMatchTime())
         # self._time_and_joystick_replay.update() # using HootAutoReplay to log and replay timestamp and joystick data
+ 
+        ds_match_time = Timer.getMatchTime()
+        SmartDashboard.putNumber("Match Time (DS)", ds_match_time)
+        # fallback when DS time unavailable
+        if ds_match_time < 0:
+            SmartDashboard.putNumber("Match Time", self.localMatchTimer.get())
+        else:
+            SmartDashboard.putNumber("Match Time", ds_match_time)
+#
 
     def teleopInit(self) -> None:
         """This makes sure that the autonomous stops running when
         teleop starts running. If you want the autonomous to
         continue until interrupted by another command, remove
         this line or comment it out. """
+        self.localMatchTimer.reset()
+        self.localMatchTimer.start()
         if self.autonomousCommand: self.autonomousCommand.cancel()
 
     def teleopPeriodic(self) -> None:
@@ -72,7 +85,8 @@ class MyRobot(commands2.TimedCommandRobot):
 
 
     def autonomousInit(self) -> None:
-        pass
+        self.localMatchTimer.reset()
+        self.localMatchTimer.start()
         """This autonomous runs the autonomous command selected by your RobotContainer class."""
         # self.autonomousCommand = self.container.auto_chooser.getSelected()
         # if self.autonomousCommand: self.autonomousCommand.schedule()
