@@ -1,4 +1,39 @@
-"""import drivetrain
+"""
+## Adding Explicit Camera Source to Dashboard Example
+# ...existing code...
+from cscore import CameraServer, HttpCamera, VideoSource
+from wpilib import SmartDashboard
+# ...existing code...
+
+class SS_CameraPose(commands2.Subsystem):
+    def __init__(self, drivetrain):
+        # ...existing code...
+        self.drivetrain = drivetrain
+        self.camera = PhotonCamera("BackCamera")
+        # ...existing code...
+
+        # Explicit dashboard camera source (PhotonVision MJPEG stream)
+        stream_url = "http://photonvision.local:1182/?action=stream"
+        self.dashboard_cam = HttpCamera(
+            "Vision_BackCamera",
+            stream_url,
+            HttpCamera.HttpCameraKind.kMJPGStreamer
+        )
+        self.dashboard_cam.setConnectionStrategy(
+            VideoSource.ConnectionStrategy.kKeepOpen
+        )
+        CameraServer.addCamera(self.dashboard_cam)
+
+        # SmartDashboard/vision category metadata
+        SmartDashboard.putString("Vision/CameraSource", "Vision_BackCamera")
+        SmartDashboard.putString("Vision/CameraURL", stream_url)
+        SmartDashboard.putBoolean("Vision/CameraPublished", True)
+
+        # ...existing code...
+
+
+
+import drivetrain
 import wpilib
 import wpimath.geometry
 from photonlibpy import PhotonCamera, PhotonPoseEstimator
