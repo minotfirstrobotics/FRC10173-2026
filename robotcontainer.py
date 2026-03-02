@@ -17,6 +17,9 @@ from wpilib import DriverStation
 from wpimath.geometry import Rotation2d
 from wpimath.units import rotationsToRadians
 
+from subsystems.SS_ShooterMotor import SS_ShooterMotor
+from subsystems.SS_UptakeMotor import SS_UptakeMotor
+
 
 class RobotContainer:
     """
@@ -53,6 +56,9 @@ class RobotContainer:
         self._joystick = CommandXboxController(0)
 
         self.drivetrain = TunerConstants.create_drivetrain()
+        
+        self.ss_shootermotor = SS_ShooterMotor()
+        self.ss_uptakemotor = SS_UptakeMotor()
 
         # Configure the button bindings
         self.configureButtonBindings()
@@ -118,6 +124,16 @@ class RobotContainer:
         self._joystick.leftBumper().onTrue(
             self.drivetrain.runOnce(self.drivetrain.seed_field_centric)
         )
+
+        # Shooter motor control
+        self._joystick.rightTrigger(0.2).whileTrue(self.ss_shootermotor.run_forward_command())
+            # Justin Case
+        self._joystick.y().runOnce(self.ss_shootermotor.stop_motor_command())
+
+        # Uptake motor control
+        self._joystick.rightBumper().whileTrue(self.ss_uptakemotor.run_forward_command())
+            # Justin Case
+        self._joystick.x().runOnce(self.ss_uptakemotor.stop_motor_command())
 
         self.drivetrain.register_telemetry(
             lambda state: self._logger.telemeterize(state)

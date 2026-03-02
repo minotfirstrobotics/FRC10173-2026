@@ -7,7 +7,6 @@ class SS_GeneralMotor(commands2.Subsystem):
     def __init__(self):
         super().__init__()
         self.spark_motor = wpilib.PWMSparkMax(constants.PWM_CHANNELS["GENERAL_MOTOR"])
-        self.spark_motor.setSafetyEnabled(False)
         self.is_running = False
         self.speed = .6
 

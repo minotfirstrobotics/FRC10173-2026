@@ -14,8 +14,10 @@ DASHBOARD_TITLES = {
     "WINCH_SERVO_DESTINATION": "Winch Servo Destination",
     "ENCODED_MOTOR_RUNNING": "Encoded Motor Running",
     "ENCODED_MOTOR_POSITION": "Encoded Motor Position",
-    "SHOOTER_EMOTOR_RUNNING": "Shooter EMotor Running",
-    "SHOOTER_EMOTOR_POSITION": "Shooter EMotor Position",
+    "SHOOTER_MOTOR_RUNNING": "Shooter Motor Running",
+    "SHOOTER_MOTOR_POSITION": "Shooter Motor Position",
+    "UPTAKE_MOTOR_RUNNING": "Uptake Motor Running",
+    "UPTAKE_MOTOR_POSITION": "Uptake Motor Position",
 }
 
 PWM_CHANNELS = {
@@ -26,7 +28,8 @@ PWM_CHANNELS = {
 
 CAN_CHANNELS = {
     "ENCODED_MOTOR": 13,
-    "SHOOTER_EMOTOR": 14, #A number to be determined based on the actual CAN ID assigned to the motor controller
+    "SHOOTER_MOTOR": 14,
+    "UPTAKE_MOTOR": 15,
 }
 
 
