@@ -7,8 +7,11 @@ from phoenix6 import HootAutoReplay
 # from pathplannerlib.auto import AutoBuilder
 from wpimath.geometry import Pose2d, Rotation2d
 from commands2.button import CommandXboxController
+from subsystems import SS_UptakeMotor
+from subsystems.SS_ShooterMotor import SS_ShooterMotor
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
 from subsystems.SS_CameraPose import SS_CameraPose
+from subsystems.SS_UptakeMotor import SS_UptakeMotor
 
 
 class RobotContainer:
