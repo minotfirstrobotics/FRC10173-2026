@@ -17,7 +17,6 @@ components = [
     "pathplannerlib",
     # "all",
     # "apriltag",
-    # "commands2",
     # "cscore",
     # "romi",
     # "sim",
@@ -30,9 +29,6 @@ requires = [
     "photonlibpy",
     "pynetworktables",
     "robotpy-rev",
-    # "robotpy-pathplannerlib",
-    # "robotpy-commands-v2",
-    # "robotpy-ctre",  # Phoenix 5
     # "robotpy-navx",
     # "robotpy-playingwithfusion",
     ]
