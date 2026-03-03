@@ -2,17 +2,18 @@ import wpilib
 import commands2
 import constants
 import phoenix6
+from commands2.button import CommandXboxController
 
 class SS_UptakeMotor(commands2.Subsystem):
-    def __init__(self):
+    def __init__(self, joystick: CommandXboxController):
         super().__init__()
         self.motor = phoenix6.hardware.TalonFX(constants.CAN_CHANNELS["UPTAKE_MOTOR"])
         self.requested_power = phoenix6.controls.DutyCycleOut(0)
 
         # configure motor
         cfg = phoenix6.configs.TalonFXConfiguration()
-        cfg.motor_output.neutral_mode = phoenix6.signals.NeutralModeValue.Brake
-        cfg.motor_output.inverted = False
+        cfg.motor_output.neutral_mode = phoenix6.signals.NeutralModeValue.BRAKE
+        cfg.motor_output.inverted = phoenix6.signals.InvertedValue.COUNTER_CLOCKWISE_POSITIVE
 
         # # Budget PID control (enable if velocity control)
         # cfg.slot0.k_p = 0.1
@@ -22,11 +23,16 @@ class SS_UptakeMotor(commands2.Subsystem):
         # # cfg.slot0.k_v = 0.0
         status = self.motor.configurator.apply(cfg)
         if not status.is_ok():
-            wpilib.DriverStation.reportError(f"TalonFX configuration failed: {status}", False)
+            wpilib.reportError(f"TalonFX configuration failed: {status}", False)
 
         self.position = 0.0
         self.is_running = False
         self.speed_cap = 1
+
+        # Uptake motor control
+        self._joystick = joystick
+        self._joystick.rightBumper().whileTrue(self.run_forward_command())
+        self._joystick.x().onTrue(commands2.cmd.runOnce(self.stop_motor_command))
 
     def periodic(self):  # Special function called periodically by the robot
         self.position = self.motor.get_rotor_position().value
@@ -41,7 +47,7 @@ class SS_UptakeMotor(commands2.Subsystem):
     def set_speed(self, speed: float) -> None:
         clamped = max(-1.0, min(1.0, float(speed)))
         self.motor.set_control(self.requested_power.with_output(clamped))
-        self.is_running = abs(clamped) > 1e-6
+        # self.is_running = abs(clamped) > 1e-6
 
     def run_forward(self) -> None:
         self.is_running = True
@@ -62,11 +68,3 @@ class SS_UptakeMotor(commands2.Subsystem):
     # def run_velocity_command(self, rpm: float):
     # # starts velocity control when scheduled, stops motor when ended
     #     return commands2.cmd.startEnd(lambda: self.set_velocity(rpm), self.stop_motor, self)
-
-## Usage:
-    # from subsystems.SS_UptakeMotor import SS_UptakeMotor
-    # self.ss_uptake_motor = SS_UptakeMotor()
-    # self.joystick.povUp().whileTrue(self.ss_uptake_motor.run_forward_command())
-    # self.joystick.povUp().onTrue(self.ss_uptake_motor.go_to_destination_B_command())
-    # self.joystick.povDown().onTrue(self.ss_uptake_motor.go_to_destination_A_command())
-    # self.joystick.povLeft().onTrue(self.ss_uptake_motor.stop_motor_command())

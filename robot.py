@@ -6,16 +6,16 @@ from wpilib import SmartDashboard, Timer
 from phoenix6 import HootAutoReplay
 # from pathplannerlib.auto import AutoBuilder
 from commands2.button import CommandXboxController
+from subsystems import SS_UptakeMotor
 from subsystems.SS_ShooterMotor import SS_ShooterMotor
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
-from subsystems.SS_UptakeMotor import SS_UptakeTalonFX
+from subsystems.SS_UptakeMotor import SS_UptakeMotor
 
 
 class RobotContainer:
     def __init__(self) -> None:
         self.joystick = CommandXboxController(0)
         self.initialize_subsystems()
-        self.initialize_swerve_drive()
         self.joystick = CommandXboxController(0) # must be before swerve drive subsystem
         self.initialize_subsystems()
         self.controller_bindings() # must be after subsystems are initialized to bind buttons to subsystem commands
@@ -24,8 +24,8 @@ class RobotContainer:
 
     def initialize_subsystems(self) -> None:
         self.ss_swerve_drive = SS_SwerveDrive(self.joystick)
-        self.ss_shooter_motor = SS_ShooterMotor()
-        self.ss_uptake_talonfx = SS_UptakeTalonFX()
+        self.ss_shooter_motor = SS_ShooterMotor(self.joystick)
+        self.ss_uptake_talonfx = SS_UptakeMotor(self.joystick)
 
     def controller_bindings(self) -> None:
         # joystick bindings for movement are contained in the SS_SwerveDrive class

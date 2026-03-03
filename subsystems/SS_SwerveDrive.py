@@ -73,8 +73,8 @@ class SS_SwerveDrive(commands2.Subsystem):
             ))
         )         
 
-    def pov_move(self, direction_x, direction_y) -> None:
-        self.drivetrain.runOnce(
+    def pov_move(self, direction_x, direction_y) -> commands2.Command:
+        return self.drivetrain.runOnce(
             self.drivetrain.apply_request(
                 lambda: self._drive_robot_centered
                     .with_velocity_x(self._pov_speed * direction_x)
