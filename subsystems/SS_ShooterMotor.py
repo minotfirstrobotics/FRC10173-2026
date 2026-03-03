@@ -10,19 +10,15 @@ class SS_ShooterMotor(commands2.Subsystem):
     def __init__(self, joystick: CommandXboxController):
         super().__init__()
         self.motor = rev.SparkMax(constants.CAN_CHANNELS["SHOOTER_MOTOR"], rev.SparkLowLevel.MotorType.kBrushless)
-        config = rev.SparkMaxConfig()
-        self.motor.configure(config, rev.ResetMode.kResetSafeParameters, rev.PersistMode.kPersistParameters)
+        self._config = rev.SparkMaxConfig()
+        self._config.setIdleMode(rev.SparkBaseConfig.IdleMode.kBrake)
+        self._config.smartCurrentLimit(30) # amps
+        self._config.closedLoop.pidf(0.1, 0.0, 0.0, 0.0, rev.ClosedLoopSlot.kSlot0)
+        self.motor.configure(self._config, rev.ResetMode.kResetSafeParameters, rev.PersistMode.kPersistParameters)
         self.motor.setInverted(False)
-        config.setIdleMode(rev.SparkBaseConfig.IdleMode.kBrake)
-        config.smartCurrentLimit(40) # amps
         self.encoder = self.motor.getEncoder()
         self.controller = self.motor.getClosedLoopController()
 
-        # Budget PIDF control (enable if velocity control)
-        self.controller.setP(0.1)
-        self.controller.setI(0.0)
-        self.controller.setD(0.0)
-        self.controller.setFF(0.0)
         self.velocity = 0
         self.is_running = False
         self.speed_cap = 1
@@ -31,7 +27,7 @@ class SS_ShooterMotor(commands2.Subsystem):
         # Shooter motor control
         self._joystick = joystick
         self._joystick.rightTrigger(0.2).whileTrue(self.run_velocity_command(self.speed_cap * self.max_rpm))
-        self._joystick.y().onTrue(commands2.cmd.runOnce(self.run_velocity_command, 0 * self.max_rpm))
+        self._joystick.y().whileTrue(self.run_velocity_command(0))
 
     def periodic(self): # Special function called periodically by the robot
         self.velocity = self.encoder.getVelocity()
@@ -46,7 +42,16 @@ class SS_ShooterMotor(commands2.Subsystem):
     # Velocity controls
     def set_velocity(self, rpm: float) -> None:
         target = float(rpm)
-        self.controller.setSetpoint(target, rev.SparkLowLevel.ControlType.kVelocity)
+        self.controller.setSetpoint(target, 
+                                    rev.SparkLowLevel.ControlType.kVelocity, 
+                                    rev.ClosedLoopSlot.kSlot0
+                                    )
+
+    def adjust_FF(self, ff: float) -> None:
+        self._config.closedLoop.pidf(0.1, 0.0, 0.0, ff, rev.ClosedLoopSlot.kSlot0)
+        self.motor.configure(self._config, 
+                             rev.ResetMode.kNoResetSafeParameters, 
+                             rev.PersistMode.kNoPersistParameters)
 
     # def run_forward(self) -> None:
     #     self.is_running = True

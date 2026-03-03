@@ -1,11 +1,8 @@
-import constants
-import typing
 import commands2
 import wpilib
 from wpilib import SmartDashboard, Timer
 from phoenix6 import HootAutoReplay
 # from pathplannerlib.auto import AutoBuilder
-from wpimath.geometry import Pose2d, Rotation2d
 from commands2.button import CommandXboxController
 from subsystems import SS_UptakeMotor
 from subsystems.SS_ShooterMotor import SS_ShooterMotor
@@ -22,6 +19,8 @@ class RobotContainer:
         self.joystick = CommandXboxController(0)
         self.ss_swerve_drive = SS_SwerveDrive(self.joystick)
         self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
+        self.ss_shooter_motor = SS_ShooterMotor(self.joystick)
+        self.ss_uptake_motor = SS_UptakeMotor(self.joystick)
         # self.auto_chooser = AutoBuilder.buildAutoChooser(constants.SWERVE_DEFAULT_NOT_GENERATED["DEFAULT_AUTONOMOUS"])
         # SmartDashboard.putData(constants.SWERVE_DEFAULT_NOT_GENERATED["DEFAULT_AUTONOMOUS"], self.auto_chooser)
 
@@ -31,7 +30,6 @@ class MyRobot(commands2.TimedCommandRobot):
     Command v2 robots are encouraged to inherit from TimedCommandRobot, which
     has an implementation of robotPeriodic which runs the scheduler for you
     """
-
     def robotInit(self) -> None:
         """
         This function is run when the robot is first started up and should be used for any
