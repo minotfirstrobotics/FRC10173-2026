@@ -26,14 +26,6 @@ class SS_CameraPose(commands2.Subsystem):
         self._field_loaded = False
 
 
-    def add_vision_measurement(self, 
-                               vision_pose: wpimath.geometry.Pose2d, 
-                               timestamp_seconds: float, 
-                               std_devs: tuple[float, float, float] | None = None, 
-                               ) -> None:
-        self.swerve_drive.drivetrain.add_vision_measurement(vision_pose, timestamp_seconds, std_devs)
-
-
     def periodic(self) -> None: #Called every 20ms by the CommandScheduler
         if not self._field_loaded: #Lazy load field layout to avoid blocking initialization
             try:
@@ -83,7 +75,7 @@ class SS_CameraPose(commands2.Subsystem):
                 std_devs = (0.8, 0.8, 1.5)
     
             # Inject into drivetrain pose estimator
-            # self.add_vision_measurement(pose3d.toPose2d(), cam_est_pose.timestampSeconds, std_devs )
+            self.swerve_drive.drivetrain.add_vision_measurement(pose3d.toPose2d(), cam_est_pose.timestampSeconds, std_devs)
 
             self.last_pose = pose3d
     
