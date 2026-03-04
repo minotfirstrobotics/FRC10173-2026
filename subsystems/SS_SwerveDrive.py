@@ -1,5 +1,4 @@
 import commands2
-import constants
 from wpimath.units import rotationsToRadians
 from phoenix6 import swerve, SignalLogger
 from telemetry import Telemetry
@@ -13,9 +12,9 @@ class SS_SwerveDrive(commands2.Subsystem):
     def __init__(self, joystick) -> None:
         super().__init__()
         self._joystick = joystick
-        self._max_angular_rate = rotationsToRadians(constants.SWERVE_DEFAULT_NOT_GENERATED["MAX_ROTATION_SPEED"]) # .75 was recommended
-        self._max_speed = constants.SWERVE_DEFAULT_NOT_GENERATED["MAX_DRIVE_SPEED_FACTOR"] * TunerConstants.speed_at_12_volts
-        self._pov_speed = constants.SWERVE_DEFAULT_NOT_GENERATED["MAX_POV_SPEED"]
+        self._max_angular_rate = rotationsToRadians(.75)
+        self._max_speed = .5 * TunerConstants.speed_at_12_volts
+        self._pov_speed = 0.2
         self._latest_pose = Pose2d()
         self._logger = Telemetry(self._max_speed)
         self.drivetrain = TunerConstants.create_drivetrain() # does this need to after swerve configs?

@@ -1,13 +1,12 @@
 import wpilib
 import commands2
-import constants
 import phoenix6
 from commands2.button import CommandXboxController
 
 class SS_UptakeMotor(commands2.Subsystem):
     def __init__(self, joystick: CommandXboxController):
         super().__init__()
-        self.motor = phoenix6.hardware.TalonFX(constants.CAN_CHANNELS["UPTAKE_MOTOR"])
+        self.motor = phoenix6.hardware.TalonFX(device_id=16)
         self.requested_power = phoenix6.controls.DutyCycleOut(0)
 
         # configure motor
@@ -36,8 +35,8 @@ class SS_UptakeMotor(commands2.Subsystem):
 
     def periodic(self):  # Special function called periodically by the robot
         self.position = self.motor.get_rotor_position().value
-        wpilib.SmartDashboard.putNumber(constants.DASHBOARD_TITLES["UPTAKE_MOTOR_POSITION"], self.position)
-        wpilib.SmartDashboard.putBoolean(constants.DASHBOARD_TITLES["UPTAKE_MOTOR_RUNNING"], self.is_running)
+        wpilib.SmartDashboard.putNumber("Uptake Motor Position", self.position)
+        wpilib.SmartDashboard.putBoolean("Uptake Motor Running", self.is_running)
 
     # # Velocity controls
     # def set_velocity(self, rpm: float) -> None:

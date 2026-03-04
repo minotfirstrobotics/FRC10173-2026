@@ -21,8 +21,8 @@ class RobotContainer:
         self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
         self.ss_shooter_motor = SS_ShooterMotor(self.joystick)
         self.ss_uptake_motor = SS_UptakeMotor(self.joystick)
-        # self.auto_chooser = AutoBuilder.buildAutoChooser(constants.SWERVE_DEFAULT_NOT_GENERATED["DEFAULT_AUTONOMOUS"])
-        # SmartDashboard.putData(constants.SWERVE_DEFAULT_NOT_GENERATED["DEFAULT_AUTONOMOUS"], self.auto_chooser)
+        # self.auto_chooser = AutoBuilder.buildAutoChooser("Autonomous Mode")
+        # SmartDashboard.putData("Default Autonomous", self.auto_chooser)
 
 
 class MyRobot(commands2.TimedCommandRobot):

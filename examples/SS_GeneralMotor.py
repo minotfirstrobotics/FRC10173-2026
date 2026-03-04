@@ -1,17 +1,16 @@
 import wpilib
 import commands2
-import constants
 
 
 class SS_GeneralMotor(commands2.Subsystem):
     def __init__(self):
         super().__init__()
-        self.spark_motor = wpilib.PWMSparkMax(constants.PWM_CHANNELS["GENERAL_MOTOR"])
+        self.spark_motor = wpilib.PWMSparkMax(7)
         self.is_running = False
         self.speed = .6
 
     def periodic(self): # Special function called periodically by the robot
-        wpilib.SmartDashboard.putBoolean(constants.DASHBOARD_TITLES["GENERAL_MOTOR_RUNNING"], self.is_running)
+        wpilib.SmartDashboard.putBoolean("General Motor Running", self.is_running)
 
 
     ## Methods
