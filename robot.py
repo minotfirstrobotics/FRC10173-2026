@@ -5,22 +5,19 @@ from phoenix6 import HootAutoReplay
 # from pathplannerlib.auto import AutoBuilder
 from commands2.button import CommandXboxController
 from subsystems import SS_UptakeMotor
-from subsystems.SS_ShooterMotor import SS_ShooterMotor
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
-from subsystems.SS_CameraPose import SS_CameraPose
+from subsystems.SS_ShooterMotor import SS_ShooterMotor
 from subsystems.SS_UptakeMotor import SS_UptakeMotor
+from subsystems.SS_CameraPose import SS_CameraPose
 
 
 class RobotContainer:
     def __init__(self) -> None:
-        """ 
-        Some inits must be in proper order: i.e. joystick -> swerve -> bindings
-        """
         self.joystick = CommandXboxController(0)
         self.ss_swerve_drive = SS_SwerveDrive(self.joystick)
-        self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
         self.ss_shooter_motor = SS_ShooterMotor(self.joystick)
         self.ss_uptake_motor = SS_UptakeMotor(self.joystick)
+        self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
         # self.auto_chooser = AutoBuilder.buildAutoChooser("Autonomous Mode")
         # SmartDashboard.putData("Default Autonomous", self.auto_chooser)
 
@@ -41,8 +38,6 @@ class MyRobot(commands2.TimedCommandRobot):
         self.autonomousCommand = None
         self.container = RobotContainer()
         self.localMatchTimer = Timer()
-
-
         # self._time_and_joystick_replay = (HootAutoReplay().with_timestamp_replay().with_joystick_replay() )
 
     def robotPeriodic(self) -> None:
@@ -69,7 +64,7 @@ class MyRobot(commands2.TimedCommandRobot):
             SmartDashboard.putNumber("Match Time", self.localMatchTimer.get())
         else:
             SmartDashboard.putNumber("Match Time", ds_match_time)
-#
+
 
     def teleopInit(self) -> None:
         """This makes sure that the autonomous stops running when
