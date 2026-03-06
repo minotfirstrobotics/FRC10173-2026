@@ -5,11 +5,12 @@ from phoenix6 import HootAutoReplay
 # from pathplannerlib.auto import AutoBuilder
 from commands2.button import CommandXboxController
 from subsystems import SS_UptakeMotor
+from subsystems import SS_TurrentLogic
 from subsystems.SS_ShooterMotor import SS_ShooterMotor
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
 from subsystems.SS_CameraPose import SS_CameraPose
 from subsystems.SS_UptakeMotor import SS_UptakeMotor
-
+from subsystems.SS_TurrentLogic import SS_TurrentLogic
 
 class RobotContainer:
     def __init__(self) -> None:
@@ -21,6 +22,7 @@ class RobotContainer:
         self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
         self.ss_shooter_motor = SS_ShooterMotor(self.joystick)
         self.ss_uptake_motor = SS_UptakeMotor(self.joystick)
+        self.ss_turrent_logic = SS_TurrentLogic(self.joystick)
         # self.auto_chooser = AutoBuilder.buildAutoChooser(constants.SWERVE_DEFAULT_NOT_GENERATED["DEFAULT_AUTONOMOUS"])
         # SmartDashboard.putData(constants.SWERVE_DEFAULT_NOT_GENERATED["DEFAULT_AUTONOMOUS"], self.auto_chooser)
 
