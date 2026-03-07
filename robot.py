@@ -15,8 +15,8 @@ class RobotContainer:
     def __init__(self) -> None:
         self.joystick = CommandXboxController(0)
         self.ss_swerve_drive = SS_SwerveDrive(self.joystick)
-        self.ss_shooter_motor = SS_ShooterMotor(self.joystick)
-        self.ss_uptake_motor = SS_UptakeMotor(self.joystick)
+        # self.ss_shooter_motor = SS_ShooterMotor(self.joystick)
+        # self.ss_uptake_motor = SS_UptakeMotor(self.joystick)
         self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
         # self.auto_chooser = AutoBuilder.buildAutoChooser("Autonomous Mode")
         # SmartDashboard.putData("Default Autonomous", self.auto_chooser)
@@ -54,16 +54,16 @@ class MyRobot(commands2.TimedCommandRobot):
         block in order for anything in the Command-based framework to work.
         """
         commands2.CommandScheduler.getInstance().run()
-        SmartDashboard.putNumber("Match Time", Timer.getMatchTime())
-        # self._time_and_joystick_replay.update() # using HootAutoReplay to log and replay timestamp and joystick data
+        # SmartDashboard.putNumber("Match Time", Timer.getMatchTime())
+        # # self._time_and_joystick_replay.update() # using HootAutoReplay to log and replay timestamp and joystick data
  
-        ds_match_time = Timer.getMatchTime()
-        SmartDashboard.putNumber("Match Time (DS)", ds_match_time)
-        # fallback when DS time unavailable
-        if ds_match_time < 0:
-            SmartDashboard.putNumber("Match Time", self.localMatchTimer.get())
-        else:
-            SmartDashboard.putNumber("Match Time", ds_match_time)
+        # ds_match_time = Timer.getMatchTime()
+        # SmartDashboard.putNumber("Match Time (DS)", ds_match_time)
+        # # fallback when DS time unavailable
+        # if ds_match_time < 0:
+        #     SmartDashboard.putNumber("Match Time", self.localMatchTimer.get())
+        # else:
+        #     SmartDashboard.putNumber("Match Time", ds_match_time)
 
 
     def teleopInit(self) -> None:

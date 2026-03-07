@@ -25,3 +25,11 @@
 
 # CTRE Commands
 * ./owlet -f wpilog "input.hoot" "output.wpilog"
+
+
+# Accessory Motor CAN_ids
+* shooter = 3
+* feeder uptake = 0
+* turret = 1
+* intake = 4
+* CANdle = 2
