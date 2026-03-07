@@ -18,6 +18,8 @@ DASHBOARD_TITLES = {
     "SHOOTER_MOTOR_POSITION": "Shooter Motor Position",
     "UPTAKE_MOTOR_RUNNING": "Uptake Motor Running",
     "UPTAKE_MOTOR_POSITION": "Uptake Motor Position",
+    "INTAKE_SYSTEM_RUNNING": "Intake System Running",
+    "INTAKE_SYSTEM_POSITION": "Intake System Position",
 }
 
 PWM_CHANNELS = {
@@ -30,6 +32,7 @@ CAN_CHANNELS = {
     "ENCODED_MOTOR": 13,
     "SHOOTER_MOTOR": 14,
     "UPTAKE_MOTOR": 15,
+    "INTAKE_SYSTEM": 16,
 }
 
 
