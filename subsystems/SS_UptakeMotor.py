@@ -6,7 +6,7 @@ from commands2.button import CommandXboxController
 class SS_UptakeMotor(commands2.Subsystem):
     def __init__(self, joystick: CommandXboxController):
         super().__init__()
-        self.motor = phoenix6.hardware.TalonFX(device_id=16)
+        self.motor = phoenix6.hardware.TalonFX(device_id=0)
         self.requested_power = phoenix6.controls.DutyCycleOut(0)
 
         # configure motor

@@ -1,13 +1,12 @@
 import wpilib
 import commands2
-import constants
 import phoenix6
 from commands2.button import CommandXboxController
 
-class SS_UptakeMotor(commands2.Subsystem):
+class SS_TurretMotor(commands2.Subsystem):
     def __init__(self, joystick: CommandXboxController):
         super().__init__()
-        self.motor = phoenix6.hardware.TalonFX(constants.CAN_CHANNELS["TURRENT_MOTOR"])
+        self.motor = phoenix6.hardware.TalonFX(device_id=1)
         self.requested_power = phoenix6.controls.DutyCycleOut(0)
 
         # configure motor
@@ -16,7 +15,6 @@ class SS_UptakeMotor(commands2.Subsystem):
         cfg.motor_output.inverted = phoenix6.signals.InvertedValue.COUNTER_CLOCKWISE_POSITIVE
 
         # ENCODER SOFT LIMITS
-
         # Example: turret allowed from -50° to +50°
         # Convert degrees to rotations: 1 rotation = 360°
         self.min_rot = -50.0 / 360.0
@@ -51,8 +49,8 @@ class SS_UptakeMotor(commands2.Subsystem):
 
     def periodic(self):
         self.position = self.motor.get_rotor_position().value
-        wpilib.SmartDashboard.putNumber(constants.DASHBOARD_TITLES["TURRENT_MOTOR_POSITION"], self.position)
-        wpilib.SmartDashboard.putBoolean(constants.DASHBOARD_TITLES["TURRENT_MOTOR_RUNNING"], self.is_running)
+        wpilib.SmartDashboard.putNumber("Turret Position", self.position)
+        wpilib.SmartDashboard.putBoolean("Turret Running", self.is_running)
 
     def set_speed(self, speed: float) -> None:
         clamped = max(-1.0, min(1.0, float(speed)))

@@ -5,7 +5,7 @@ from phoenix6.controls import FireAnimation, SolidColor
 
 class MyRobot:
     def robotInit(self):
-        self.candle = CANdle(0) # check Phoenix Tuner X for the correct ID#
+        self.candle = CANdle(0) # check Phoenix Tuner X for the correct ID# (currently 5 and 2)
 
         # Fluent-style LED config
         configs = CANdleConfiguration()

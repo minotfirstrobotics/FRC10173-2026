@@ -8,7 +8,7 @@ from subsystems import SS_UptakeMotor
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
 from subsystems.SS_ShooterMotor import SS_ShooterMotor
 from subsystems.SS_UptakeMotor import SS_UptakeMotor
-from subsystems.SS_TurrentLogic import SS_TurrentLogic
+from subsystems.SS_TurretMotor import SS_TurretMotor
 from subsystems.SS_CameraPose import SS_CameraPose
 
 
@@ -19,7 +19,7 @@ class RobotContainer:
         # self.ss_shooter_motor = SS_ShooterMotor(self.joystick)
         # self.ss_uptake_motor = SS_UptakeMotor(self.joystick)
         self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
-        self.ss_turrent_logic = SS_TurrentLogic(self.joystick)
+        self.ss_turret_logic = SS_TurretMotor(self.joystick)
         # self.auto_chooser = AutoBuilder.buildAutoChooser("Autonomous Mode")
         # SmartDashboard.putData("Default Autonomous", self.auto_chooser)
 

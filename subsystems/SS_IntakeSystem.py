@@ -2,14 +2,13 @@ from calendar import c
 
 import wpilib
 import commands2
-import constants
 import rev
 from commands2.button import CommandXboxController
 
 class SS_IntakeSystem(commands2.Subsystem):
     def __init__(self, joystick: CommandXboxController):
         super().__init__()
-        self.motor = rev.SparkMax(constants.CAN_CHANNELS["INTAKE_SYSTEM"], rev.SparkLowLevel.MotorType.kBrushed)
+        self.motor = rev.SparkMax(device_id=4, type=rev.SparkLowLevel.MotorType.kBrushed)
         self._config = rev.SparkMaxConfig()
         self._config.setIdleMode(rev.SparkBaseConfig.IdleMode.kBrake)
         self._config.smartCurrentLimit(30) # amps
@@ -30,8 +29,8 @@ class SS_IntakeSystem(commands2.Subsystem):
 
     def periodic(self): # Special function called periodically by the robot
         self.position = self.encoder.getPosition()
-        wpilib.SmartDashboard.putNumber(constants.DASHBOARD_TITLES["INTAKE_SYSTEM_POSITION"], self.position)
-        wpilib.SmartDashboard.putBoolean(constants.DASHBOARD_TITLES["INTAKE_SYSTEM_RUNNING"], self.is_running)
+        wpilib.SmartDashboard.putNumber("Intake Velocity", self.position)
+        wpilib.SmartDashboard.putBoolean("Intake Running", self.is_running)
 
     def set_speed(self, speed: float) -> None:
         clamped = max(-1.0, min(1.0, float(speed)))

@@ -8,7 +8,7 @@ from commands2.button import CommandXboxController
 class SS_ShooterMotor(commands2.Subsystem):
     def __init__(self, joystick: CommandXboxController):
         super().__init__()
-        self.motor = rev.SparkMax(deviceID=17, type=rev.SparkLowLevel.MotorType.kBrushless)
+        self.motor = rev.SparkMax(deviceID=3, type=rev.SparkLowLevel.MotorType.kBrushless)
         self._config = rev.SparkMaxConfig()
         self._config.setIdleMode(rev.SparkBaseConfig.IdleMode.kBrake)
         self._config.smartCurrentLimit(30) # amps
