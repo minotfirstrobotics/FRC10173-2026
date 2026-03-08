@@ -7,7 +7,7 @@ from commands2.button import CommandXboxController
 from subsystems import SS_UptakeTalon
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
 from subsystems.SS_ShooterSpark import SS_ShooterSpark
-from subsystems.SS_TurretTalon import SS_TurretTalon
+from subsystems.SS_TurretTalon_Trapezoidal import SS_TurretTalon
 from subsystems.SS_UptakeTalon import SS_UptakeTalon
 from subsystems.SS_IntakeSpark import SS_IntakeSpark
 from subsystems.SS_CameraPose import SS_CameraPose

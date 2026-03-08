@@ -1,13 +1,17 @@
 # To Do List:
-* Make intake use set_velocity
-* Make turret system use set_position
+* Intake is sticking
+* Bathtub and belt protection for uptake feeder
+* Find CAN errors
+* Tune FF for shooter
+* Tune PIDF/mm for turret and choose trapezoid vs pidf
+* Get 2 cameras working
+* Get photonvision for other 2 cams
 * Make climbing gear and strategy
-* Enable autonomous choose on dashboard
+* Enable autonomous choise on dashboard
 * Build autonomous 
-* Determine logging strategies (SignalLogger.enable_auto_logging(True) )
+* Determine logging strategies (SignalLogger.enable_auto_logging(True), hoot, etc )
 
 # Dependencies:
-* MrK had to use python3.14 -m pip install ... sometimes
 * pip install robotpy
 * pip install robotpy-commands-v2
 * pip install phoenix6
@@ -15,6 +19,7 @@
 * pip install robotpy-pathplannerlib
 * pip install robotpy-rev
 * pip install photonlibpy
+* MrK had to use python3.14 -m pip install ... sometimes
 
 # Python Commands
 * robotpy deploy

@@ -1,5 +1,3 @@
-from calendar import c
-
 import wpilib
 import commands2
 import rev
@@ -14,42 +12,47 @@ class SS_IntakeSpark(commands2.Subsystem):
         self._config.smartCurrentLimit(30) # amps
         self._config.closedLoop.pidf(0.1, 0.0, 0.0, 0.0, rev.ClosedLoopSlot.kSlot0)
         self.motor.configure(self._config, rev.ResetMode.kResetSafeParameters, rev.PersistMode.kPersistParameters)
-        self.motor.setInverted(False)
+        # self.motor.setInverted(False)
         self.encoder = self.motor.getEncoder()
         self.controller = self.motor.getClosedLoopController()
 
-        self.speed_cap = .1
-        self.max_rpm = 5000 # 5000 is example max RPM
+        self.cruising_speed_factor = .1
+        self.max_rpm = 5000
 
         self._joystick = joystick
-        self._joystick.a().whileTrue(self.run_forward_command())
-        # self._joystick.x().onTrue(self.stop_motor_command())
+        self._joystick.a().whileTrue(self.cruising_speed_command())
 
     def periodic(self): # Special function called periodically by the robot
-        self.velocity = self.encoder.getVelocity()
-        wpilib.SmartDashboard.putNumber("Intake Velocity", self.velocity)
-        self.is_running = self.velocity > 1e-4
-        wpilib.SmartDashboard.putBoolean("Intake Running", self.is_running)
+        wpilib.SmartDashboard.putNumber("Intake Actual Velocity", self.encoder.getVelocity())
+        wpilib.SmartDashboard.putNumber("Intake Setpoint Velocity", self.controller.getSetpoint())
 
     # -------------------------
     # Motor movement functions
     # -------------------------
-    def set_velocity(self, rpm: float) -> None:
-        target = float(rpm)
-        self.controller.setSetpoint(target, 
+    def set_velocity(self, target_rpm: float) -> None:
+        self.controller.setSetpoint(float(target_rpm), 
                                     rev.SparkLowLevel.ControlType.kVelocity, 
                                     rev.ClosedLoopSlot.kSlot0
                                     )
+
+    def stop_motor(self):
+        self.motor.set(0)
 
     # -------------------------
     # Commands
     # -------------------------
     def run_velocity_command(self, rpm: float) -> commands2.Command:
-        return commands2.cmd.startEnd(lambda: self.set_velocity(rpm), lambda: self.set_velocity(0), self)
+        return commands2.cmd.startEnd(lambda: self.set_velocity(rpm), 
+                                      lambda: self.stop_motor(), self)
 
-    def run_forward_command(self):
-        return commands2.cmd.startEnd(lambda: self.set_velocity(self.speed_cap*self.max_rpm), lambda: self.set_velocity(0), self)
+    def cruising_speed_command(self):
+        return commands2.cmd.startEnd(lambda: self.set_velocity(self.cruising_speed_factor*self.max_rpm), 
+                                      lambda: self.stop_motor(), self)
+    
+    def full_speed_command(self):
+        return commands2.cmd.startEnd(lambda: self.set_velocity(1*self.max_rpm), 
+                                      lambda: self.stop_motor(), self)
     
     def stop_motor_command(self):
-        return commands2.cmd.runOnce(lambda: self.set_velocity(0), self)
+        return commands2.cmd.runOnce(lambda: self.stop_motor(), self)
     
