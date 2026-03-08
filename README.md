@@ -1,10 +1,7 @@
 # To Do List:
-* Make an intake subsystem (SPARK; running speed like uptake)
-* Make a turret subsystem (TalonFX; run to position)
-* Camera
-  * Restore camera feed
-  * Get pose from april tag on dashboard
-  * Inject vision pose into swerve drive
+* Make intake use set_velocity
+* Make turret system use set_position
+* Make climbing gear and strategy
 * Enable autonomous choose on dashboard
 * Build autonomous 
 * Determine logging strategies (SignalLogger.enable_auto_logging(True) )

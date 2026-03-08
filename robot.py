@@ -4,11 +4,12 @@ from wpilib import SmartDashboard, Timer
 from phoenix6 import HootAutoReplay
 # from pathplannerlib.auto import AutoBuilder
 from commands2.button import CommandXboxController
-from subsystems import SS_UptakeMotor
+from subsystems import SS_UptakeTalon
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
-from subsystems.SS_ShooterMotor import SS_ShooterMotor
-from subsystems.SS_UptakeMotor import SS_UptakeMotor
-from subsystems.SS_TurretMotor import SS_TurretMotor
+from subsystems.SS_ShooterSpark import SS_ShooterSpark
+from subsystems.SS_TurretTalon import SS_TurretTalon
+from subsystems.SS_UptakeTalon import SS_UptakeTalon
+from subsystems.SS_IntakeSpark import SS_IntakeSpark
 from subsystems.SS_CameraPose import SS_CameraPose
 
 
@@ -16,10 +17,11 @@ class RobotContainer:
     def __init__(self) -> None:
         self.joystick = CommandXboxController(0)
         self.ss_swerve_drive = SS_SwerveDrive(self.joystick)
-        # self.ss_shooter_motor = SS_ShooterMotor(self.joystick)
-        # self.ss_uptake_motor = SS_UptakeMotor(self.joystick)
-        self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
-        self.ss_turret_logic = SS_TurretMotor(self.joystick)
+        self.ss_shooter_spark = SS_ShooterSpark(self.joystick)
+        self.ss_turret_talon = SS_TurretTalon(self.joystick)
+        self.ss_uptake_talon = SS_UptakeTalon(self.joystick)
+        self.ss_intake_spark = SS_IntakeSpark(self.joystick)
+        # self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
         # self.auto_chooser = AutoBuilder.buildAutoChooser("Autonomous Mode")
         # SmartDashboard.putData("Default Autonomous", self.auto_chooser)
 
@@ -56,16 +58,16 @@ class MyRobot(commands2.TimedCommandRobot):
         block in order for anything in the Command-based framework to work.
         """
         commands2.CommandScheduler.getInstance().run()
-        # SmartDashboard.putNumber("Match Time", Timer.getMatchTime())
-        # # self._time_and_joystick_replay.update() # using HootAutoReplay to log and replay timestamp and joystick data
+        # self._time_and_joystick_replay.update() # using HootAutoReplay to log and replay timestamp and joystick data
  
-        # ds_match_time = Timer.getMatchTime()
-        # SmartDashboard.putNumber("Match Time (DS)", ds_match_time)
-        # # fallback when DS time unavailable
-        # if ds_match_time < 0:
-        #     SmartDashboard.putNumber("Match Time", self.localMatchTimer.get())
-        # else:
-        #     SmartDashboard.putNumber("Match Time", ds_match_time)
+        SmartDashboard.putNumber("Match Time", Timer.getMatchTime())
+        ds_match_time = Timer.getMatchTime()
+        SmartDashboard.putNumber("Match Time (DS)", ds_match_time)
+        # fallback when DS time unavailable
+        if ds_match_time < 0:
+            SmartDashboard.putNumber("Match Time", self.localMatchTimer.get())
+        else:
+            SmartDashboard.putNumber("Match Time", ds_match_time)
 
 
     def teleopInit(self) -> None:

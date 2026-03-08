@@ -2,7 +2,7 @@ import commands2
 from wpimath.units import rotationsToRadians
 from phoenix6 import swerve, SignalLogger
 from telemetry import Telemetry
-from generated.tuner_constants_2025 import TunerConstants
+from generated.tuner_constants import TunerConstants
 from wpilib import DriverStation, Timer, SmartDashboard
 from wpimath.geometry import Pose2d, Rotation2d
 from commands2.button import Trigger
@@ -13,7 +13,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         super().__init__()
         self._joystick = joystick
         self._max_angular_rate = rotationsToRadians(.75)
-        self._max_speed = .5 * TunerConstants.speed_at_12_volts
+        self._max_speed = .2 * TunerConstants.speed_at_12_volts
         self._pov_speed = 0.2
         self._latest_pose = Pose2d()
         self._logger = Telemetry(self._max_speed)
@@ -72,7 +72,9 @@ class SS_SwerveDrive(commands2.Subsystem):
         SmartDashboard.putNumber("Swerve/Swerve Rotation (deg)", pose_rotation.degrees())
 
 
-    ## Methods to control the swerve drive subsystem
+    # -------------------------
+    # Motor movement functions
+    # -------------------------
     def heading_is_driver_controlled(self) -> None:
         self.drivetrain.setDefaultCommand(
             self.drivetrain.apply_request(lambda: (
@@ -122,7 +124,9 @@ class SS_SwerveDrive(commands2.Subsystem):
         )
 
 
-    ## Commands
+    # -------------------------
+    # Commands
+    # -------------------------
     def heading_is_auto_controlled_command(self) -> commands2.Command:
         return commands2.cmd.runOnce(self.heading_is_auto_controlled)
     

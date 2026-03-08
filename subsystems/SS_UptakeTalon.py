@@ -3,7 +3,7 @@ import commands2
 import phoenix6
 from commands2.button import CommandXboxController
 
-class SS_UptakeMotor(commands2.Subsystem):
+class SS_UptakeTalon(commands2.Subsystem):
     def __init__(self, joystick: CommandXboxController):
         super().__init__()
         self.motor = phoenix6.hardware.TalonFX(device_id=0)
@@ -24,44 +24,39 @@ class SS_UptakeMotor(commands2.Subsystem):
         if not status.is_ok():
             wpilib.reportError(f"TalonFX configuration failed: {status}", False)
 
-        self.position = 0.0
-        self.is_running = False
-        self.speed_cap = 1
+        self.speed_cap = .2
 
-        # Uptake motor control
         self._joystick = joystick
-        self._joystick.rightBumper().whileTrue(self.run_forward_command())
-        self._joystick.x().onTrue(commands2.cmd.runOnce(self.stop_motor_command))
+        self._joystick.b().whileTrue(self.run_forward_command())
+        # self._joystick.x().whileTrue(self.run_velocity_command(0))
 
     def periodic(self):  # Special function called periodically by the robot
         self.position = self.motor.get_rotor_position().value
         wpilib.SmartDashboard.putNumber("Uptake Motor Position", self.position)
-        wpilib.SmartDashboard.putBoolean("Uptake Motor Running", self.is_running)
+        # self.is_running = self.velocity > 1e-4
+        # wpilib.SmartDashboard.putBoolean("Uptake Motor Running", self.is_running)
 
-    # # Velocity controls
-    # def set_velocity(self, rpm: float) -> None:
-    #     target = float(rpm)
-    #     self.motor.set_control(phoenix6.controls.VelocityDutyCycle(target))
 
+    # -------------------------
+    # Motor movement functions
+    # -------------------------
     def set_speed(self, speed: float) -> None:
         clamped = max(-1.0, min(1.0, float(speed)))
         self.motor.set_control(self.requested_power.with_output(clamped))
-        # self.is_running = abs(clamped) > 1e-6
 
-    def run_forward(self) -> None:
-        self.is_running = True
-        self.set_speed(self.speed_cap)
-
-    def stop_motor(self) -> None:
+    def stop_motor(self):
         self.is_running = False
         self.set_speed(0)
 
-    ## Commands
+    # -------------------------
+    # Commands
+    # -------------------------
     def run_forward_command(self):
-        return commands2.cmd.startEnd(self.run_forward, self.stop_motor, self)
-    
+        return commands2.cmd.startEnd(lambda: self.set_speed(self.speed_cap), self.stop_motor, self)
+
     def stop_motor_command(self):
         return commands2.cmd.runOnce(self.stop_motor, self)
+
 
     # # Velocity command
     # def run_velocity_command(self, rpm: float):
