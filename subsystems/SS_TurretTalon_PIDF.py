@@ -4,9 +4,9 @@ import phoenix6
 from commands2.button import CommandXboxController
 
 class SS_TurretTalon(commands2.Subsystem):
-    def __init__(self, joystick: CommandXboxController):
+    def __init__(self, motor_id: int, joystick: CommandXboxController):
         super().__init__()
-        self.motor = phoenix6.hardware.TalonFX(device_id=1)
+        self.motor = phoenix6.hardware.TalonFX(device_id=motor_id)
 
         cfg = phoenix6.configs.TalonFXConfiguration()
         cfg.motor_output.neutral_mode = phoenix6.signals.NeutralModeValue.COAST #BRAKE

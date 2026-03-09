@@ -4,30 +4,40 @@ import phoenix6
 from commands2.button import CommandXboxController
 
 class SS_TurretTalon(commands2.Subsystem):
-    def __init__(self, joystick: CommandXboxController):
+    def __init__(self, motor_id: int, joystick: CommandXboxController):
         super().__init__()
-        self.motor = phoenix6.hardware.TalonFX(device_id=1)
+        self.motor = phoenix6.hardware.TalonFX(device_id=motor_id)
         self.requested_power = phoenix6.controls.DutyCycleOut(0)
 
-        cfg = phoenix6.configs.TalonFXConfiguration()
-        cfg.motor_output.neutral_mode = phoenix6.signals.NeutralModeValue.COAST #BRAKE
-        cfg.motor_output.inverted = phoenix6.signals.InvertedValue.COUNTER_CLOCKWISE_POSITIVE
+        self.cfg = phoenix6.configs.TalonFXConfiguration()
+        self.cfg.motor_output.neutral_mode = phoenix6.signals.NeutralModeValue.COAST #BRAKE
+        self.cfg.motor_output.inverted = phoenix6.signals.InvertedValue.COUNTER_CLOCKWISE_POSITIVE
 
         # Setup Motion Magic control mode for position control with trapezoidal motion profiling
-        cfg.slot0.k_p = 5.0
-        cfg.slot0.k_i = 0.0
-        cfg.slot0.k_d = 0.0
-        cfg.slot0.k_v = 0.0  # optional velocity feedforward for running at certain speeds
-        cfg.slot0.k_s = 0.0  # optional static feedforward for overcoming static friction
-        cfg.slot0.k_a = 0.0  # optional acceleration feedforward for compensating inertia
-        cfg.slot0.k_g = 0.0  # optional gravity feedforward for compensating gravity effects
-        cfg.motion_magic.motion_magic_cruise_velocity = 2.0      # rps
-        cfg.motion_magic.motion_magic_acceleration = 2.0         # rps^2
-        cfg.motion_magic.motion_magic_jerk = 10.0                # rps^3 (optional)
-        cfg.feedback.sensor_to_mechanism_ratio = 100.0
+        self.cfg.slot0.k_p = 5.0
+        self.cfg.slot0.k_i = 0.0
+        self.cfg.slot0.k_d = 0.0
+        self.cfg.slot0.k_v = 0.0  # optional velocity feedforward for running at certain speeds
+        self.cfg.slot0.k_s = 0.0  # optional static feedforward for overcoming static friction
+        self.cfg.slot0.k_a = 0.0  # optional acceleration feedforward for compensating inertia
+        self.cfg.slot0.k_g = 0.0  # optional gravity feedforward for compensating gravity effects
+        self.cfg.motion_magic.motion_magic_cruise_velocity = 2.0      # rps
+        self.cfg.motion_magic.motion_magic_acceleration = 2.0         # rps^2
+        self.cfg.motion_magic.motion_magic_jerk = 10.0                # rps^3 (optional)
+        self.cfg.feedback.sensor_to_mechanism_ratio = 100.0
+        wpilib.SmartDashboard.putNumber("PIDF/Turret P", 0.1)
+        wpilib.SmartDashboard.putNumber("PIDF/Turret I", 0.0)
+        wpilib.SmartDashboard.putNumber("PIDF/Turret D", 0.0)
+        wpilib.SmartDashboard.putNumber("PIDF/Turret Fv", 0.0)
+        wpilib.SmartDashboard.putNumber("PIDF/Turret Fs", 0.0)
+        wpilib.SmartDashboard.putNumber("PIDF/Turret Fa", 0.0)
+        wpilib.SmartDashboard.putNumber("PIDF/Turret Fg", 0.0)
+        wpilib.SmartDashboard.putNumber("PIDF/Turret Vcruise", 2.0)
+        wpilib.SmartDashboard.putNumber("PIDF/Turret Accel", 2.0)
+        wpilib.SmartDashboard.putNumber("PIDF/Turret Fjerk", 10.0)
         self.position_request_with_trapezoid = phoenix6.controls.MotionMagicDutyCycle(0.0)
 
-        status = self.motor.configurator.apply(cfg)
+        status = self.motor.configurator.apply(self.cfg)
         if not status.is_ok():
             wpilib.reportError(f"TalonFX configuration failed: {status}", False)
 
@@ -41,6 +51,27 @@ class SS_TurretTalon(commands2.Subsystem):
     def periodic(self):
         wpilib.SmartDashboard.putNumber("Turret Actual Position", self.motor.get_rotor_position().value)
         wpilib.SmartDashboard.putNumber("Turret Setpoint Position", self.requested_position)
+        if wpilib.SmartDashboard.getNumber("PIDF/Turret P", 0.1) != self.cfg.slot0.k_p:
+            self.cfg.slot0.k_p = wpilib.SmartDashboard.getNumber("PIDF/Turret P", 0.1)
+        if wpilib.SmartDashboard.getNumber("PIDF/Turret I", 0.0) != self.cfg.slot0.k_i:
+            self.cfg.slot0.k_i = wpilib.SmartDashboard.getNumber("PIDF/Turret I", 0.0)
+        if wpilib.SmartDashboard.getNumber("PIDF/Turret D", 0.0) != self.cfg.slot0.k_d:
+            self.cfg.slot0.k_d = wpilib.SmartDashboard.getNumber("PIDF/Turret D", 0.0)
+        if wpilib.SmartDashboard.getNumber("PIDF/Turret Fv", 0.0) != self.cfg.slot0.k_v:
+            self.cfg.slot0.k_v = wpilib.SmartDashboard.getNumber("PIDF/Turret Fv", 0.0)
+        if wpilib.SmartDashboard.getNumber("PIDF/Turret Fs", 0.0) != self.cfg.slot0.k_s:
+            self.cfg.slot0.k_s = wpilib.SmartDashboard.getNumber("PIDF/Turret Fs", 0.0)
+        if wpilib.SmartDashboard.getNumber("PIDF/Turret Fa", 0.0) != self.cfg.slot0.k_a:
+            self.cfg.slot0.k_a = wpilib.SmartDashboard.getNumber("PIDF/Turret Fa", 0.0)
+        if wpilib.SmartDashboard.getNumber("PIDF/Turret Fg", 0.0) != self.cfg.slot0.k_g:
+            self.cfg.slot0.k_g = wpilib.SmartDashboard.getNumber("PIDF/Turret Fg", 0.0)
+        if wpilib.SmartDashboard.getNumber("PIDF/Turret Vcruise", 2.0) != self.cfg.motion_magic.motion_magic_cruise_velocity:
+            self.cfg.motion_magic.motion_magic_cruise_velocity = wpilib.SmartDashboard.getNumber("PIDF/Turret Vcruise", 2.0)
+        if wpilib.SmartDashboard.getNumber("PIDF/Turret Accel", 2.0) != self.cfg.motion_magic.motion_magic_acceleration:
+            self.cfg.motion_magic.motion_magic_acceleration = wpilib.SmartDashboard.getNumber("PIDF/Turret Accel", 2.0)
+        if wpilib.SmartDashboard.getNumber("PIDF/Turret Fjerk", 10.0) != self.cfg.motion_magic.motion_magic_jerk:
+            self.cfg.motion_magic.motion_magic_jerk = wpilib.SmartDashboard.getNumber("PIDF/Turret Fjerk", 10.0)
+
 
     # -------------------------
     # Motor movement functions

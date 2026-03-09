@@ -10,6 +10,7 @@ from subsystems.SS_ShooterSpark import SS_ShooterSpark
 from subsystems.SS_TurretTalon_Trapezoidal import SS_TurretTalon
 from subsystems.SS_UptakeTalon import SS_UptakeTalon
 from subsystems.SS_IntakeSpark import SS_IntakeSpark
+from subsystems.SS_CANdleLight import SS_CANdleLight
 from subsystems.SS_CameraPose import SS_CameraPose
 
 
@@ -17,10 +18,12 @@ class RobotContainer:
     def __init__(self) -> None:
         self.joystick = CommandXboxController(0)
         self.ss_swerve_drive = SS_SwerveDrive(self.joystick)
-        self.ss_shooter_spark = SS_ShooterSpark(self.joystick)
-        self.ss_turret_talon = SS_TurretTalon(self.joystick)
-        self.ss_uptake_talon = SS_UptakeTalon(self.joystick)
-        self.ss_intake_spark = SS_IntakeSpark(self.joystick)
+        self.ss_shooter_spark = SS_ShooterSpark(3, self.joystick)
+        self.ss_turret_talon = SS_TurretTalon(1, self.joystick)
+        self.ss_uptake_talon = SS_UptakeTalon(0, self.joystick)
+        self.ss_intake_spark = SS_IntakeSpark(4, self.joystick)
+        # self.ss_candle_light_rear = SS_CANdleLight(2)
+        # self.ss_candle_light_front = SS_CANdleLight(5)
         # self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
         # self.auto_chooser = AutoBuilder.buildAutoChooser("Autonomous Mode")
         # SmartDashboard.putData("Default Autonomous", self.auto_chooser)
@@ -85,9 +88,9 @@ class MyRobot(commands2.TimedCommandRobot):
 
 
     def autonomousInit(self) -> None:
+        """This autonomous runs the autonomous command selected by your RobotContainer class."""
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
-        """This autonomous runs the autonomous command selected by your RobotContainer class."""
         # self.autonomousCommand = self.container.auto_chooser.getSelected()
         # if self.autonomousCommand: self.autonomousCommand.schedule()
 

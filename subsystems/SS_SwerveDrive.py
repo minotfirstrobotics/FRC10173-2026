@@ -52,10 +52,10 @@ class SS_SwerveDrive(commands2.Subsystem):
     def controller_bindings(self) -> None:
         self._joystick.a().onTrue(self.heading_is_auto_controlled_command())
         self._joystick.a().onFalse(self.heading_is_driver_controlled_command())
-        self._joystick.pov(0).whileTrue(self.pov_move_command(1, 0))
-        self._joystick.pov(180).whileTrue(self.pov_move_command(-1, 0))
-        self._joystick.pov(90).whileTrue(self.pov_move_command(0, 1))
-        self._joystick.pov(270).whileTrue(self.pov_move_command(0, -1))
+        # self._joystick.pov(0).whileTrue(self.pov_move_command(1, 0))
+        # self._joystick.pov(180).whileTrue(self.pov_move_command(-1, 0))
+        # self._joystick.pov(90).whileTrue(self.pov_move_command(0, 1))
+        # self._joystick.pov(270).whileTrue(self.pov_move_command(0, -1))
         (self._joystick.back() & self._joystick.b()).whileTrue(self.brake_command())
         (self._joystick.back() & self._joystick.start()).onTrue(self.reset_field_oriented_perspective())
 
