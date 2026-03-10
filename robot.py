@@ -4,7 +4,6 @@ from wpilib import SmartDashboard, Timer
 from phoenix6 import HootAutoReplay
 # from pathplannerlib.auto import AutoBuilder
 from commands2.button import CommandXboxController
-from subsystems import SS_UptakeTalon_Power_Power
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
 from subsystems.SS_ShooterNEO import SS_ShooterNEO
 from subsystems.SS_TurretTalon_Trapezoidal import SS_TurretTalon
@@ -20,7 +19,7 @@ class RobotContainer:
         self.ss_swerve_drive = SS_SwerveDrive(self.joystick)
         self.ss_shooter_spark = SS_ShooterNEO(3, self.joystick)
         self.ss_turret_talon = SS_TurretTalon(1, self.joystick)
-        self.ss_uptake_talon = SS_UptakeTalon_Power_Power(0, self.joystick)
+        self.ss_uptake_talon = SS_UptakeTalon_Power(0, self.joystick)
         self.ss_intake_spark = SS_IntakeSIMM(4, self.joystick)
         # self.ss_candle_light_rear = SS_CANdleLight(2)
         # self.ss_candle_light_front = SS_CANdleLight(5)
