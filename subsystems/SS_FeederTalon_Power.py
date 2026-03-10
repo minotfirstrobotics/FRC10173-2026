@@ -1,9 +1,10 @@
 import wpilib
 import commands2
 import phoenix6
+from pathplannerlib.auto import NamedCommands
 from commands2.button import CommandXboxController
 
-class SS_UptakeTalon_Power(commands2.Subsystem):
+class SS_FeederTalon_Power(commands2.Subsystem):
     def __init__(self, motor_id: int, joystick: CommandXboxController):
         super().__init__()
         self.motor = phoenix6.hardware.TalonFX(device_id=motor_id)
@@ -24,9 +25,12 @@ class SS_UptakeTalon_Power(commands2.Subsystem):
         self._joystick = joystick
         self._joystick.b().whileTrue(self.run_forward_command())
 
+        NamedCommands.registerCommand("Feeder Spin", self.run_forward_command())
+        NamedCommands.registerCommand("Feeder Stop", self.stop_motor_command())
+
     def periodic(self):  # Special function called periodically by the robot
-        wpilib.SmartDashboard.putNumber("SS_Telemetry/Uptake Motor Requested Speed", self.requested_speed)
-        wpilib.SmartDashboard.putNumber("SS_Telemetry/Uptake Motor Actual Speed", self.motor.get_rotor_velocity().value)
+        wpilib.SmartDashboard.putNumber("SS_Telemetry/Feeder Motor Requested Speed", self.requested_speed)
+        wpilib.SmartDashboard.putNumber("SS_Telemetry/Feeder Motor Actual Speed", self.motor.get_rotor_velocity().value)
 
     # -------------------------
     # Motor movement functions

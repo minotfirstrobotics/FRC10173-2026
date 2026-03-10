@@ -1,6 +1,7 @@
 import wpilib
 import commands2
 import phoenix6
+from pathplannerlib.auto import NamedCommands
 from commands2.button import CommandXboxController
 
 class SS_TurretTalon(commands2.Subsystem):
@@ -43,10 +44,15 @@ class SS_TurretTalon(commands2.Subsystem):
 
         self.requested_position = 0.0
         self.motor.set_position(self.requested_position) # pidf reset encoder position to 0 on startup
+        wpilib.SmartDashboard.putNumber("SS_Telemetry/Turret Actual Position", 0.0)
+        wpilib.SmartDashboard.putNumber("SS_Telemetry/Turret Setpoint Position", 0.0)
 
         self._joystick = joystick
-        self._joystick.rightBumper().onTrue(self.point_right_command())
         self._joystick.leftBumper().onTrue(self.point_ahead_command())
+        self._joystick.rightBumper().onTrue(self.point_right_command())
+
+        NamedCommands.registerCommand("Turret Point Ahead", self.point_ahead_command())
+        NamedCommands.registerCommand("Turret Point Right", self.point_right_command())
 
     def periodic(self):
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Turret Actual Position", self.motor.get_rotor_position().value)

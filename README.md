@@ -1,6 +1,6 @@
 # To Do List:
 * Intake is sticking
-* Bathtub and belt protection for uptake feeder
+* Bathtub and belt protection for feeder feeder
 * Find CAN errors
 * Tune FF for shooter
 * Tune PIDF/mm for turret and choose trapezoid vs pidf

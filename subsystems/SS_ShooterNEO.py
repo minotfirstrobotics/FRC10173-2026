@@ -1,6 +1,7 @@
 import wpilib
 import commands2
 import rev
+from pathplannerlib.auto import NamedCommands
 from commands2.button import CommandXboxController
 
 class SS_ShooterNEO(commands2.Subsystem):
@@ -33,6 +34,9 @@ class SS_ShooterNEO(commands2.Subsystem):
         self._joystick = joystick
         self._joystick.y().whileTrue(self.cruising_speed_command())
         self._joystick.x().whileTrue(self.full_speed_command())
+
+        NamedCommands.registerCommand("Shooter Spin-up to Setpoint", self.run_velocity_command(self.controller.getSetpoint()))
+        NamedCommands.registerCommand("Shooter Stop", self.stop_motor_command())
 
     def periodic(self): # Special function called periodically by the robot
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Shooter Current Velocity ", self.encoder.getVelocity())

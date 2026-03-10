@@ -1,6 +1,7 @@
 import wpilib
 import commands2
 import rev
+from pathplannerlib.auto import NamedCommands
 from commands2.button import CommandXboxController
 
 class SS_IntakeSIMM(commands2.Subsystem):
@@ -22,6 +23,9 @@ class SS_IntakeSIMM(commands2.Subsystem):
 
         self._joystick = joystick
         self._joystick.a().whileTrue(self.cruising_speed_command())
+
+        NamedCommands.registerCommand("Intake Spin", self.cruising_speed_command())
+        NamedCommands.registerCommand("Intake Stop", self.stop_motor_command())
 
     def periodic(self): # Special function called periodically by the robot
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Intake Actual Velocity", self.encoder.getVelocity())

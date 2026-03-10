@@ -2,12 +2,12 @@ import commands2
 import wpilib
 from wpilib import SmartDashboard, Timer
 from phoenix6 import HootAutoReplay
-# from pathplannerlib.auto import AutoBuilder
+from pathplannerlib.auto import AutoBuilder, NamedCommands
 from commands2.button import CommandXboxController
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
 from subsystems.SS_ShooterNEO import SS_ShooterNEO
 from subsystems.SS_TurretTalon_Trapezoidal import SS_TurretTalon
-from subsystems.SS_UptakeTalon_Power import SS_UptakeTalon_Power
+from subsystems.SS_FeederTalon_Power import SS_FeederTalon_Power
 from subsystems.SS_IntakeSIMM import SS_IntakeSIMM
 from subsystems.SS_CANdleLight import SS_CANdleLight
 from subsystems.SS_CameraPose import SS_CameraPose
@@ -19,14 +19,14 @@ class RobotContainer:
         self.ss_swerve_drive = SS_SwerveDrive(self.joystick)
         self.ss_shooter_spark = SS_ShooterNEO(3, self.joystick)
         self.ss_turret_talon = SS_TurretTalon(1, self.joystick)
-        self.ss_uptake_talon = SS_UptakeTalon_Power(0, self.joystick)
+        self.ss_feeder_talon = SS_FeederTalon_Power(0, self.joystick)
         self.ss_intake_spark = SS_IntakeSIMM(4, self.joystick)
         # self.ss_candle_light_rear = SS_CANdleLight(2)
         # self.ss_candle_light_front = SS_CANdleLight(5)
         # self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
-        # self.auto_chooser = AutoBuilder.buildAutoChooser("Autonomous Mode")
-        # SmartDashboard.putData("Default Autonomous", self.auto_chooser)
 
+        self.auto_chooser = AutoBuilder.buildAutoChooser("Autonomous Mode")
+        SmartDashboard.putData("Default Autonomous", self.auto_chooser)
 
 class MyRobot(commands2.TimedCommandRobot):
     """
@@ -90,8 +90,8 @@ class MyRobot(commands2.TimedCommandRobot):
         """This autonomous runs the autonomous command selected by your RobotContainer class."""
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
-        # self.autonomousCommand = self.container.auto_chooser.getSelected()
-        # if self.autonomousCommand: self.autonomousCommand.schedule()
+        self.autonomousCommand = self.container.auto_chooser.getSelected()
+        if self.autonomousCommand: self.autonomousCommand.schedule()
 
     def autonomousPeriodic(self) -> None:
         """This function is called periodically during autonomous"""
