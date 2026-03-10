@@ -31,7 +31,8 @@ class SS_TurretTalon(commands2.Subsystem):
         self._joystick.leftBumper().whileTrue(self.turn_left_command())
 
     def periodic(self):
-        wpilib.SmartDashboard.putNumber("Turret Actual Position", self.motor.get_rotor_position().value)
+        wpilib.SmartDashboard.putNumber("SS_Telemetry/Turret Actual Position", self.motor.get_rotor_position().value)
+        # No Position setpoint using the velocity method
 
     # -------------------------
     # Motor movement functions

@@ -35,8 +35,8 @@ class SS_ShooterSpark(commands2.Subsystem):
         self._joystick.x().whileTrue(self.full_speed_command())
 
     def periodic(self): # Special function called periodically by the robot
-        wpilib.SmartDashboard.putNumber("Shooter Current Velocity ", self.encoder.getVelocity())
-        wpilib.SmartDashboard.putNumber("Shooter Setpoint Velocity", self.controller.getSetpoint())
+        wpilib.SmartDashboard.putNumber("SS_Telemetry/Shooter Current Velocity ", self.encoder.getVelocity())
+        wpilib.SmartDashboard.putNumber("SS_Telemetry/Shooter Setpoint Velocity", self.controller.getSetpoint())
         def set_pidf_from_dashboard():
             self._config.closedLoop.pidf(self.P, self.I, self.D, self.FF, rev.ClosedLoopSlot.kSlot0)
             self.motor.configure(self._config, rev.ResetMode.kNoResetSafeParameters, rev.PersistMode.kNoPersistParameters)

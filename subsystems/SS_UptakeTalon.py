@@ -25,8 +25,8 @@ class SS_UptakeTalon(commands2.Subsystem):
         self._joystick.b().whileTrue(self.run_forward_command())
 
     def periodic(self):  # Special function called periodically by the robot
-        wpilib.SmartDashboard.putNumber("Uptake Motor Requested Speed", self.requested_speed)
-        wpilib.SmartDashboard.putNumber("Uptake Motor Actual Speed", self.motor.get_rotor_velocity().value)
+        wpilib.SmartDashboard.putNumber("SS_Telemetry/Uptake Motor Requested Speed", self.requested_speed)
+        wpilib.SmartDashboard.putNumber("SS_Telemetry/Uptake Motor Actual Speed", self.motor.get_rotor_velocity().value)
 
     # -------------------------
     # Motor movement functions
