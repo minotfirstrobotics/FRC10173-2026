@@ -3,7 +3,7 @@ import commands2
 import phoenix6
 from commands2.button import CommandXboxController
 
-class SS_UptakeTalon(commands2.Subsystem):
+class SS_UptakeTalon_Power(commands2.Subsystem):
     def __init__(self, motor_id: int, joystick: CommandXboxController):
         super().__init__()
         self.motor = phoenix6.hardware.TalonFX(device_id=motor_id)

@@ -7,7 +7,7 @@
 * Get 2 cameras working
 * Get photonvision for other 2 cams
 * Make climbing gear and strategy
-* Enable autonomous choise on dashboard
+* Enable autonomous choice on dashboard
 * Build autonomous 
 * Determine logging strategies (SignalLogger.enable_auto_logging(True), hoot, etc )
 

@@ -3,7 +3,7 @@ import commands2
 import rev
 from commands2.button import CommandXboxController
 
-class SS_ShooterSpark(commands2.Subsystem):
+class SS_ShooterNEO(commands2.Subsystem):
     def __init__(self, motor_id: int, joystick: CommandXboxController):
         super().__init__()
         self.motor = rev.SparkMax(deviceID=motor_id, type=rev.SparkLowLevel.MotorType.kBrushless)
