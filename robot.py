@@ -21,12 +21,12 @@ class RobotContainer:
         self.ss_turret_talon = SS_TurretTalon(1, self.joystick)
         self.ss_feeder_talon = SS_FeederTalon_Power(0, self.joystick)
         self.ss_intake_spark = SS_IntakeSIMM(4, self.joystick)
-        self.ss_candle_light_rear = SS_CANdleLight(2)
+        # self.ss_candle_light_rear = SS_CANdleLight(2)
         # self.ss_candle_light_front = SS_CANdleLight(5)
-        # self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
+        self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
 
-        self.auto_chooser = AutoBuilder.buildAutoChooser("Autonomous Mode")
-        SmartDashboard.putData("Default Autonomous", self.auto_chooser)
+        # self.auto_chooser = AutoBuilder.buildAutoChooser("Autonomous Mode")
+        # SmartDashboard.putData("Default Autonomous", self.auto_chooser)
 
 class MyRobot(commands2.TimedCommandRobot):
     """
@@ -79,7 +79,7 @@ class MyRobot(commands2.TimedCommandRobot):
         this line or comment it out. """
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
-        if self.autonomousCommand: self.autonomousCommand.cancel()
+        # if self.autonomousCommand: self.autonomousCommand.cancel()
 
     def teleopPeriodic(self) -> None:
         """This function is called periodically during operator control"""
@@ -90,8 +90,8 @@ class MyRobot(commands2.TimedCommandRobot):
         """This autonomous runs the autonomous command selected by your RobotContainer class."""
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
-        self.autonomousCommand = self.container.auto_chooser.getSelected()
-        if self.autonomousCommand: self.autonomousCommand.schedule()
+        # self.autonomousCommand = self.container.auto_chooser.getSelected()
+        # if self.autonomousCommand: self.autonomousCommand.schedule()
 
     def autonomousPeriodic(self) -> None:
         """This function is called periodically during autonomous"""

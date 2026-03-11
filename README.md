@@ -28,3 +28,8 @@
 # CTRE Commands
 * ./owlet -f wpilog "input.hoot" "output.wpilog"
 
+# Camera USB ports
+* USB3 port is back.
+* TopRight is front.
+* BottomLeft is left.
+* BottomRight is right.

@@ -11,7 +11,7 @@ class SS_TurretTalon(commands2.Subsystem):
         self.requested_power = phoenix6.controls.DutyCycleOut(0)
 
         self.cfg = phoenix6.configs.TalonFXConfiguration()
-        self.cfg.motor_output.neutral_mode = phoenix6.signals.NeutralModeValue.COAST #BRAKE
+        self.cfg.motor_output.neutral_mode = phoenix6.signals.NeutralModeValue.BRAKE
         self.cfg.motor_output.inverted = phoenix6.signals.InvertedValue.COUNTER_CLOCKWISE_POSITIVE
 
         # Setup Motion Magic control mode for position control with trapezoidal motion profiling
@@ -93,13 +93,13 @@ class SS_TurretTalon(commands2.Subsystem):
     # Commands
     # -------------------------
     def point_ahead_command(self):
-        return commands2.cmd.runOnce(lambda: self.set_position(-0.25), self)
+        return commands2.cmd.runOnce(lambda: self.set_position(0), self)
     
     def point_right_command(self):
-        return commands2.cmd.runOnce(lambda: self.set_position(0.0), self)
+        return commands2.cmd.runOnce(lambda: self.set_position(2.4), self)
     
     def point_behind_command(self):
-        return commands2.cmd.runOnce(lambda: self.set_position(0.25), self)
+        return commands2.cmd.runOnce(lambda: self.set_position(4.7), self)
     
     def point_to_target_command(self, target_rotations: float):
         return commands2.cmd.runOnce(lambda: self.set_position(target_rotations), self)

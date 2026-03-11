@@ -2,7 +2,7 @@ import commands2
 from wpimath.units import rotationsToRadians
 from phoenix6 import swerve, SignalLogger
 from telemetry import Telemetry
-from generated.tuner_constants import TunerConstants
+from generated.tuner_constants_2026_GF import TunerConstants
 from wpilib import DriverStation, Timer, SmartDashboard
 from wpimath.geometry import Pose2d, Rotation2d
 from commands2.button import Trigger

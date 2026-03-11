@@ -15,26 +15,27 @@ class SS_ShooterNEO(commands2.Subsystem):
         self.encoder = self.motor.getEncoder()
         self.controller = self.motor.getClosedLoopController()
 
-        self.P = 0.1
-        self.I = 0.0
-        self.D = 0.0
+        self.P = 0.002
+        self.I = 0.0000005
+        self.D = 0.005
         self.FF = 0.0
         self._config.closedLoop.pidf(self.P, self.I, self.D, self.FF, rev.ClosedLoopSlot.kSlot0)
         self.motor.configure(self._config, rev.ResetMode.kResetSafeParameters, rev.PersistMode.kPersistParameters)
-        wpilib.SmartDashboard.putNumber("PIDF/Shooter P", 0.1)
-        wpilib.SmartDashboard.putNumber("PIDF/Shooter I", 0.0)
-        wpilib.SmartDashboard.putNumber("PIDF/Shooter D", 0.0)
-        wpilib.SmartDashboard.putNumber("PIDF/Shooter FF", 0.0)
+        wpilib.SmartDashboard.putNumber("PIDF/Shooter P", self.P)
+        wpilib.SmartDashboard.putNumber("PIDF/Shooter I", self.I)
+        wpilib.SmartDashboard.putNumber("PIDF/Shooter D", self.D)
+        wpilib.SmartDashboard.putNumber("PIDF/Shooter FF", self.FF)
 
         self.current_velocity = 0.0
-        self.setpoint_velocity = 3750 # 5676 is empirical max RPM for NEO
+        self.setpoint_velocity = 3580 # 5676 is empirical max RPM for NEO
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Shooter Current Velocity ", self.current_velocity)
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Shooter Setpoint Velocity", self.setpoint_velocity)
 
         self._joystick = joystick
         self._joystick.y().whileTrue(self.run_setpoint_velocity_command())
+        # self._joystick.x().onFalse(self.spin_up_and_wait_command())
 
-        NamedCommands.registerCommand("Shooter Spin-up to Setpoint", self.run_velocity_command(self.controller.getSetpoint()))
+        NamedCommands.registerCommand("Shooter Spin-up to Setpoint", self.spin_up_and_wait_command())
         NamedCommands.registerCommand("Shooter Stop", self.stop_motor_command())
 
     def periodic(self): # Special function called periodically by the robot

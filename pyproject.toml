@@ -14,7 +14,7 @@ robotpy_version = "2026.2.1.1"
 # keeping these versions on par with robotpy version
 components = [
     "commands2",
-    "pathplannerlib",
+    # "robotpy-pathplannerlib",
     # "all",
     # "apriltag",
     # "cscore",
@@ -29,6 +29,7 @@ requires = [
     "photonlibpy",
     "pynetworktables",
     "robotpy-rev",
+    "robotpy-pathplannerlib",
     # "robotpy-navx",
     # "robotpy-playingwithfusion",
     ]

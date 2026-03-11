@@ -12,7 +12,7 @@ class SS_FeederTalon_Power(commands2.Subsystem):
         # configure motor
         cfg = phoenix6.configs.TalonFXConfiguration()
         cfg.motor_output.neutral_mode = phoenix6.signals.NeutralModeValue.BRAKE
-        cfg.motor_output.inverted = phoenix6.signals.InvertedValue.COUNTER_CLOCKWISE_POSITIVE
+        cfg.motor_output.inverted = phoenix6.signals.InvertedValue.CLOCKWISE_POSITIVE
 
         status = self.motor.configurator.apply(cfg)
         if not status.is_ok():
