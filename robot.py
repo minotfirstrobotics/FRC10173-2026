@@ -21,7 +21,7 @@ class RobotContainer:
         self.ss_turret_talon = SS_TurretTalon(1, self.joystick)
         self.ss_uptake_talon = SS_UptakeTalon_Power(0, self.joystick)
         self.ss_intake_spark = SS_IntakeSIMM(4, self.joystick)
-        # self.ss_candle_light_rear = SS_CANdleLight(2)
+        self.ss_candle_light_rear = SS_CANdleLight(2)
         # self.ss_candle_light_front = SS_CANdleLight(5)
         # self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
         # self.auto_chooser = AutoBuilder.buildAutoChooser("Autonomous Mode")
