@@ -7,6 +7,10 @@ from wpilib import DriverStation, Timer, SmartDashboard
 from wpimath.geometry import Pose2d, Rotation2d
 from commands2.button import Trigger
 from commands2.sysid import SysIdRoutine
+from pathplannerlib.auto import AutoBuilder
+from pathplannerlib.config import RobotConfig, PIDConstants
+from wpilib import DriverStation
+
 
 class SS_SwerveDrive(commands2.Subsystem):
     def __init__(self, joystick) -> None:
@@ -45,6 +49,17 @@ class SS_SwerveDrive(commands2.Subsystem):
             .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE)
         )
         self.heading_is_driver_controlled()
+
+        # AutoBuilder.configure(
+        #     pose_supplier=self.get_pose,                  # Callable that returns current Pose2d
+        #     reset_pose=self.reset_pose,                   # Callable to reset odometry
+        #     robot_relative_speeds_supplier=self.get_robot_relative_speeds,  # Callable returning ChassisSpeeds
+        #     robot_relative_output=self.drive_robot_relative,  # Callable accepting ChassisSpeeds
+        #     path_following_controller=...,                # e.g., PPHolonomicDriveController(...)
+        #     robot_config=RobotConfig.fromGUISettings(),   # Load from PathPlanner GUI
+        #     should_flip_path=lambda: DriverStation.getAlliance() == DriverStation.Alliance.kRed,
+        #     drive_subsystem=self                          # The drive subsystem
+        # )
 
         # TODO i can't find register telemetry in the swerve module
         # self.drivetrain.register_telemetry( lambda state: self._logger.telemeterize(state) )
