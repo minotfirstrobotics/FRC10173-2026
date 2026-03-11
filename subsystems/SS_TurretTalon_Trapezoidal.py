@@ -48,8 +48,8 @@ class SS_TurretTalon(commands2.Subsystem):
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Turret Setpoint Position", 0.0)
 
         self._joystick = joystick
-        self._joystick.leftBumper().onTrue(self.point_ahead_command())
-        self._joystick.rightBumper().onTrue(self.point_right_command())
+        # self._joystick.leftBumper().onTrue(self.point_ahead_command())
+        # self._joystick.rightBumper().onTrue(self.point_right_command())
 
         NamedCommands.registerCommand("Turret Point Ahead", self.point_ahead_command())
         NamedCommands.registerCommand("Turret Point Right", self.point_right_command())
