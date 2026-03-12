@@ -1,4 +1,5 @@
 import commands2
+import wpilib
 from wpimath.units import rotationsToRadians
 from phoenix6 import swerve, SignalLogger
 from telemetry import Telemetry
@@ -17,7 +18,8 @@ class SS_SwerveDrive(commands2.Subsystem):
         super().__init__()
         self._joystick = joystick
         self._max_angular_rate = rotationsToRadians(.75)
-        self._max_speed = .2 * TunerConstants.speed_at_12_volts
+        self._max_speed = .6 * TunerConstants.speed_at_12_volts
+        wpilib.SmartDashboard.putNumber("SS_Telemetry/Swerve Max Speed", self._max_speed)
         self._pov_speed = 0.2
         self._latest_pose = Pose2d()
         self._logger = Telemetry(self._max_speed)
@@ -50,6 +52,8 @@ class SS_SwerveDrive(commands2.Subsystem):
         )
         self.heading_is_driver_controlled()
 
+        
+
         # AutoBuilder.configure(
         #     pose_supplier=self.get_pose,                  # Callable that returns current Pose2d
         #     reset_pose=self.reset_pose,                   # Callable to reset odometry
@@ -78,6 +82,13 @@ class SS_SwerveDrive(commands2.Subsystem):
         pose = self.drivetrain.sample_pose_at(Timer.getFPGATimestamp())
         if pose is not None:
             self._latest_pose = pose
+
+        if wpilib.SmartDashboard.getNumber("SS_Telemetry/Swerve Max Speed", self._max_speed) != self._max_speed:
+            self._max_speed = wpilib.SmartDashboard.getNumber("SS_Telemetry/Swerve Max Speed", self._max_speed)
+            # place to update any commands that rely on _max_speed if needed
+        if self._max_speed > 1: # Cap at Drive Speed
+            self._max_speed = 1
+            wpilib.SmartDashboard.putNumber("SS_Telemetry/Swerve Max Speed", self._max_speed)
 
         # Dashboard output
         pose_translation = self._latest_pose.translation()

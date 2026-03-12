@@ -18,9 +18,10 @@ class SS_FeederTalon_Power(commands2.Subsystem):
         if not status.is_ok():
             wpilib.reportError(f"TalonFX configuration failed: {status}", False)
 
-        self.cruising_speed = .2
-        self.reverse_speed = -.2
+        self.cruising_speed = .6
+        self.reverse_speed = -self.cruising_speed
         self.requested_speed = 0
+        wpilib.SmartDashboard.putNumber("SS_Telemetry/Feeder Motor Requested Speed", self.requested_speed)
         self.requested_power = phoenix6.controls.DutyCycleOut(self.requested_speed)
 
         self._joystick = joystick
@@ -33,8 +34,13 @@ class SS_FeederTalon_Power(commands2.Subsystem):
         
 
     def periodic(self):  # Special function called periodically by the robot
-        wpilib.SmartDashboard.putNumber("SS_Telemetry/Feeder Motor Requested Speed", self.requested_speed)
-        wpilib.SmartDashboard.putNumber("SS_Telemetry/Feeder Motor Actual Speed", self.motor.get_rotor_velocity().value)
+        if wpilib.SmartDashboard.getNumber("SS_Telemetry/Feeder Motor Requested Speed", self.requested_speed) != self.requested_speed:
+            self.requested_speed = wpilib.SmartDashboard.getNumber("SS_Telemetry/Feeder Motor Requested Speed", self.requested_speed)
+            # place to update any commands that rely on _max_speed if needed
+        if self.requested_speed > 1: # Cap at Feeder Speed %
+            self.requested_speed = 1
+            wpilib.SmartDashboard.putNumber("SS_Telemetry/Feeder Motor Requested Speed", self.requested_speed)
+            wpilib.SmartDashboard.putNumber("SS_Telemetry/Feeder Motor Actual Speed", self.motor.get_rotor_velocity().value)
 
     # -------------------------
     # Motor movement functions
