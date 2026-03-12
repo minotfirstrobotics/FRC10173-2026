@@ -19,14 +19,18 @@ class SS_FeederTalon_Power(commands2.Subsystem):
             wpilib.reportError(f"TalonFX configuration failed: {status}", False)
 
         self.cruising_speed = .2
+        self.reverse_speed = -.2
         self.requested_speed = 0
         self.requested_power = phoenix6.controls.DutyCycleOut(self.requested_speed)
 
         self._joystick = joystick
         self._joystick.b().whileTrue(self.run_forward_command())
+        self._joystick.leftBumper().whileTrue(self.run_reverse_command())
 
         NamedCommands.registerCommand("Feeder Spin", self.run_forward_command())
         NamedCommands.registerCommand("Feeder Stop", self.stop_motor_command())
+        NamedCommands.registerCommand("Feeder Reverse", self.run_reverse_command())
+        
 
     def periodic(self):  # Special function called periodically by the robot
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Feeder Motor Requested Speed", self.requested_speed)
@@ -49,6 +53,10 @@ class SS_FeederTalon_Power(commands2.Subsystem):
     # -------------------------
     def run_forward_command(self):
         return commands2.cmd.startEnd(lambda: self.set_speed(self.cruising_speed), 
+                                      lambda: self.stop_motor(), self)
+    
+    def run_reverse_command(self):
+        return commands2.cmd.startEnd(lambda: self.set_speed(self.reverse_speed), 
                                       lambda: self.stop_motor(), self)
 
     def stop_motor_command(self):

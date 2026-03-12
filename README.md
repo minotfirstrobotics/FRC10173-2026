@@ -16,6 +16,7 @@
 * Determine logging strategies (SignalLogger.enable_auto_logging(True), hoot, etc )
 
 # Dependencies:
+
 * pip install robotpy
 * pip install robotpy-commands-v2
 * pip install phoenix6

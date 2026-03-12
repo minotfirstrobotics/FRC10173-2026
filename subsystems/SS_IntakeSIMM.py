@@ -23,8 +23,9 @@ class SS_IntakeSIMM(commands2.Subsystem):
 
         self._joystick = joystick
         self._joystick.a().whileTrue(self.cruising_speed_command())
-
+        self._joystick.rightBumper().whileTrue(self.reverse_command())
         NamedCommands.registerCommand("Intake Spin", self.cruising_speed_command())
+        NamedCommands.registerCommand("Intake Reverse", self.reverse_command())
         NamedCommands.registerCommand("Intake Stop", self.stop_motor_command())
 
     def periodic(self): # Special function called periodically by the robot
@@ -45,6 +46,10 @@ class SS_IntakeSIMM(commands2.Subsystem):
     # -------------------------
     def cruising_speed_command(self):
         return commands2.cmd.startEnd(lambda: self.set_speed(self.cruising_speed_factor), 
+                                      lambda: self.stop_motor(), self)
+    
+    def reverse_command(self):
+        return commands2.cmd.startEnd(lambda: self.set_speed(-.62), 
                                       lambda: self.stop_motor(), self)
     
     def full_speed_command(self):
