@@ -14,7 +14,9 @@ class SS_CANdleLight(commands2.Subsystem):
         # Fluent-style LED config
         configs = CANdleConfiguration()
         configs.led.with_strip_type(StripTypeValue.RGB).with_brightness_scalar(0.5)
-        configs.candle_features = CANdleFeaturesConfigs().with_enable5_v_rail(True)
+
+        configs.candle_features = CANdleFeaturesConfigs()
+        #configs.candle_features.with_enable5_v_rail(True)
         self.candle.configurator.apply(configs)
         self.set_all_leds_RGBW(red=0, green=0, blue=255) # Set all LEDs to blue
 
