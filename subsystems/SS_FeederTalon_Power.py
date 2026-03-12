@@ -20,8 +20,9 @@ class SS_FeederTalon_Power(commands2.Subsystem):
 
         self.cruising_speed = .6
         self.reverse_speed = -self.cruising_speed
-        self.requested_speed = 0
+        self.requested_speed = self.cruising_speed
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Feeder Motor Requested Speed", self.requested_speed)
+        wpilib.SmartDashboard.putNumber("SS_Telemetry/Feeder Motor Actual Speed", self.motor.get_rotor_velocity().value)
         self.requested_power = phoenix6.controls.DutyCycleOut(self.requested_speed)
 
         self._joystick = joystick

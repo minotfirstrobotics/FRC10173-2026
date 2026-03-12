@@ -18,7 +18,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         super().__init__()
         self._joystick = joystick
         self._max_angular_rate = rotationsToRadians(.75)
-        self._max_speed = .6 * TunerConstants.speed_at_12_volts
+        self._max_speed = TunerConstants.speed_at_12_volts
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Swerve Max Speed", self._max_speed)
         self._pov_speed = 0.2
         self._latest_pose = Pose2d()
