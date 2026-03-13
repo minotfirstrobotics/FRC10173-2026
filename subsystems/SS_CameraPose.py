@@ -17,18 +17,22 @@ class SS_CameraPose(commands2.Subsystem):
         # Define camera-to-robot transforms
         # Initialize pose estimators
         self.front_cam = PhotonCamera("FrontCamera")
-        self.kRobotToFrontCam = Transform3d(Translation3d(0.2, 0.0, 0.5), 
-                                            Rotation3d(0.0, 0.0, 0.0))  # Example values
-        self.front_cam_pose_est = PhotonPoseEstimator(field_layout, self.kRobotToFrontCam)
+        # self.kRobotToFrontCam = Transform3d(Translation3d(0.2, 0.0, 0.5), 
+        #                                     Rotation3d(0.0, 0.0, 0.0))  # Example values
+        # self.front_cam_pose_est = PhotonPoseEstimator(field_layout, self.kRobotToFrontCam)
 
         self.back_cam = PhotonCamera("BackCamera")
-        self.kRobotToBackCam = Transform3d(Translation3d(-0.2, 0.0, 0.5), 
-                                           Rotation3d(0.0, 0.0, 180.0))  # Example values
-        self.back_cam_pose_est = PhotonPoseEstimator(field_layout, self.kRobotToBackCam)
+        # self.kRobotToBackCam = Transform3d(Translation3d(-0.2, 0.0, 0.5), 
+        #                                    Rotation3d(0.0, 0.0, 180.0))  # Example values
+        # self.back_cam_pose_est = PhotonPoseEstimator(field_layout, self.kRobotToBackCam)
+
+        self.left_cam = PhotonCamera("LeftCamera")
+
+        self.right_cam = PhotonCamera("RightCamera")
 
         self.last_pose = None
 
-    def periodic(self) -> None:  # Called every 20ms by the CommandScheduler
+    def bad_periodic(self) -> None:  # Called every 20ms by the CommandScheduler
         # Get results from both cameras
         # Process the most recent results from each camera
         front_results = self.front_cam.getAllUnreadResults()
