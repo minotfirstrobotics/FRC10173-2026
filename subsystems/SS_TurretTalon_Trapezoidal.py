@@ -11,12 +11,12 @@ class SS_TurretTalon(commands2.Subsystem):
         self.requested_power = phoenix6.controls.DutyCycleOut(0)
 
         self.cfg = phoenix6.configs.TalonFXConfiguration()
-        self.cfg.motor_output.neutral_mode = phoenix6.signals.NeutralModeValue.BRAKE
+        self.cfg.motor_output.neutral_mode = phoenix6.signals.NeutralModeValue.COAST
         self.cfg.motor_output.inverted = phoenix6.signals.InvertedValue.COUNTER_CLOCKWISE_POSITIVE
 
         # Setup Motion Magic control mode for position control with trapezoidal motion profiling
-        self.cfg.slot0.k_p = 5.0
-        self.cfg.slot0.k_i = 0.0
+        self.cfg.slot0.k_p = 3.0
+        self.cfg.slot0.k_i = 0.5
         self.cfg.slot0.k_d = 0.0
         self.cfg.slot0.k_v = 0.0  # optional velocity feedforward for running at certain speeds
         self.cfg.slot0.k_s = 0.0  # optional static feedforward for overcoming static friction
@@ -25,7 +25,7 @@ class SS_TurretTalon(commands2.Subsystem):
         self.cfg.motion_magic.motion_magic_cruise_velocity = 2.0      # rps
         self.cfg.motion_magic.motion_magic_acceleration = 2.0         # rps^2
         self.cfg.motion_magic.motion_magic_jerk = 10.0                # rps^3 (optional)
-        self.cfg.feedback.sensor_to_mechanism_ratio = 100.0
+        #self.cfg.feedback.sensor_to_mechanism_ratio = 100.0
         wpilib.SmartDashboard.putNumber("PIDF/Turret P", 0.1)
         wpilib.SmartDashboard.putNumber("PIDF/Turret I", 0.0)
         wpilib.SmartDashboard.putNumber("PIDF/Turret D", 0.0)
@@ -48,8 +48,8 @@ class SS_TurretTalon(commands2.Subsystem):
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Turret Setpoint Position", 0.0)
 
         self._joystick = joystick
-        # self._joystick.leftBumper().onTrue(self.point_ahead_command())
-        # self._joystick.rightBumper().onTrue(self.point_right_command())
+        self._joystick.povLeft().onTrue(self.point_ahead_command())
+        self._joystick.povRight().onTrue(self.point_right_command())
 
         NamedCommands.registerCommand("Turret Point Ahead", self.point_ahead_command())
         NamedCommands.registerCommand("Turret Point Right", self.point_right_command())
@@ -96,7 +96,7 @@ class SS_TurretTalon(commands2.Subsystem):
         return commands2.cmd.runOnce(lambda: self.set_position(0), self)
     
     def point_right_command(self):
-        return commands2.cmd.runOnce(lambda: self.set_position(2.4), self)
+        return commands2.cmd.runOnce(lambda: self.set_position(-2.56), self)
     
     def point_behind_command(self):
         return commands2.cmd.runOnce(lambda: self.set_position(4.7), self)

@@ -22,8 +22,8 @@ class SS_IntakeSIMM(commands2.Subsystem):
         self.max_rpm = 5000
 
         self._joystick = joystick
-        self._joystick.a().whileTrue(self.cruising_speed_command())
-        self._joystick.rightBumper().whileTrue(self.reverse_command())
+        self._joystick.a().onTrue(self.cruising_speed_command())
+        self._joystick.b().whileTrue(self.reverse_command())
         NamedCommands.registerCommand("Intake Spin", self.cruising_speed_command())
         NamedCommands.registerCommand("Intake Reverse", self.reverse_command())
         NamedCommands.registerCommand("Intake Stop", self.stop_motor_command())

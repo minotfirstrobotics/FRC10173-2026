@@ -1,6 +1,7 @@
 import wpilib
 import commands2
 import rev
+from subsystems import SS_FeederTalon_Power
 from pathplannerlib.auto import NamedCommands
 from commands2.button import CommandXboxController
 
@@ -27,12 +28,12 @@ class SS_ShooterNEO(commands2.Subsystem):
         wpilib.SmartDashboard.putNumber("PIDF/Shooter FF", self.FF)
 
         self.current_velocity = 0.0
-        self.setpoint_velocity = 4200 # 5676 is empirical max RPM for NEO
+        self.setpoint_velocity = 4650 # 5676 is empirical max RPM for NEO
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Shooter Current Velocity ", self.current_velocity)
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Shooter Setpoint Velocity", self.setpoint_velocity)
 
         self._joystick = joystick
-        self._joystick.y().whileTrue(self.run_setpoint_velocity_command())
+        self._joystick.rightBumper().whileTrue(self.run_setpoint_velocity_command())
         # self._joystick.x().onFalse(self.spin_up_and_wait_command())
 
         NamedCommands.registerCommand("Shooter Spin-up to Setpoint", self.spin_up_and_wait_command())
@@ -73,8 +74,12 @@ class SS_ShooterNEO(commands2.Subsystem):
     # Commands
     # -------------------------
     def run_setpoint_velocity_command(self):
-        return commands2.cmd.startEnd(lambda: self.set_velocity(self.setpoint_velocity), 
-                                      lambda: self.stop_motor(), self)
+        return (
+            commands2.cmd.runOnce(lambda: self.set_velocity(self.setpoint_velocity), self)
+            .andThen(commands2.cmd.waitSeconds(3.0))
+            .andThen(commands2.cmd.runOnce(lambda: SS_FeederTalon_Power.run_forward_command(self)))
+            .finallyDo(lambda interrupted: (self.stop_motor(), SS_FeederTalon_Power.stop_motor(self)))
+        )
 
     def stop_motor_command(self):
         return commands2.cmd.runOnce(lambda: self.stop_motor(), self)

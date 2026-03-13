@@ -36,14 +36,14 @@ class SS_SwerveDrive(commands2.Subsystem):
         # Initialize swerve drive configurations
         self._drive_field_centered = (
             swerve.requests.FieldCentric()
-            .with_deadband(self._max_speed * 0.05)
-            .with_rotational_deadband(self._max_angular_rate * 0.05)
+            .with_deadband(self._max_speed * 0.1)
+            .with_rotational_deadband(self._max_angular_rate * 0.1)
             .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE)
         )
         self._drive_facing_direction = (
             swerve.requests.FieldCentricFacingAngle()
-            .with_deadband(self._max_speed * 0.05)
-            .with_rotational_deadband(self._max_angular_rate * 0.05)
+            .with_deadband(self._max_speed * 0.1)
+            .with_rotational_deadband(self._max_angular_rate * 0.1)
             .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE)
         )
         self._drive_robot_centered = (

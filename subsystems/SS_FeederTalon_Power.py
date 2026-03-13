@@ -26,8 +26,8 @@ class SS_FeederTalon_Power(commands2.Subsystem):
         self.requested_power = phoenix6.controls.DutyCycleOut(self.requested_speed)
 
         self._joystick = joystick
-        self._joystick.b().whileTrue(self.run_forward_command())
-        self._joystick.leftBumper().whileTrue(self.run_reverse_command())
+        self._joystick.leftBumper().whileTrue(self.run_forward_command())
+        self._joystick.leftTrigger(threshold=0.2).whileTrue(self.run_reverse_command())
 
         NamedCommands.registerCommand("Feeder Spin", self.run_forward_command())
         NamedCommands.registerCommand("Feeder Stop", self.stop_motor_command())
