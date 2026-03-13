@@ -17,22 +17,13 @@ class SS_CameraPose(commands2.Subsystem):
         # Define camera-to-robot transforms
         # Initialize pose estimators
         self.front_cam = PhotonCamera("FrontCamera")
-        self.kRobotToFrontCam = Transform3d(
-            Translation3d(0.2, 0.0, 0.5),
-            Rotation3d.fromDegrees(0.0, 0.0, 0.0)
-        )
-        self.front_cam_pose_est = PhotonPoseEstimator(
-            field_layout,
-            PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP,
-            self.front_cam,
-            self.kRobotToFrontCam
-        )
+        self.kRobotToFrontCam = Transform3d(Translation3d(0.2, 0.0, 0.5), 
+                                            Rotation3d(0.0, 0.0, 0.0))  # Example values
+        self.front_cam_pose_est = PhotonPoseEstimator(field_layout, self.kRobotToFrontCam)
 
         # self.back_cam = PhotonCamera("BackCamera")
-        # self.kRobotToBackCam = Transform3d(
-        #    Translation3d(-0.2, 0.0, 0.5),
-        #    Rotation3d.fromDegrees(0.0, 0.0, 180.0)
-        # )
+        # self.kRobotToBackCam = Transform3d(Translation3d(-0.2, 0.0, 0.5), 
+        #                                    Rotation3d(0.0, 0.0, 180.0))  # Example values
         # self.back_cam_pose_est = PhotonPoseEstimator(field_layout, self.kRobotToBackCam)
 
         self.last_pose = None
@@ -46,14 +37,10 @@ class SS_CameraPose(commands2.Subsystem):
         # back_results = self.back_cam.getAllUnreadResults()
         # back_pose = self.process_camera_results(back_results, self.back_cam_pose_est)
 
-        # Combine poses if both are valid
-        if not front_pose:  # Only front camera is used
-            return
+        # Combine poses: if both are valid
+        if front_pose:
+            return 
         self.last_pose = front_pose
-        # elif front_pose:
-        #     self.last_pose = front_pose
-        # elif back_pose:
-        #     self.last_pose = back_pose
 
         # Inject the pose into the drivetrain pose estimator
         pose3d = self.last_pose.estimatedPose
@@ -90,16 +77,16 @@ class SS_CameraPose(commands2.Subsystem):
         return cam_est_pose
 
     # def combine_poses(self, pose1, pose2):
-        # Example: Average the translations and rotations
-        # avg_translation = (pose1.estimatedPose.translation() + pose2.estimatedPose.translation()) / 2
+    #     # Example: Average the translations and rotations
+    #     avg_translation = (pose1.estimatedPose.translation() + pose2.estimatedPose.translation()) / 2
 
-        # rot1 = pose1.estimatedPose.rotation()
-        # rot2 = pose2.estimatedPose.rotation()
-        # avg_rotation = Rotation3d(
-            # (rot1.X() + rot2.X()) / 2,  # Roll
-            # (rot1.Y() + rot2.Y()) / 2,  # Pitch
-            # (rot1.Z() + rot2.Z()) / 2   # Yaw
-        # )
+    #     rot1 = pose1.estimatedPose.rotation()
+    #     rot2 = pose2.estimatedPose.rotation()
+    #     avg_rotation = Rotation3d(
+    #         (rot1.X() + rot2.X()) / 2,  # Roll
+    #         (rot1.Y() + rot2.Y()) / 2,  # Pitch
+    #         (rot1.Z() + rot2.Z()) / 2   # Yaw
+    #     )
 
-        # pose3d = Pose3d(avg_translation, avg_rotation)
-        # return EstimatedRobotPose(pose3d, pose1.timestampSeconds, pose1.targetsUsed)# + pose2.targetsUsed)
+    #     pose3d = Pose3d(avg_translation, avg_rotation)
+    #     return EstimatedRobotPose(pose3d, pose1.timestampSeconds, pose1.targetsUsed)# + pose2.targetsUsed)
