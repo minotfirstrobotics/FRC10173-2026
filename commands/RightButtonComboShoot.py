@@ -21,7 +21,7 @@ class SpinUpShooterwithFeeder(commands2.Command):
         self.ss_shooter.run_setpoint_velocity_command() # Spin up shooter
 
     def execute(self):
-            if self.ss_shooter.current_velocity > 4000:
+            if abs(self.ss_shooter.current_velocity - self.ss_shooter.setpoint_velocity) < self.velocity_tolerance:
                  self.ss_feeder.run_forward_command() # Spin up feeder                                  
 
     def isFinished(self):
