@@ -18,7 +18,8 @@ class SS_SwerveDrive(commands2.Subsystem):
         super().__init__()
         self._joystick = joystick
         self._max_angular_rate = rotationsToRadians(.75)
-        self._max_speed = TunerConstants.speed_at_12_volts
+        self._max_speed_factor = 0.2
+        self._max_speed = self._max_speed_factor * TunerConstants.speed_at_12_volts
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Swerve Max Speed", self._max_speed)
         self._pov_speed = 0.2
         self._latest_pose = Pose2d()
@@ -83,12 +84,14 @@ class SS_SwerveDrive(commands2.Subsystem):
         if pose is not None:
             self._latest_pose = pose
 
-        if wpilib.SmartDashboard.getNumber("SS_Telemetry/Swerve Max Speed", self._max_speed) != self._max_speed:
-            self._max_speed = wpilib.SmartDashboard.getNumber("SS_Telemetry/Swerve Max Speed", self._max_speed)
+        if wpilib.SmartDashboard.getNumber("SS_Telemetry/Swerve Max Speed", self._max_speed_factor) != self._max_speed_factor:
+            self._max_speed_factor = wpilib.SmartDashboard.getNumber("SS_Telemetry/Swerve Max Speed", self._max_speed_factor)
             # place to update any commands that rely on _max_speed if needed
-        if self._max_speed > 1: # Cap at Drive Speed
-            self._max_speed = 1
-            wpilib.SmartDashboard.putNumber("SS_Telemetry/Swerve Max Speed", self._max_speed)
+        if self._max_speed_factor > 1: # Cap at Drive Speed
+            self._max_speed_factor = 1
+            wpilib.SmartDashboard.putNumber("SS_Telemetry/Swerve Max Speed", self._max_speed_factor)
+        
+        self._max_speed = self._max_speed_factor * TunerConstants.speed_at_12_volts
 
         # Dashboard output
         pose_translation = self._latest_pose.translation()

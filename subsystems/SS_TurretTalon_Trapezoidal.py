@@ -11,7 +11,7 @@ class SS_TurretTalon(commands2.Subsystem):
         self.requested_power = phoenix6.controls.DutyCycleOut(0)
 
         self.cfg = phoenix6.configs.TalonFXConfiguration()
-        self.cfg.motor_output.neutral_mode = phoenix6.signals.NeutralModeValue.COAST
+        self.cfg.motor_output.neutral_mode = phoenix6.signals.NeutralModeValue.BRAKE
         self.cfg.motor_output.inverted = phoenix6.signals.InvertedValue.COUNTER_CLOCKWISE_POSITIVE
 
         # Setup Motion Magic control mode for position control with trapezoidal motion profiling
