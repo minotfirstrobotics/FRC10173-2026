@@ -22,8 +22,8 @@ class RobotContainer:
         self.ss_feeder_talon = SS_FeederTalon_Power(0, self.joystick)
         self.ss_intake_spark = SS_IntakeSIMM(4, self.joystick)
         #self.ss_candle_light_rear = SS_CANdleLight(2)
-        # self.ss_candle_light_front = SS_CANdleLight(5)
-        # self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
+        self.ss_candle_light_front = SS_CANdleLight(5)
+        self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
 
         # self.auto_chooser = AutoBuilder.buildAutoChooser("Autonomous Mode")
         # SmartDashboard.putData("Default Autonomous", self.auto_chooser)
