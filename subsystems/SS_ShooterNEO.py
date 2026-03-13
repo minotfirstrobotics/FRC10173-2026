@@ -74,12 +74,9 @@ class SS_ShooterNEO(commands2.Subsystem):
     # Commands
     # -------------------------
     def run_setpoint_velocity_command(self):
-        return (
-            commands2.cmd.runOnce(lambda: self.set_velocity(self.setpoint_velocity), self)
-            .andThen(commands2.cmd.waitSeconds(3.0))
-            .andThen(commands2.cmd.runOnce(lambda: SS_FeederTalon_Power.run_forward_command(self)))
-            .finallyDo(lambda interrupted: (self.stop_motor(), SS_FeederTalon_Power.stop_motor(self)))
-        )
+        return commands2.cmd.startEnd(lambda: self.set_velocity(self.setpoint_velocity),
+                                      lambda: self.stop_motor(), self)
+        
 
     def stop_motor_command(self):
         return commands2.cmd.runOnce(lambda: self.stop_motor(), self)
