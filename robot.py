@@ -30,8 +30,8 @@ class RobotContainer:
         # SmartDashboard.putData("Default Autonomous", self.auto_chooser)
 
 
-        ss_shoot_command = RightButtonComboShoot(self.ss_shooter_spark, self.ss_feeder_talon, self.joystick)
-        self.joystick.rightBumper().onTrue(ss_shoot_command)
+        # ss_shoot_command = RightButtonComboShoot(self.ss_shooter_spark, self.ss_feeder_talon, self.joystick)
+        # self.joystick.rightBumper().onTrue(ss_shoot_command)
         
 
 class MyRobot(commands2.TimedCommandRobot):
