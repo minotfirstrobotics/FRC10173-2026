@@ -16,10 +16,10 @@ class SS_ShooterNEO(commands2.Subsystem):
         self.encoder = self.motor.getEncoder()
         self.controller = self.motor.getClosedLoopController()
 
-        self.P = 0.002
-        self.I = 0.0000005
-        self.D = 0.005
-        self.FF = 0.0
+        self.P = 0.00017
+        self.I = 0.0
+        self.D = 0.0
+        self.FF = 0.00017
         self._config.closedLoop.pidf(self.P, self.I, self.D, self.FF, rev.ClosedLoopSlot.kSlot0)
         self.motor.configure(self._config, rev.ResetMode.kResetSafeParameters, rev.PersistMode.kPersistParameters)
         wpilib.SmartDashboard.putNumber("PIDF/Shooter P", self.P)
@@ -28,7 +28,7 @@ class SS_ShooterNEO(commands2.Subsystem):
         wpilib.SmartDashboard.putNumber("PIDF/Shooter FF", self.FF)
 
         self.current_velocity = 0.0
-        self.setpoint_velocity = 4650 # 5676 is empirical max RPM for NEO
+        self.setpoint_velocity = 3000 # 5676 is empirical max RPM for NEO
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Shooter Current Velocity ", self.current_velocity)
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Shooter Setpoint Velocity", self.setpoint_velocity)
 
