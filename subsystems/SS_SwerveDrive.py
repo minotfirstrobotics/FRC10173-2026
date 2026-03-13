@@ -10,6 +10,7 @@ from commands2.button import Trigger
 from commands2.sysid import SysIdRoutine
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.config import RobotConfig, PIDConstants
+from pathplannerlib.controller import PPHolonomicDriveController
 from wpilib import DriverStation
 
 
@@ -56,14 +57,17 @@ class SS_SwerveDrive(commands2.Subsystem):
         
 
         # AutoBuilder.configure(
-        #     pose_supplier=self.get_pose,                  # Callable that returns current Pose2d
-        #     reset_pose=self.reset_pose,                   # Callable to reset odometry
-        #     robot_relative_speeds_supplier=self.get_robot_relative_speeds,  # Callable returning ChassisSpeeds
-        #     robot_relative_output=self.drive_robot_relative,  # Callable accepting ChassisSpeeds
-        #     path_following_controller=...,                # e.g., PPHolonomicDriveController(...)
-        #     robot_config=RobotConfig.fromGUISettings(),   # Load from PathPlanner GUI
+        #     pose_supplier=self.get_pose,
+        #     reset_pose=self.reset_pose,
+        #     robot_relative_speeds_supplier=self.get_robot_relative_speeds,
+        #     robot_relative_output=self.drive_robot_relative,
+        #     path_following_controller=PPHolonomicDriveController(
+        #         PIDConstants(0.0, 0.0, 0.0),   # Translation PID (tune these)
+        #         PIDConstants(0.0, 0.0, 0.0),   # Rotation PID (tune these)
+        #     ),
+        #     robot_config=RobotConfig.fromGUISettings(),
         #     should_flip_path=lambda: DriverStation.getAlliance() == DriverStation.Alliance.kRed,
-        #     drive_subsystem=self                          # The drive subsystem
+        #     drive_subsystem=self
         # )
 
         # TODO i can't find register telemetry in the swerve module

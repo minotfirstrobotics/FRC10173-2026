@@ -28,7 +28,7 @@ class SS_ShooterNEO(commands2.Subsystem):
         wpilib.SmartDashboard.putNumber("PIDF/Shooter FF", self.FF)
 
         self.current_velocity = 0.0
-        self.setpoint_velocity = 3000 # 5676 is empirical max RPM for NEO
+        self.setpoint_velocity = 3200 # 5676 is empirical max RPM for NEO
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Shooter Current Velocity ", self.current_velocity)
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Shooter Setpoint Velocity", self.setpoint_velocity)
 
