@@ -129,6 +129,8 @@ class MyRobot(commands2.TimedCommandRobot):
         """This autonomous runs the autonomous command selected by your RobotContainer class."""
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
+
+        
         # self.autonomousCommand = self.container.auto_chooser.getSelected()
         # if self.autonomousCommand: self.autonomousCommand.schedule()
 

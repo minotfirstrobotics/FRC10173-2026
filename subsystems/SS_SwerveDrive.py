@@ -118,7 +118,16 @@ class SS_SwerveDrive(commands2.Subsystem):
             ))
         )
 
-    def heading_is_auto_controlled(self) -> None:
+    def heading_is_auto_controlled(self, vx_requested, vy_requested, vrotation_requested) -> None:
+        self.drivetrain.setDefaultCommand(
+            self.drivetrain.apply_request(lambda: (
+                self._drive_field_centered
+                    .with_velocity_x(vx_requested * self._max_speed)
+                    .with_velocity_y(vy_requested * self._max_speed)
+                    .with_rotational_rate(vrotation_requested * self._max_angular_rate))
+            ))
+
+    def heading_is_driver_padlocked(self) -> None:
         self.drivetrain.setDefaultCommand(
             self.drivetrain.apply_request(lambda: (
                 self._drive_facing_direction
@@ -127,7 +136,18 @@ class SS_SwerveDrive(commands2.Subsystem):
                     .with_target_direction(Rotation2d(0, 1))      # Desired Heading (e.g., (0,1) = 90 deg)
                     .with_heading_pid(1, 0, 0)              # PID for heading control
             ))
-        )         
+        )
+
+    def heading_is_auto_padlocked(self, vx_requested, vy_requested, x_vector, y_vector) -> None:
+        self.drivetrain.setDefaultCommand(
+            self.drivetrain.apply_request(lambda: (
+                self._drive_facing_direction
+                    .with_velocity_x(vx_requested * self._max_speed)
+                    .with_velocity_y(vy_requested * self._max_speed)
+                    .with_target_direction(Rotation2d(x_vector, y_vector))      # Desired Heading (e.g., (0,1) = 90 deg)
+                    .with_heading_pid(1, 0, 0)              # PID for heading control
+            ))
+        )
 
     def pov_move(self, direction_x, direction_y) -> None:
         self.drivetrain.apply_request(
@@ -160,11 +180,17 @@ class SS_SwerveDrive(commands2.Subsystem):
     # -------------------------
     # Commands
     # -------------------------
-    def heading_is_auto_controlled_command(self) -> commands2.Command:
-        return commands2.cmd.runOnce(self.heading_is_auto_controlled)
-    
     def heading_is_driver_controlled_command(self) -> commands2.Command:
         return commands2.cmd.runOnce(self.heading_is_driver_controlled)
+    
+    def heading_is_auto_controlled_command(self, vx_requested=0, vy_requested=0, vrotation_requested=0) -> commands2.Command:
+        return commands2.cmd.runOnce(lambda: self.heading_is_auto_controlled(vx_requested, vy_requested, vrotation_requested))
+
+    def heading_is_driver_padlocked(self) -> commands2.Command:
+        return commands2.cmd.runOnce(self.heading_is_driver_padlocked)
+    
+    def heading_is_auto_padlocked_command(self, vx_requested=0, vy_requested=0, vrotation_requested=0) -> commands2.Command:
+        return commands2.cmd.runOnce(lambda: self.heading_is_auto_padlocked(vx_requested, vy_requested, vrotation_requested))
     
     def pov_move_command(self, direction_x, direction_y) -> commands2.Command:
         return commands2.cmd.runOnce(lambda: self.pov_move(direction_x, direction_y))
