@@ -17,18 +17,14 @@ class SS_CameraPose(commands2.Subsystem):
         # Define camera-to-robot transforms
         # Initialize pose estimators
         self.front_cam = PhotonCamera("FrontCamera")
-        # self.kRobotToFrontCam = Transform3d(Translation3d(0.2, 0.0, 0.5), 
-        #                                     Rotation3d(0.0, 0.0, 0.0))  # Example values
-        # self.front_cam_pose_est = PhotonPoseEstimator(field_layout, self.kRobotToFrontCam)
+        self.kRobotToFrontCam = Transform3d(Translation3d(0.2, 0.0, 0.5), 
+                                            Rotation3d(0.0, 0.0, 0.0))  # Example values
+        self.front_cam_pose_est = PhotonPoseEstimator(field_layout, self.kRobotToFrontCam)
 
-        self.back_cam = PhotonCamera("BackCamera")
+        # self.back_cam = PhotonCamera("BackCamera")
         # self.kRobotToBackCam = Transform3d(Translation3d(-0.2, 0.0, 0.5), 
         #                                    Rotation3d(0.0, 0.0, 180.0))  # Example values
         # self.back_cam_pose_est = PhotonPoseEstimator(field_layout, self.kRobotToBackCam)
-
-        self.left_cam = PhotonCamera("LeftCamera")
-
-        self.right_cam = PhotonCamera("RightCamera")
 
         self.last_pose = None
 
@@ -38,16 +34,16 @@ class SS_CameraPose(commands2.Subsystem):
         front_results = self.front_cam.getAllUnreadResults()
         front_pose = self.process_camera_results(front_results, self.front_cam_pose_est)
 
-        back_results = self.back_cam.getAllUnreadResults()
-        back_pose = self.process_camera_results(back_results, self.back_cam_pose_est)
+        # back_results = self.back_cam.getAllUnreadResults()
+        # back_pose = self.process_camera_results(back_results, self.back_cam_pose_est)
 
-        # Combine poses if both are valid
-        if front_pose and back_pose:
-            self.last_pose = self.combine_poses(front_pose, back_pose)
-        elif front_pose:
+        # Combine poses: if both are valid
+        # if front_pose and back_pose:
+        #     self.last_pose = self.combine_poses(front_pose, back_pose)
+        if front_pose:
             self.last_pose = front_pose
-        elif back_pose:
-            self.last_pose = back_pose
+        # elif back_pose:
+        #     self.last_pose = back_pose
         else:
             return  # No valid pose from either camera
 
