@@ -5,7 +5,7 @@ from subsystems import SS_FeederTalon_Power
 from commands2.button import CommandXboxController
 
 
-class RightButtonComboShoot(commands2.Command):
+class CMD_ComboShoot(commands2.Command):
     def __init__(self, ss_shooter: SS_ShooterNEO, ss_feeder: SS_FeederTalon_Power, joystick: CommandXboxController):
         super().__init__()
         self.ss_shooter = ss_shooter

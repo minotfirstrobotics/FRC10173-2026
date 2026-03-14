@@ -11,8 +11,8 @@ from subsystems.SS_FeederTalon_Power import SS_FeederTalon_Power
 from subsystems.SS_IntakeSIMM import SS_IntakeSIMM
 from subsystems.SS_CANdleLight import SS_CANdleLight
 from subsystems.SS_CameraPose import SS_CameraPose
-from commands.RightButtonComboShoot import RightButtonComboShoot
-from commands.CMD_Shoot import CMD_Shoot
+from commands.CMD_ComboShoot import CMD_ComboShoot
+from commands.SEQ_Shoot import SEQ_Shoot
 
 
 class RobotContainer:
@@ -31,9 +31,10 @@ class RobotContainer:
         # SmartDashboard.putData("Default Autonomous", self.auto_chooser)
 
 
-        # ss_shoot_command = RightButtonComboShoot(self.ss_shooter_spark, self.ss_feeder_talon, self.joystick)
+        # ss_shoot_command = CMD_ComboShoot(self.ss_shooter_spark, self.ss_feeder_talon, self.joystick)
         # self.joystick.rightBumper().onTrue(ss_shoot_command)
-        # self.shoot_balls_sequence = CMD_Shoot(self.ss_shooter_spark, self.ss_feeder_talon)
+
+        # self.shoot_balls_sequence = SEQ_Shoot(self.ss_shooter_spark, self.ss_feeder_talon)
         # self.joystick.rightBumper().onTrue(self.shoot_balls_sequence)
         # self.joystick.rightBumper().onFalse(self.ss_shooter_spark.stop_motor_command())
         # self.joystick.rightBumper().onFalse(self.ss_feeder_talon.stop_motor_command())
