@@ -98,7 +98,7 @@ class MyRobot(commands2.TimedCommandRobot):
         and running subsystem periodic() methods.  This must be called from the robot's periodic
         block in order for anything in the Command-based framework to work.
         """
-        commands2.CommandScheduler.getInstance().run()
+        # commands2.CommandScheduler.getInstance().run()
         # self._time_and_driver_replay.update() # using HootAutoReplay to log and replay timestamp and driver data
  
         SmartDashboard.putNumber("Match Time", Timer.getMatchTime())
