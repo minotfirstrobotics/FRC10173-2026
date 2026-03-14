@@ -119,7 +119,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         )
 
     def heading_is_auto_controlled(self, vx_requested, vy_requested, vrotation_requested) -> None:
-        self.drivetrain.setDefaultCommand(
+        self.drivetrain.runOnce(
             self.drivetrain.apply_request(lambda: (
                 self._drive_field_centered
                     .with_velocity_x(vx_requested * self._max_speed)
@@ -139,7 +139,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         )
 
     def heading_is_auto_padlocked(self, vx_requested, vy_requested, x_vector, y_vector) -> None:
-        self.drivetrain.setDefaultCommand(
+        self.drivetrain.runOnce(
             self.drivetrain.apply_request(lambda: (
                 self._drive_facing_direction
                     .with_velocity_x(vx_requested * self._max_speed)
