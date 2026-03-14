@@ -13,13 +13,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "SimplePath"
+            "pathName": "Start Jerk"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "SimplePath2"
+            "pathName": "eat"
           }
         }
       ]

@@ -2,6 +2,7 @@ import commands2
 import wpilib
 from wpimath.units import rotationsToRadians
 from phoenix6 import swerve, SignalLogger
+from wpimath.kinematics import ChassisSpeeds
 from telemetry import Telemetry
 from generated.tuner_constants_2026_GF import TunerConstants
 from wpilib import DriverStation, Timer, SmartDashboard
@@ -54,24 +55,20 @@ class SS_SwerveDrive(commands2.Subsystem):
         )
         self.heading_is_driver_controlled()
 
-        
-
-        # AutoBuilder.configure(
-        #     pose_supplier=self.get_pose,
-        #     reset_pose=self.reset_pose,
-        #     robot_relative_speeds_supplier=self.get_robot_relative_speeds,
-        #     robot_relative_output=self.drive_robot_relative,
-        #     path_following_controller=PPHolonomicDriveController(
-        #         PIDConstants(0.0, 0.0, 0.0),   # Translation PID (tune these)
-        #         PIDConstants(0.0, 0.0, 0.0),   # Rotation PID (tune these)
-        #     ),
-        #     robot_config=RobotConfig.fromGUISettings(),
-        #     should_flip_path=lambda: DriverStation.getAlliance() == DriverStation.Alliance.kRed,
-        #     drive_subsystem=self
-        # )
-
-        # TODO i can't find register telemetry in the swerve module
-        # self.drivetrain.register_telemetry( lambda state: self._logger.telemeterize(state) )
+        # Configure AutoBuilder for PathPlanner - 2026 Modern Pattern
+        AutoBuilder.configure(
+            pose_supplier=self.get_pose,
+            reset_pose=self.reset_pose,
+            robot_relative_speeds_supplier=self.get_robot_relative_speeds,
+            speeds_output=self.drive_robot_relative,
+            path_following_controller=PPHolonomicDriveController(
+                PIDConstants(5.0, 0.0, 0.0),  # Translation PID (tune these values)
+                PIDConstants(5.0, 0.0, 0.0),  # Rotation PID (tune these values)
+            ),
+            robot_config=RobotConfig.fromGUISettings(),
+            should_flip_path=lambda: DriverStation.getAlliance() == DriverStation.Alliance.kRed,
+            drive_subsystem=self
+        )
 
     def controller_bindings(self) -> None:
         self._joystick.a().onTrue(self.heading_is_auto_controlled_command())
@@ -104,6 +101,28 @@ class SS_SwerveDrive(commands2.Subsystem):
         SmartDashboard.putNumber("Swerve/Swerve Pose Y (meters)", pose_translation.Y())
         SmartDashboard.putNumber("Swerve/Swerve Rotation (deg)", pose_rotation.degrees())
 
+
+    # -------------------------
+    # is the pose for pathplannerlib
+    # -------------------------
+    def get_pose(self) -> Pose2d:
+        """Get the current robot pose on the field."""
+        return self._latest_pose
+
+    def reset_pose(self, pose: Pose2d) -> None:
+        """Reset the robot's odometry to the specified pose."""
+        self.drivetrain.reset_odometry(pose)
+        self._latest_pose = pose
+
+    def get_robot_relative_speeds(self) -> ChassisSpeeds:
+        """Get the current robot-relative chassis speeds."""
+        return self.drivetrain.get_state().speeds
+
+    def drive_robot_relative(self, robot_relative_speeds: ChassisSpeeds) -> None:
+        """Drive the robot at the given robot-relative speeds."""
+        self.drivetrain.set_control(
+            swerve.requests.ApplyRobotSpeeds().with_speeds(robot_relative_speeds)
+        )
 
     # -------------------------
     # Motor movement functions

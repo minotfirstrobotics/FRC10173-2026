@@ -27,9 +27,9 @@ class RobotContainer:
         self.ss_candle_light_front = SS_CANdleLight(5)
         # self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
 
-        # self.auto_chooser = AutoBuilder.buildAutoChooser("Autonomous Mode")
-        # SmartDashboard.putData("Default Autonomous", self.auto_chooser)
-
+        # Build auto chooser from PathPlanner auto.auto files in deploy folder
+        self.auto_chooser = AutoBuilder.buildAutoChooser("Tests")
+        SmartDashboard.putData("Autonomous Routine", self.auto_chooser)
 
         # ss_shoot_command = CMD_ComboShoot(self.ss_shooter_spark, self.ss_feeder_talon, self.joystick)
         # self.joystick.rightBumper().onTrue(ss_shoot_command)
@@ -38,6 +38,10 @@ class RobotContainer:
         # self.joystick.rightBumper().onTrue(self.shoot_balls_sequence)
         # self.joystick.rightBumper().onFalse(self.ss_shooter_spark.stop_motor_command())
         # self.joystick.rightBumper().onFalse(self.ss_feeder_talon.stop_motor_command())
+
+    def getAutonomousCommand(self) -> commands2.Command:
+        """Get the selected autonomous command from the chooser."""
+        return self.auto_chooser.getSelected()
         
 
 class MyRobot(commands2.TimedCommandRobot):
@@ -57,6 +61,17 @@ class MyRobot(commands2.TimedCommandRobot):
         self.container = RobotContainer()
         self.localMatchTimer = Timer()
         # self._time_and_joystick_replay = (HootAutoReplay().with_timestamp_replay().with_joystick_replay() )
+
+    def autonomousInit(self) -> None:
+        """
+        This function is run once when the robot enters autonomous mode.
+        Gets the selected autonomous command from the chooser and schedules it.
+        """
+        self.localMatchTimer.reset()
+        self.localMatchTimer.start()
+        self.autonomousCommand = self.container.getAutonomousCommand()
+        if self.autonomousCommand:
+            self.autonomousCommand.schedule()
 
     def robotPeriodic(self) -> None:
         """
@@ -96,14 +111,6 @@ class MyRobot(commands2.TimedCommandRobot):
     def teleopPeriodic(self) -> None:
         """This function is called periodically during operator control"""
         pass
-
-
-    def autonomousInit(self) -> None:
-        """This autonomous runs the autonomous command selected by your RobotContainer class."""
-        self.localMatchTimer.reset()
-        self.localMatchTimer.start()
-        # self.autonomousCommand = self.container.auto_chooser.getSelected()
-        # if self.autonomousCommand: self.autonomousCommand.schedule()
 
     def autonomousPeriodic(self) -> None:
         """This function is called periodically during autonomous"""

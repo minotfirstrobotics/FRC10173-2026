@@ -1,0 +1,15 @@
+{
+  "version": 1.0,
+  "commands": [
+    { "name": "Intake Spin" },
+    { "name": "Intake Reverse" },
+    { "name": "Intake Stop" },
+    { "name": "Shooter Spin-up to Setpoint" },
+    { "name": "Shooter Stop" },
+    { "name": "Feeder Spin" },
+    { "name": "Feeder Reverse" },
+    { "name": "Feeder Stop" },
+    { "name": "Turret Point Ahead" },
+    { "name": "Turret Point Right" }
+  ]
+}

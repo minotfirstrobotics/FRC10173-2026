@@ -3,29 +3,45 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.904,
-        "y": 6.753
+        "x": 4.364326872570419,
+        "y": 7.409152210638252
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.5473894436519258,
-        "y": 7.327888730385164
+        "x": 5.36432687257042,
+        "y": 7.409152210638252
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 4.3884022824536375,
-        "y": 7.4572753209700435
+        "x": 3.4594906921012263,
+        "y": 7.409152210638252
       },
       "prevControl": {
-        "x": 3.25259581107608,
-        "y": 7.657711757095495
+        "x": 4.376157991834022,
+        "y": 7.382191407704935
       },
       "nextControl": {
-        "x": 5.928102710413694,
-        "y": 7.1855634807417985
+        "x": 2.6280196073457525,
+        "y": 7.433607242542824
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.24736432922252,
+        "y": 7.299104567067675
+      },
+      "prevControl": {
+        "x": 6.222909297317947,
+        "y": 7.751522657302269
+      },
+      "nextControl": {
+        "x": 6.26085814372627,
+        "y": 7.0494689987482975
       },
       "isLocked": false,
       "linkedName": null
@@ -36,28 +52,23 @@
         "y": 7.0300992161173745
       },
       "prevControl": {
-        "x": 7.7582633674503345,
-        "y": 7.873276044297965
+        "x": 7.353569520159088,
+        "y": 7.717867361325954
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": "End of Ingress"
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 1,
-      "rotationDegrees": -1.3639275316030146
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3,
-    "maxAcceleration": 3,
-    "maxAngularVelocity": 540,
-    "maxAngularAcceleration": 720,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
@@ -71,5 +82,5 @@
     "velocity": 0,
     "rotation": 0.0
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }
