@@ -4,6 +4,8 @@ from wpilib import SmartDashboard, Timer
 from phoenix6 import HootAutoReplay
 from pathplannerlib.auto import AutoBuilder, NamedCommands
 from commands2.button import CommandXboxController
+from commands.CMD_Shoot import CMDShoot
+from subsystems.SS_ControlerSetInputs import SS_ControllerSetInputs
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
 from subsystems.SS_ShooterNEO import SS_ShooterNEO
 from subsystems.SS_TurretTalon_Trapezoidal import SS_TurretTalon
@@ -17,18 +19,31 @@ from commands.SEQ_Shoot import SEQ_Shoot
 
 class RobotContainer:
     def __init__(self) -> None:
-        self.joystick = CommandXboxController(0)
-        self.ss_swerve_drive = SS_SwerveDrive(self.joystick)
-        self.ss_shooter_spark = SS_ShooterNEO(3, self.joystick)
-        self.ss_turret_talon = SS_TurretTalon(1, self.joystick)
-        self.ss_feeder_talon = SS_FeederTalon_Power(0, self.joystick)
-        self.ss_intake_spark = SS_IntakeSIMM(4, self.joystick)
+        self.driver = CommandXboxController(0)
+        self.operator = CommandXboxController(1)
+        self
+        self.ss_swerve_drive = SS_SwerveDrive(self.driver)
+        self.ss_shooter_spark = SS_ShooterNEO(3, self.driver)
+        self.ss_turret_talon = SS_TurretTalon(1, self.driver)
+        self.ss_feeder_talon = SS_FeederTalon_Power(0, self.driver)
+        self.ss_intake_spark = SS_IntakeSIMM(4, self.driver)
         #self.ss_candle_light_rear = SS_CANdleLight(2)
         self.ss_candle_light_front = SS_CANdleLight(5)
         self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
 
         # self.auto_chooser = AutoBuilder.buildAutoChooser("Autonomous Mode")
         # SmartDashboard.putData("Default Autonomous", self.auto_chooser)
+        self.ss_controller_inputs = SS_ControllerSetInputs(
+            driver=self.driver,
+            operator=self.operator, 
+            feeder=self.ss_feeder_talon,
+            turret=self.ss_turret_talon,
+            shooter=self.ss_shooter_spark,
+            camera=None,  # if controller does not use camera
+            swerve=self.ss_swerve_drive,
+            intake=self.ss_intake_spark,
+            lights=None  # for candle subsytem if we use controllers for that
+        )
 
 
         # ss_shoot_command = CMD_ComboShoot(self.ss_shooter_spark, self.ss_feeder_talon, self.joystick)
@@ -56,7 +71,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.autonomousCommand = None
         self.container = RobotContainer()
         self.localMatchTimer = Timer()
-        # self._time_and_joystick_replay = (HootAutoReplay().with_timestamp_replay().with_joystick_replay() )
+        # self._time_and_driver_replay = (HootAutoReplay().with_timestamp_replay().with_driver_replay() )
 
     def robotPeriodic(self) -> None:
         """
@@ -72,7 +87,7 @@ class MyRobot(commands2.TimedCommandRobot):
         block in order for anything in the Command-based framework to work.
         """
         commands2.CommandScheduler.getInstance().run()
-        # self._time_and_joystick_replay.update() # using HootAutoReplay to log and replay timestamp and joystick data
+        # self._time_and_driver_replay.update() # using HootAutoReplay to log and replay timestamp and driver data
  
         SmartDashboard.putNumber("Match Time", Timer.getMatchTime())
         ds_match_time = Timer.getMatchTime()
