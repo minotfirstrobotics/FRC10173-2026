@@ -1,10 +1,9 @@
 # To Do List:
+* stop SparkMax CAN errors
 * try removing redundant command scheduler
 * flash radio if necessary
 * Intake is sticking
 * Bathtub and belt protection for feeder
-* Find CAN errors
-* Tune FF for shooter
 * calculate range to target
 * determine field area and target certain locations
 * determine how to padlock heading to target point
@@ -13,6 +12,7 @@
 * Enable autonomous choice on dashboard
 * Build autonomous 
 * Make climbing gear and strategy
+* fix RobotContainer controller maps
 * Determine logging strategies (SignalLogger.enable_auto_logging(True), hoot, etc )
 
 # Dependencies:

@@ -4,8 +4,6 @@ from wpilib import SmartDashboard, Timer
 from phoenix6 import HootAutoReplay
 from pathplannerlib.auto import AutoBuilder, NamedCommands
 from commands2.button import CommandXboxController
-from commands.CMD_Shoot import CMDShoot
-from subsystems.SS_ControlerSetInputs import SS_ControllerSetInputs
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
 from subsystems.SS_ShooterNEO import SS_ShooterNEO
 from subsystems.SS_TurretTalon_Trapezoidal import SS_TurretTalon
@@ -20,31 +18,21 @@ from commands.SEQ_Shoot import SEQ_Shoot
 class RobotContainer:
     def __init__(self) -> None:
         self.driver = CommandXboxController(0)
-        self.operator = CommandXboxController(1)
-        self
-        self.ss_swerve_drive = SS_SwerveDrive(self.driver)
+        # self.operator = CommandXboxController(1)
         self.ss_shooter_spark = SS_ShooterNEO(3, self.driver)
         self.ss_turret_talon = SS_TurretTalon(1, self.driver)
         self.ss_feeder_talon = SS_FeederTalon_Power(0, self.driver)
         self.ss_intake_spark = SS_IntakeSIMM(4, self.driver)
         #self.ss_candle_light_rear = SS_CANdleLight(2)
         self.ss_candle_light_front = SS_CANdleLight(5)
+        self.ss_swerve_drive = SS_SwerveDrive(self.driver)
         self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
 
         # self.auto_chooser = AutoBuilder.buildAutoChooser("Autonomous Mode")
         # SmartDashboard.putData("Default Autonomous", self.auto_chooser)
-        self.ss_controller_inputs = SS_ControllerSetInputs(
-            driver=self.driver,
-            operator=self.operator, 
-            feeder=self.ss_feeder_talon,
-            turret=self.ss_turret_talon,
-            shooter=self.ss_shooter_spark,
-            camera=None,  # if controller does not use camera
-            swerve=self.ss_swerve_drive,
-            intake=self.ss_intake_spark,
-            lights=None  # for candle subsytem if we use controllers for that
-        )
 
+        # self.configure_driver_inputs()
+        # self.configure_operator_inputs()
 
         # ss_shoot_command = CMD_ComboShoot(self.ss_shooter_spark, self.ss_feeder_talon, self.joystick)
         # self.joystick.rightBumper().onTrue(ss_shoot_command)
@@ -53,7 +41,31 @@ class RobotContainer:
         # self.joystick.rightBumper().onTrue(self.shoot_balls_sequence)
         # self.joystick.rightBumper().onFalse(self.ss_shooter_spark.stop_motor_command())
         # self.joystick.rightBumper().onFalse(self.ss_feeder_talon.stop_motor_command())
-        
+
+
+    def configure_driver_inputs(self):
+        self.driver.a().whileTrue(self.run_intake_command())
+        self.driver.b().whileTrue(self.run_outtake_command())
+        self.driver.y().whileTrue(self.run_vision_align_command())
+        self.driver.x().whileTrue(self.run_shooter_spin_command())
+        self.driver.leftBumper().whileTrue(self.swerve.field_oriented_command())
+        self.driver.leftTrigger(threshold=0.2).whileTrue(self.swerve.precision_mode_command())
+        self.driver.rightBumper().whileTrue(self.swerve.robot_oriented_command())
+        self.driver.rightTrigger(threshold=0.2).whileTrue(self.swerve.boost_mode_command())
+
+    def configure_operator_inputs(self):
+        self.operator.y().whileTrue(self.run_vision_align_command())
+        self.operator.x().whileTrue(self.run_shooter_spin_command())
+        self.operator.leftBumper().whileTrue(self.swerve.field_oriented_command())
+        self.operator.leftTrigger(threshold=0.2).whileTrue(self.swerve.precision_mode_command())
+        self.operator.rightBumper().whileTrue(self.swerve.robot_oriented_command())
+        self.operator.rightTrigger(threshold=0.2).whileTrue(self.swerve.boost_mode_command())
+        self.operator.povUp().whileTrue(self.swerve.slow_mode_command())
+        self.operator.povDown().whileTrue(self.swerve.normal_mode_command())
+        self.operator.povLeft().whileTrue(self.swerve.fast_mode_command())
+        self.operator.povRight().whileTrue(self.swerve.turbo_mode_command())
+
+
 
 class MyRobot(commands2.TimedCommandRobot):
     """
