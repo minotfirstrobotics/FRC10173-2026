@@ -24,8 +24,9 @@ class SS_SwerveDrive(commands2.Subsystem):
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Swerve Max Speed", self._max_speed)
         self._pov_speed = 0.2
         self._latest_pose = Pose2d()
-        self._logger = Telemetry(self._max_speed)
         self.drivetrain = TunerConstants.create_drivetrain() # does this need to after swerve configs?
+        # self._logger = Telemetry(self._max_speed)
+        # self.drivetrain.register_telemetry( lambda state: self._logger.telemeterize(state) )
 
         self.controller_bindings()
         self.PIDF_sysID_tuning_bindings()
@@ -54,8 +55,6 @@ class SS_SwerveDrive(commands2.Subsystem):
         )
         self.heading_is_driver_controlled()
 
-        
-
         # AutoBuilder.configure(
         #     pose_supplier=self.get_pose,
         #     reset_pose=self.reset_pose,
@@ -69,9 +68,6 @@ class SS_SwerveDrive(commands2.Subsystem):
         #     should_flip_path=lambda: DriverStation.getAlliance() == DriverStation.Alliance.kRed,
         #     drive_subsystem=self
         # )
-
-        # TODO i can't find register telemetry in the swerve module
-        # self.drivetrain.register_telemetry( lambda state: self._logger.telemeterize(state) )
 
     def controller_bindings(self) -> None:
         self._joystick.a().onTrue(self.heading_is_auto_controlled_command())
