@@ -60,8 +60,8 @@ class SS_SwerveDrive(commands2.Subsystem):
             pose_supplier=self.get_pose,
             reset_pose=self.reset_pose,
             robot_relative_speeds_supplier=self.get_robot_relative_speeds,
-            speeds_output=self.drive_robot_relative,
-            path_following_controller=PPHolonomicDriveController(
+            output=self.drive_robot_relative,
+            controller=PPHolonomicDriveController(
                 PIDConstants(5.0, 0.0, 0.0),  # Translation PID (tune these values)
                 PIDConstants(5.0, 0.0, 0.0),  # Rotation PID (tune these values)
             ),
