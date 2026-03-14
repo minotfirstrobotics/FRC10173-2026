@@ -1,0 +1,70 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 12.77265335235378,
+        "y": 7.444336661911555
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 13.837111053808892,
+        "y": 7.444336661911555
+      },
+      "isLocked": true,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 14.03871111111713,
+        "y": 7.444336661911555
+      },
+      "prevControl": {
+        "x": 14.564911111117134,
+        "y": 7.484533333331313
+      },
+      "nextControl": {
+        "x": 13.593141789492506,
+        "y": 7.410299406844908
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 10.803555555561577,
+        "y": 7.444336661911555
+      },
+      "prevControl": {
+        "x": 11.203077777783799,
+        "y": 7.416322222220202
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "End of red jerk"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 179.8063007310811
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 179.82965969833543
+  },
+  "useDefaultConstraints": true
+}

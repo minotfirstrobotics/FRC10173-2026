@@ -5,21 +5,21 @@
     "data": {
       "commands": [
         {
-          "type": "wait",
+          "type": "path",
           "data": {
-            "waitTime": 0.5
+            "pathName": "red jerk"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Start Jerk blue"
+            "pathName": "eat red"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "eat"
+            "pathName": "to human red"
           }
         }
       ]
