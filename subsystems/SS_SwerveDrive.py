@@ -110,7 +110,7 @@ class SS_SwerveDrive(commands2.Subsystem):
 
     def reset_pose(self, pose: Pose2d) -> None:
         """Reset the robot's odometry to the specified pose."""
-        self.drivetrain.reset_odometry(pose) # maybe this should be reset_pose(pose) rather than reset_odometry from swerve_drivetrain.py
+        self.drivetrain.reset_pose(pose)
         self._latest_pose = pose
 
     def get_robot_relative_speeds(self) -> ChassisSpeeds:
