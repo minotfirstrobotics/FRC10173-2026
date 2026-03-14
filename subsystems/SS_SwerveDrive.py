@@ -106,20 +106,16 @@ class SS_SwerveDrive(commands2.Subsystem):
     # is the pose for pathplannerlib
     # -------------------------
     def get_pose(self) -> Pose2d:
-        """Get the current robot pose on the field."""
         return self._latest_pose
 
     def reset_pose(self, pose: Pose2d) -> None:
-        """Reset the robot's odometry to the specified pose."""
         self.drivetrain.reset_odometry(pose)
         self._latest_pose = pose
 
     def get_robot_relative_speeds(self) -> ChassisSpeeds:
-        """Get the current robot-relative chassis speeds."""
         return self.drivetrain.get_state().speeds
 
-    def drive_robot_relative(self, robot_relative_speeds: ChassisSpeeds) -> None:
-        """Drive the robot at the given robot-relative speeds."""
+    def drive_robot_relative(self, robot_relative_speeds: ChassisSpeeds, drive_feedforwards=None) -> None:
         self.drivetrain.set_control(
             swerve.requests.ApplyRobotSpeeds().with_speeds(robot_relative_speeds)
         )
