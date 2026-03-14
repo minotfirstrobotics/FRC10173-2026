@@ -189,8 +189,8 @@ class SS_SwerveDrive(commands2.Subsystem):
     def heading_is_driver_padlocked(self) -> commands2.Command:
         return commands2.cmd.runOnce(self.heading_is_driver_padlocked)
     
-    def heading_is_auto_padlocked_command(self, vx_requested=0, vy_requested=0, vrotation_requested=0) -> commands2.Command:
-        return commands2.cmd.runOnce(lambda: self.heading_is_auto_padlocked(vx_requested, vy_requested, vrotation_requested))
+    def heading_is_auto_padlocked_command(self, vx_requested=0, vy_requested=0, x_vector=0, y_vector=.2) -> commands2.Command:
+        return commands2.cmd.runOnce(lambda: self.heading_is_auto_padlocked(vx_requested, vy_requested, x_vector, y_vector))
     
     def pov_move_command(self, direction_x, direction_y) -> commands2.Command:
         return commands2.cmd.runOnce(lambda: self.pov_move(direction_x, direction_y))
