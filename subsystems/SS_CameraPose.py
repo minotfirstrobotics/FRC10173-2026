@@ -54,7 +54,7 @@ class SS_CameraPose(commands2.Subsystem):
         # Inject the pose into the drivetrain pose estimator
         pose3d = self.last_pose.estimatedPose
         # if len(front_results[-1].targets) + len(back_results[-1].targets) >= 2:
-        #     std_devs = (0.3, 0.3, 0.5)
+        #     std_devs = (0.7, 0.7, 0.5)
         # else:
         #     std_devs = (0.8, 0.8, 1.5)
 

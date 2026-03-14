@@ -3,6 +3,7 @@ import wpilib
 from wpimath.units import rotationsToRadians
 from phoenix6 import swerve, SignalLogger
 from wpimath.kinematics import ChassisSpeeds
+from pathplannerlib.util import DriveFeedforwards
 from telemetry import Telemetry
 from generated.tuner_constants_2026_GF import TunerConstants
 from wpilib import DriverStation, Timer, SmartDashboard
@@ -60,8 +61,8 @@ class SS_SwerveDrive(commands2.Subsystem):
             pose_supplier=self.get_pose,
             reset_pose=self.reset_pose,
             robot_relative_speeds_supplier=self.get_robot_relative_speeds,
-            speeds_output=self.drive_robot_relative,
-            path_following_controller=PPHolonomicDriveController(
+            output=self.drive_robot_relative,
+            controller=PPHolonomicDriveController(
                 PIDConstants(5.0, 0.0, 0.0),  # Translation PID (tune these values)
                 PIDConstants(5.0, 0.0, 0.0),  # Rotation PID (tune these values)
             ),
@@ -118,7 +119,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         """Get the current robot-relative chassis speeds."""
         return self.drivetrain.get_state().speeds
 
-    def drive_robot_relative(self, robot_relative_speeds: ChassisSpeeds) -> None:
+    def drive_robot_relative(self, robot_relative_speeds: ChassisSpeeds, feedforwards: DriveFeedforwards) -> None:
         """Drive the robot at the given robot-relative speeds."""
         self.drivetrain.set_control(
             swerve.requests.ApplyRobotSpeeds().with_speeds(robot_relative_speeds)

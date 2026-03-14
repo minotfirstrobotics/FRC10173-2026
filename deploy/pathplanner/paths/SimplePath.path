@@ -3,67 +3,46 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.904,
-        "y": 6.753
+        "x": 0.8461565836298937,
+        "y": 7.0
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.5473894436519258,
-        "y": 7.327888730385164
+        "x": 2.0263826803495872,
+        "y": 6.993880953200904
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 4.3884022824536375,
-        "y": 7.4572753209700435
+        "x": 3.5036773428232504,
+        "y": 7.0
       },
       "prevControl": {
-        "x": 3.25259581107608,
-        "y": 7.657711757095495
-      },
-      "nextControl": {
-        "x": 5.928102710413694,
-        "y": 7.1855634807417985
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 7.714666243496884,
-        "y": 7.0300992161173745
-      },
-      "prevControl": {
-        "x": 7.7582633674503345,
-        "y": 7.873276044297965
+        "x": 2.3693369823718795,
+        "y": 7.000235828954109
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "End of Ingress"
+      "linkedName": null
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 1,
-      "rotationDegrees": -1.3639275316030146
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3,
-    "maxAcceleration": 3,
-    "maxAngularVelocity": 540,
-    "maxAngularAcceleration": 720,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -88.79899110252957
+    "rotation": 0.0
   },
   "reversed": false,
   "folder": null,
@@ -71,5 +50,5 @@
     "velocity": 0,
     "rotation": 0.0
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }
