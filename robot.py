@@ -69,9 +69,32 @@ class MyRobot(commands2.TimedCommandRobot):
         """
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
+        # Get the selection from the chooser. Some chooser implementations
+        # may return a callable that constructs a command, or return an
+        # object that already is a command. Be defensive and handle both.
         self.autonomousCommand = self.container.getAutonomousCommand()
-        if self.autonomousCommand:
-            self.autonomousCommand.schedule()
+
+        # If the chooser returned a factory (callable), call it to get the
+        # actual command instance.
+        if callable(self.autonomousCommand):
+            try:
+                self.autonomousCommand = self.autonomousCommand()
+            except Exception as e:
+                # If the factory raises, log and clear autonomousCommand.
+                print(f"Error creating autonomous command from chooser: {e}")
+                self.autonomousCommand = None
+
+        # If the selected object has a schedule() method, schedule it.
+        if self.autonomousCommand is not None and hasattr(self.autonomousCommand, "schedule"):
+            try:
+                self.autonomousCommand.schedule()
+            except Exception as e:
+                print(f"Failed to schedule autonomous command: {e}")
+                self.autonomousCommand = None
+        else:
+            # Helpful debug information when something unexpected is returned
+            if self.autonomousCommand is not None:
+                print(f"Autonomous selection is not scheduleable: {type(self.autonomousCommand)!r} -> {self.autonomousCommand!r}")
 
     def robotPeriodic(self) -> None:
         """

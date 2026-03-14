@@ -3,7 +3,6 @@ import wpilib
 from wpimath.units import rotationsToRadians
 from phoenix6 import swerve, SignalLogger
 from wpimath.kinematics import ChassisSpeeds
-from pathplannerlib.util import DriveFeedforwards
 from telemetry import Telemetry
 from generated.tuner_constants_2026_GF import TunerConstants
 from wpilib import DriverStation, Timer, SmartDashboard
@@ -107,7 +106,6 @@ class SS_SwerveDrive(commands2.Subsystem):
     # is the pose for pathplannerlib
     # -------------------------
     def get_pose(self) -> Pose2d:
-        """Get the current robot pose on the field."""
         return self._latest_pose
 
     def reset_pose(self, pose: Pose2d) -> None:
@@ -116,11 +114,27 @@ class SS_SwerveDrive(commands2.Subsystem):
         self._latest_pose = pose
 
     def get_robot_relative_speeds(self) -> ChassisSpeeds:
-        """Get the current robot-relative chassis speeds."""
-        return self.drivetrain.get_state().speeds
+        """Get the current robot-relative chassis speeds.
 
-    def drive_robot_relative(self, robot_relative_speeds: ChassisSpeeds, feedforwards: DriveFeedforwards) -> None:
-        """Drive the robot at the given robot-relative speeds."""
+        The underlying drivetrain may not yet have a valid state (especially
+        during early init or in simulation). Return a zero ChassisSpeeds if the
+        state is unavailable to avoid AttributeError.
+        """
+        state = None
+        try:
+            state = self.drivetrain.get_state()
+        except Exception:
+            # Be defensive: if getting state raises, treat as no motion.
+            state = None
+
+        if state is None:
+            return ChassisSpeeds(0.0, 0.0, 0.0)
+
+        # Some drivetrain implementations may not include 'speeds' attribute
+        # (unlikely), so be defensive.
+        return getattr(state, "speeds", ChassisSpeeds(0.0, 0.0, 0.0))
+
+    def drive_robot_relative(self, robot_relative_speeds: ChassisSpeeds, drive_feedforwards=None) -> None:
         self.drivetrain.set_control(
             swerve.requests.ApplyRobotSpeeds().with_speeds(robot_relative_speeds)
         )
