@@ -12,7 +12,7 @@ from subsystems.SS_IntakeSIMM import SS_IntakeSIMM
 from subsystems.SS_CANdleLight import SS_CANdleLight
 from subsystems.SS_CameraPose import SS_CameraPose
 from commands.CMD_ComboShoot import CMD_ComboShoot
-from commands.SEQ_Shoot import SEQ_Shoot
+from commands.SEQ_sequences import SEQ_Shoot
 
 
 class RobotContainer:
@@ -98,7 +98,7 @@ class MyRobot(commands2.TimedCommandRobot):
         and running subsystem periodic() methods.  This must be called from the robot's periodic
         block in order for anything in the Command-based framework to work.
         """
-        # commands2.CommandScheduler.getInstance().run()
+        commands2.CommandScheduler.getInstance().run()
         # self._time_and_driver_replay.update() # using HootAutoReplay to log and replay timestamp and driver data
  
         SmartDashboard.putNumber("Match Time", Timer.getMatchTime())
@@ -126,9 +126,13 @@ class MyRobot(commands2.TimedCommandRobot):
 
 
     def autonomousInit(self) -> None:
+        from commands.SEQ_sequences import SEQ_DeployIntake
         """This autonomous runs the autonomous command selected by your RobotContainer class."""
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
+
+        auto = SEQ_DeployIntake(self.container.ss_swerve_drive, self.container.ss_shooter_spark, self.container.ss_feeder_talon, self.container.ss_intake_spark)
+        auto.schedule()
         # self.autonomousCommand = self.container.auto_chooser.getSelected()
         # if self.autonomousCommand: self.autonomousCommand.schedule()
 
