@@ -1,6 +1,7 @@
 import commands2
 import wpilib
 from wpilib import SmartDashboard, Timer
+from wpimath.geometry import Pose2d, Rotation2d
 from phoenix6 import HootAutoReplay
 from pathplannerlib.auto import AutoBuilder, NamedCommands
 from commands2.button import CommandXboxController
@@ -27,6 +28,8 @@ class RobotContainer:
         self.ss_candle_light_front = SS_CANdleLight(5)
         self.ss_swerve_drive = SS_SwerveDrive(self.driver)
         self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
+
+        
 
         # self.auto_chooser = AutoBuilder.buildAutoChooser("Autonomous Mode")
         # SmartDashboard.putData("Default Autonomous", self.auto_chooser)
@@ -83,6 +86,10 @@ class MyRobot(commands2.TimedCommandRobot):
         self.autonomousCommand = None
         self.container = RobotContainer()
         self.localMatchTimer = Timer()
+        
+        self.field = wpilib.Field2d()
+        wpilib.SmartDashboard.putData("Field", self.field)
+        
         # self._time_and_driver_replay = (HootAutoReplay().with_timestamp_replay().with_driver_replay() )
 
     def robotPeriodic(self) -> None:
@@ -110,6 +117,9 @@ class MyRobot(commands2.TimedCommandRobot):
         else:
             SmartDashboard.putNumber("Match Time", ds_match_time)
 
+        self.field.setRobotPose(self.container.ss_swerve_drive._latest_pose)
+        # Optional: Display other objects (e.g., game pieces)
+        # self.field.getObject("note1").setPose(Pose2d(1, 2, Rotation2d(0)))
 
     def teleopInit(self) -> None:
         """This makes sure that the autonomous stops running when
