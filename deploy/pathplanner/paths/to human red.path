@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 8.839300998573465,
-        "y": 4.947175463623396
+        "x": 8.451141226818828,
+        "y": 4.973052781740371
       },
       "prevControl": null,
       "nextControl": {
-        "x": 9.89250743951905,
-        "y": 5.525507446540905
+        "x": 9.504347667764414,
+        "y": 5.55138476465788
       },
       "isLocked": false,
       "linkedName": "end of eat red"
@@ -69,7 +69,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -91.54815769897782
+    "rotation": -71.56505117707796
   },
   "useDefaultConstraints": true
 }
