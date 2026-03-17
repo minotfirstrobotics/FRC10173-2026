@@ -86,10 +86,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.autonomousCommand = None
         self.container = RobotContainer()
         self.localMatchTimer = Timer()
-        
-        self.field = wpilib.Field2d()
-        wpilib.SmartDashboard.putData("Field", self.field)
-        
+                
         # self._time_and_driver_replay = (HootAutoReplay().with_timestamp_replay().with_driver_replay() )
 
     def robotPeriodic(self) -> None:
@@ -116,10 +113,6 @@ class MyRobot(commands2.TimedCommandRobot):
             SmartDashboard.putNumber("Match Time", self.localMatchTimer.get())
         else:
             SmartDashboard.putNumber("Match Time", ds_match_time)
-
-        self.field.setRobotPose(self.container.ss_swerve_drive._latest_pose)
-        # Optional: Display other objects (e.g., game pieces)
-        # self.field.getObject("note1").setPose(Pose2d(1, 2, Rotation2d(0)))
 
     def teleopInit(self) -> None:
         """This makes sure that the autonomous stops running when

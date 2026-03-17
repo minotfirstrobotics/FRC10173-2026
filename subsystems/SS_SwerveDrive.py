@@ -27,6 +27,9 @@ class SS_SwerveDrive(commands2.Subsystem):
         self._logger = Telemetry(self._max_speed)
         self.drivetrain = TunerConstants.create_drivetrain() # does this need to after swerve configs?
 
+        self.field = wpilib.Field2d()
+        wpilib.SmartDashboard.putData("Field", self.field)
+
         self.controller_bindings()
         self.PIDF_sysID_tuning_bindings()
 
@@ -103,6 +106,10 @@ class SS_SwerveDrive(commands2.Subsystem):
         SmartDashboard.putNumber("Swerve/Swerve Pose X (meters)", pose_translation.X())
         SmartDashboard.putNumber("Swerve/Swerve Pose Y (meters)", pose_translation.Y())
         SmartDashboard.putNumber("Swerve/Swerve Rotation (deg)", pose_rotation.degrees())
+        self.field.setRobotPose(self._latest_pose)
+        # Optional: Display other objects (e.g., game pieces)
+        # self.field.getObject("note1").setPose(Pose2d(1, 2, Rotation2d(0)))
+
 
 
     # -------------------------
