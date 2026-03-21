@@ -58,7 +58,6 @@ class SS_SwerveDrive(commands2.Subsystem):
         )
         self.heading_is_driver_controlled()
 
-        # Configure AutoBuilder for PathPlanner - 2026 Modern Pattern
         AutoBuilder.configure(
             pose_supplier=self.get_pose,
             reset_pose=self.reset_pose,
