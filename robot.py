@@ -1,6 +1,7 @@
 import commands2
 import wpilib
 from wpilib import SmartDashboard, Timer
+from wpimath.geometry import Pose2d, Rotation2d
 from phoenix6 import HootAutoReplay
 from pathplannerlib.auto import AutoBuilder, NamedCommands
 from commands2.button import CommandXboxController

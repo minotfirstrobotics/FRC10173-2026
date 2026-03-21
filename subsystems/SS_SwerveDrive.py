@@ -28,6 +28,9 @@ class SS_SwerveDrive(commands2.Subsystem):
         self._logger = Telemetry(self._max_speed)
         self.drivetrain = TunerConstants.create_drivetrain() # does this need to after swerve configs?
 
+        self.field = wpilib.Field2d()
+        wpilib.SmartDashboard.putData("Field", self.field)
+
         self.controller_bindings()
         self.PIDF_sysID_tuning_bindings()
 
@@ -71,6 +74,20 @@ class SS_SwerveDrive(commands2.Subsystem):
         )
 
     def controller_bindings(self) -> None:
+    # Guard controller bindings when no joystick is attached. Creating
+    # command bindings when no HID is present causes repeated HAL/WPILib
+    # warnings ("Joystick Button 1 missing (max 0)"). In simulation it is
+    # common to run without a controller connected, so skip bindings when
+    # there are no joysticks detected.
+        try:
+            if DriverStation.getJoystickCount() == 0:
+                # No joystick plugged in; skip creating bindings.
+                return
+        except Exception:
+            # If the DriverStation API isn't available for some reason, be
+            # defensive and proceed to avoid breaking startup.
+            pass
+
         self._joystick.a().onTrue(self.heading_is_auto_controlled_command())
         self._joystick.a().onFalse(self.heading_is_driver_controlled_command())
         # self._joystick.pov(0).whileTrue(self.pov_move_command(1, 0))
@@ -79,7 +96,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         # self._joystick.pov(270).whileTrue(self.pov_move_command(0, -1))
         (self._joystick.back() & self._joystick.b()).whileTrue(self.brake_command())
         (self._joystick.back() & self._joystick.start()).onTrue(self.reset_field_oriented_perspective())
-
+    
     def periodic(self) -> None:
         pose = self.drivetrain.sample_pose_at(Timer.getFPGATimestamp())
         if pose is not None:
@@ -100,7 +117,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         SmartDashboard.putNumber("Swerve/Swerve Pose X (meters)", pose_translation.X())
         SmartDashboard.putNumber("Swerve/Swerve Pose Y (meters)", pose_translation.Y())
         SmartDashboard.putNumber("Swerve/Swerve Rotation (deg)", pose_rotation.degrees())
-
+        self.field.setRobotPose(self._latest_pose)
 
     # -------------------------
     # is the pose for pathplannerlib
@@ -173,6 +190,13 @@ class SS_SwerveDrive(commands2.Subsystem):
         self.drivetrain.apply_request(lambda: swerve.requests.SwerveDriveBrake())
 
     def PIDF_sysID_tuning_bindings(self) -> None:
+    # As above, skip sysid tuning bindings if no joystick is present.
+        try:
+            if DriverStation.getJoystickCount() == 0:
+                return
+        except Exception:
+            pass
+
         (self._joystick.start() & self._joystick.leftBumper()).onTrue(SignalLogger.start)
         (self._joystick.start() & self._joystick.rightBumper()).onTrue(SignalLogger.stop)
 
