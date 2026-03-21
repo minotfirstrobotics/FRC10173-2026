@@ -1,12 +1,12 @@
 import wpilib
 import commands2
-from subsystems import SS_ShooterNEO
+from subsystems import SS_ShooterKraken
 from subsystems import SS_FeederTalon_Power
 from commands2.button import CommandXboxController
 
 
 class CMD_ComboShoot(commands2.Command):
-    def __init__(self, ss_shooter: SS_ShooterNEO, ss_feeder: SS_FeederTalon_Power, joystick: CommandXboxController):
+    def __init__(self, ss_shooter: SS_ShooterKraken, ss_feeder: SS_FeederTalon_Power, joystick: CommandXboxController):
         super().__init__()
         self.ss_shooter = ss_shooter
         self.addRequirements(ss_shooter) # Ensure no other command uses ss_shooter

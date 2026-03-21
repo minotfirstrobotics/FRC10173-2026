@@ -4,8 +4,8 @@ from commands import CMD_Shoot
 
 from subsystems import (
     SS_FeederTalon_Power,
+    SS_ShooterKraken,
     SS_TurretTalon_Trapezoidal,
-    SS_ShooterNEO,
     SS_CameraPose,
     SS_SwerveDrive,
     SS_IntakeSIMM,
@@ -22,7 +22,7 @@ class SS_ControllerSetInputs(commands2.Subsystem):
         operator: CommandXboxController,
         feeder: SS_FeederTalon_Power,
         turret: SS_TurretTalon_Trapezoidal,
-        shooter: SS_ShooterNEO,
+        shooter: SS_ShooterKraken,
         camera: SS_CameraPose,
         swerve: SS_SwerveDrive,
         intake: SS_IntakeSIMM,

@@ -1,6 +1,6 @@
 from commands2 import SequentialCommandGroup, WaitCommand
 from subsystems.SS_FeederTalon_Power import SS_FeederTalon_Power
-from subsystems.SS_ShooterNEO import SS_ShooterNEO, SpinUpAndWait_CommDef
+from subsystems.SS_ShooterKraken import SS_ShooterNEO, SpinUpAndWait_CommDef
 
 class SEQ_Shoot(SequentialCommandGroup):
     """

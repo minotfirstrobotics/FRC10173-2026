@@ -5,7 +5,7 @@ from phoenix6 import HootAutoReplay
 from pathplannerlib.auto import AutoBuilder, NamedCommands
 from commands2.button import CommandXboxController
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
-from subsystems.SS_ShooterNEO import SS_ShooterNEO
+from subsystems.SS_ShooterKraken import SS_ShooterKraken
 from subsystems.SS_TurretTalon_Trapezoidal import SS_TurretTalon
 from subsystems.SS_FeederTalon_Power import SS_FeederTalon_Power
 from subsystems.SS_IntakeSIMM import SS_IntakeSIMM
@@ -19,7 +19,7 @@ class RobotContainer:
     def __init__(self) -> None:
         self.driver = CommandXboxController(0)
         # self.operator = CommandXboxController(1)
-        self.ss_shooter_spark = SS_ShooterNEO(3, self.driver)
+        self.ss_shooter_kraken = SS_ShooterKraken(3, self.driver)
         self.ss_turret_talon = SS_TurretTalon(1, self.driver)
         self.ss_feeder_talon = SS_FeederTalon_Power(0, self.driver)
         self.ss_intake_spark = SS_IntakeSIMM(4, self.driver)
@@ -34,12 +34,12 @@ class RobotContainer:
         # self.configure_driver_inputs()
         # self.configure_operator_inputs()
 
-        # ss_shoot_command = CMD_ComboShoot(self.ss_shooter_spark, self.ss_feeder_talon, self.joystick)
+        # ss_shoot_command = CMD_ComboShoot(self.ss_shooter_kraken, self.ss_feeder_talon, self.joystick)
         # self.joystick.rightBumper().onTrue(ss_shoot_command)
 
-        # self.shoot_balls_sequence = SEQ_Shoot(self.ss_shooter_spark, self.ss_feeder_talon)
+        # self.shoot_balls_sequence = SEQ_Shoot(self.ss_shooter_kraken, self.ss_feeder_talon)
         # self.joystick.rightBumper().onTrue(self.shoot_balls_sequence)
-        # self.joystick.rightBumper().onFalse(self.ss_shooter_spark.stop_motor_command())
+        # self.joystick.rightBumper().onFalse(self.ss_shooter_kraken.stop_motor_command())
         # self.joystick.rightBumper().onFalse(self.ss_feeder_talon.stop_motor_command())
 
 
