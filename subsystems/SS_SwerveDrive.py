@@ -74,20 +74,6 @@ class SS_SwerveDrive(commands2.Subsystem):
         )
 
     def controller_bindings(self) -> None:
-    # Guard controller bindings when no joystick is attached. Creating
-    # command bindings when no HID is present causes repeated HAL/WPILib
-    # warnings ("Joystick Button 1 missing (max 0)"). In simulation it is
-    # common to run without a controller connected, so skip bindings when
-    # there are no joysticks detected.
-        try:
-            if DriverStation.getJoystickCount() == 0:
-                # No joystick plugged in; skip creating bindings.
-                return
-        except Exception:
-            # If the DriverStation API isn't available for some reason, be
-            # defensive and proceed to avoid breaking startup.
-            pass
-
         self._joystick.a().onTrue(self.heading_is_auto_controlled_command())
         self._joystick.a().onFalse(self.heading_is_driver_controlled_command())
         # self._joystick.pov(0).whileTrue(self.pov_move_command(1, 0))
@@ -95,7 +81,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         # self._joystick.pov(90).whileTrue(self.pov_move_command(0, 1))
         # self._joystick.pov(270).whileTrue(self.pov_move_command(0, -1))
         (self._joystick.back() & self._joystick.b()).whileTrue(self.brake_command())
-        (self._joystick.back() & self._joystick.start()).onTrue(self.reset_field_oriented_perspective())
+        (self._joystick.back() & self._joystick.start()).onTrue(self.reset_field_oriented_perspective_command())
     
     def periodic(self) -> None:
         pose = self.drivetrain.sample_pose_at(Timer.getFPGATimestamp())
@@ -126,12 +112,11 @@ class SS_SwerveDrive(commands2.Subsystem):
         return self._latest_pose
 
     def reset_pose(self, pose: Pose2d) -> None:
-        self.drivetrain.reset_odometry(pose)
+        self.drivetrain.reset_pose(pose)
         self._latest_pose = pose
 
     def get_robot_relative_speeds(self) -> ChassisSpeeds:
         """Get the current robot-relative chassis speeds.
-
         The underlying drivetrain may not yet have a valid state (especially
         during early init or in simulation). Return a zero ChassisSpeeds if the
         state is unavailable to avoid AttributeError.
@@ -164,18 +149,15 @@ class SS_SwerveDrive(commands2.Subsystem):
                 self._drive_field_centered
                     .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
                     .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
-                    .with_rotational_rate(-self._joystick.getRightX() * abs(self._joystick.getRightX() * self._max_angular_rate))
-            ))
-        )
+                    .with_rotational_rate(-self._joystick.getRightX() * abs(self._joystick.getRightX() * self._max_angular_rate)) )))
 
     def heading_is_auto_controlled(self, vx_requested, vy_requested, vrotation_requested) -> None:
-        self.drivetrain.runOnce(
+        self.drivetrain.setDefaultCommand(
             self.drivetrain.apply_request(lambda: (
                 self._drive_field_centered
                     .with_velocity_x(vx_requested * self._max_speed)
                     .with_velocity_y(vy_requested * self._max_speed)
-                    .with_rotational_rate(vrotation_requested * self._max_angular_rate))
-            ))
+                    .with_rotational_rate(vrotation_requested * self._max_angular_rate)) ))
 
     def heading_is_driver_padlocked(self) -> None:
         self.drivetrain.setDefaultCommand(
@@ -184,39 +166,29 @@ class SS_SwerveDrive(commands2.Subsystem):
                     .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
                     .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
                     .with_target_direction(Rotation2d(0, 1))      # Desired Heading (e.g., (0,1) = 90 deg)
-                    .with_heading_pid(1, 0, 0)              # PID for heading control
-            ))
-        )
+                    .with_heading_pid(1, 0, 0) ))  )             # PID for heading control
 
     def heading_is_auto_padlocked(self, vx_requested, vy_requested, x_vector, y_vector) -> None:
-        self.drivetrain.runOnce(
+        self.drivetrain.setDefaultCommand(
             self.drivetrain.apply_request(lambda: (
                 self._drive_facing_direction
                     .with_velocity_x(vx_requested * self._max_speed)
                     .with_velocity_y(vy_requested * self._max_speed)
                     .with_target_direction(Rotation2d(x_vector, y_vector))      # Desired Heading (e.g., (0,1) = 90 deg)
-                    .with_heading_pid(1, 0, 0)              # PID for heading control
-            ))
-        )
-
+                    .with_heading_pid(1, 0, 0) ))  )             # PID for heading control
+            
     def pov_move(self, direction_x, direction_y) -> None:
-        self.drivetrain.apply_request(
-            lambda: self._drive_robot_centered
+        self.drivetrain.apply_request(lambda: (
+            self._drive_robot_centered
                 .with_velocity_x(direction_x * self._pov_speed)
                 .with_velocity_y(direction_y * self._pov_speed)
+            )
         )
 
     def brake(self) -> None:
         self.drivetrain.apply_request(lambda: swerve.requests.SwerveDriveBrake())
 
     def PIDF_sysID_tuning_bindings(self) -> None:
-    # As above, skip sysid tuning bindings if no joystick is present.
-        try:
-            if DriverStation.getJoystickCount() == 0:
-                return
-        except Exception:
-            pass
-
         (self._joystick.start() & self._joystick.leftBumper()).onTrue(SignalLogger.start)
         (self._joystick.start() & self._joystick.rightBumper()).onTrue(SignalLogger.stop)
 
@@ -240,22 +212,22 @@ class SS_SwerveDrive(commands2.Subsystem):
     def heading_is_driver_controlled_command(self) -> commands2.Command:
         return commands2.cmd.runOnce(self.heading_is_driver_controlled)
     
-    def heading_is_auto_controlled_command(self, vx_requested=0, vy_requested=0, vrotation_requested=0) -> commands2.Command:
+    def heading_is_auto_controlled_command(self, vx_requested=0.0, vy_requested=0.0, vrotation_requested=0.0) -> commands2.Command:
         return commands2.cmd.runOnce(lambda: self.heading_is_auto_controlled(vx_requested, vy_requested, vrotation_requested))
 
-    def heading_is_driver_padlocked(self) -> commands2.Command:
+    def heading_is_driver_padlocked_command(self) -> commands2.Command:
         return commands2.cmd.runOnce(self.heading_is_driver_padlocked)
     
-    def heading_is_auto_padlocked_command(self, vx_requested=0, vy_requested=0, x_vector=0, y_vector=.2) -> commands2.Command:
+    def heading_is_auto_padlocked_command(self, vx_requested=0.0, vy_requested=0.0, x_vector=0.0, y_vector=0.2) -> commands2.Command:
         return commands2.cmd.runOnce(lambda: self.heading_is_auto_padlocked(vx_requested, vy_requested, x_vector, y_vector))
     
-    def pov_move_command(self, direction_x, direction_y) -> commands2.Command:
+    def pov_move_command(self, direction_x=0.0, direction_y=0.0) -> commands2.Command:
         return commands2.cmd.runOnce(lambda: self.pov_move(direction_x, direction_y))
 
     def brake_command(self) -> commands2.Command:
         return commands2.cmd.runOnce(self.brake)
     
-    def reset_field_oriented_perspective(self) -> commands2.Command:
+    def reset_field_oriented_perspective_command(self) -> commands2.Command:
         # Resets the rotation of the robot pose to 0 from the ForwardPerspectiveValue.OPERATOR_PERSPECTIVE perspective. 
         # This makes the current orientation of the robot X forward for field-centric maneuvers.
         return commands2.cmd.runOnce(lambda: self.drivetrain.seed_field_centric())

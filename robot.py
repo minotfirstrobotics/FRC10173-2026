@@ -1,24 +1,24 @@
 import commands2
 import wpilib
-from wpilib import SmartDashboard, Timer
+from wpilib import SmartDashboard, Timer, DriverStation
 from wpimath.geometry import Pose2d, Rotation2d
 from phoenix6 import HootAutoReplay
 from pathplannerlib.auto import AutoBuilder, NamedCommands
 from commands2.button import CommandXboxController
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
 from subsystems.SS_ShooterKraken import SS_ShooterKraken
-from examples.SS_TurretTalon_Trapezoidal import SS_TurretTalon
 from examples.SS_FeederTalon_Power import SS_FeederTalon_Power
 from examples.SS_IntakeSIMM import SS_IntakeSIMM
 from subsystems.SS_CANdleLight import SS_CANdleLight
 from subsystems.SS_CameraPose import SS_CameraPose
 from commands.CMD_ComboShoot import CMD_ComboShoot
-from commands.SEQ_sequences import SEQ_Shoot
+from commands.SEQ_sequences import SEQ_Shoot, SEQ_DeployIntake
 
 
 class RobotContainer:
     def __init__(self) -> None:
         self.driver = CommandXboxController(0)
+        DriverStation.silenceJoystickConnectionWarning(True)
         # self.operator = CommandXboxController(1)
         self.ss_shooter_kraken = SS_ShooterKraken(3, self.driver)
         self.ss_feeder_talon = SS_FeederTalon_Power(0, self.driver)
@@ -28,33 +28,28 @@ class RobotContainer:
         self.ss_swerve_drive = SS_SwerveDrive(self.driver)
         self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
 
-        
-
         # Build auto chooser from PathPlanner auto.auto files in deploy folder
         self.auto_chooser = AutoBuilder.buildAutoChooser("Tests")
         SmartDashboard.putData("Autonomous Routine", self.auto_chooser)
+
         # self.configure_driver_inputs()
         # self.configure_operator_inputs()
+        # self.configure_inputs_for_testing_commands()
 
-        # ss_shoot_command = CMD_ComboShoot(self.ss_shooter_kraken, self.ss_feeder_talon, self.joystick)
-        # self.joystick.rightBumper().onTrue(ss_shoot_command)
-
-        # self.shoot_balls_sequence = SEQ_Shoot(self.ss_shooter_kraken, self.ss_feeder_talon)
-        # self.joystick.rightBumper().onTrue(self.shoot_balls_sequence)
-        # self.joystick.rightBumper().onFalse(self.ss_shooter_kraken.stop_motor_command())
-        # self.joystick.rightBumper().onFalse(self.ss_feeder_talon.stop_motor_command())
-        
-
+    '''
     def configure_driver_inputs(self):
-        self.driver.a().whileTrue(self.run_intake_command())
-        self.driver.b().whileTrue(self.run_outtake_command())
-        self.driver.y().whileTrue(self.run_vision_align_command())
-        self.driver.x().whileTrue(self.run_shooter_spin_command())
-        self.driver.leftBumper().whileTrue(self.swerve.field_oriented_command())
-        self.driver.leftTrigger(threshold=0.2).whileTrue(self.swerve.precision_mode_command())
-        self.driver.rightBumper().whileTrue(self.swerve.robot_oriented_command())
-        self.driver.rightTrigger(threshold=0.2).whileTrue(self.swerve.boost_mode_command())
-
+        self.driver.rightBumper().whileTrue(self.ss_shooter_kraken.run_setpoint_velocity_command())
+        self.driver.a().whileTrue(self.ss_intake_spark.run_intake_command())
+        self.driver.b().whileTrue(self.ss_feeder_talon.run_outtake_command())
+        self.driver.y().whileTrue(self.ss_camera_pose.run_vision_align_command())
+        self.driver.x().whileTrue(self.ss_shooter_kraken.run_shooter_spin_command())
+        self.driver.leftBumper().whileTrue(self.ss_swerve_drive.field_oriented_command())
+        self.driver.leftTrigger(threshold=0.2).whileTrue(self.ss_swerve_drive.precision_mode_command())
+        self.driver.rightBumper().whileTrue(self.ss_swerve_drive.robot_oriented_command())
+        self.driver.rightTrigger(threshold=0.2).whileTrue(self.ss_swerve_drive.boost_mode_command())
+    '''
+        
+    '''
     def configure_operator_inputs(self):
         self.operator.y().whileTrue(self.run_vision_align_command())
         self.operator.x().whileTrue(self.run_shooter_spin_command())
@@ -66,7 +61,24 @@ class RobotContainer:
         self.operator.povDown().whileTrue(self.swerve.normal_mode_command())
         self.operator.povLeft().whileTrue(self.swerve.fast_mode_command())
         self.operator.povRight().whileTrue(self.swerve.turbo_mode_command())
+    '''
 
+    def configure_inputs_for_testing_commands(self):
+        ''' 
+        This is where you can bind buttons to commands for testing purposes, 
+        without affecting your main driver/operator bindings. 
+        '''
+        # ss_shoot_command = CMD_ComboShoot(self.ss_shooter_kraken, self.ss_feeder_talon, self.driver)
+        # self.driver.rightBumper().onTrue(ss_shoot_command)
+        # self.shoot_balls_sequence = SEQ_Shoot(self.ss_shooter_kraken, self.ss_feeder_talon)
+        # self.driver.rightBumper().onTrue(self.shoot_balls_sequence)
+        # self.driver.rightBumper().onFalse(self.ss_shooter_kraken.stop_motor_command())
+        # self.driver.rightBumper().onFalse(self.ss_feeder_talon.stop_motor_command())
+        # self.driver.x().onFalse(self.spin_up_and_wait_command())
+
+    def getAutonomousCommand(self) -> commands2.Command:
+        """Get the selected autonomous command from the chooser."""
+        return self.auto_chooser.getSelected()
 
 
 class MyRobot(commands2.TimedCommandRobot):
@@ -85,7 +97,6 @@ class MyRobot(commands2.TimedCommandRobot):
         self.autonomousCommand = None
         self.container = RobotContainer()
         self.localMatchTimer = Timer()
-                
         # self._time_and_driver_replay = (HootAutoReplay().with_timestamp_replay().with_driver_replay() )
 
     def robotPeriodic(self) -> None:
@@ -101,27 +112,21 @@ class MyRobot(commands2.TimedCommandRobot):
         and running subsystem periodic() methods.  This must be called from the robot's periodic
         block in order for anything in the Command-based framework to work.
         """
-        commands2.CommandScheduler.getInstance().run()
         # self._time_and_driver_replay.update() # using HootAutoReplay to log and replay timestamp and driver data
- 
-        SmartDashboard.putNumber("Match Time", Timer.getMatchTime())
-        ds_match_time = Timer.getMatchTime()
-        SmartDashboard.putNumber("Match Time (DS)", ds_match_time)
-        # fallback when DS time unavailable
-        if ds_match_time < 0:
-            SmartDashboard.putNumber("Match Time", self.localMatchTimer.get())
-        else:
-            SmartDashboard.putNumber("Match Time", ds_match_time)
+        commands2.CommandScheduler.getInstance().run()
+        match_time_from_driver_station = Timer.getMatchTime()
+        SmartDashboard.putNumber("Match Time", self.localMatchTimer.get() if match_time_from_driver_station < 0 else match_time_from_driver_station)
 
 
     def teleopInit(self) -> None:
-        """This makes sure that the autonomous stops running when
+        """
+        This makes sure that the autonomous stops running when
         teleop starts running. If you want the autonomous to
         continue until interrupted by another command, remove
-        this line or comment it out. """
+        this line or comment it out. 
+        """
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
-        # if self.autonomousCommand: self.autonomousCommand.cancel()
 
     def teleopPeriodic(self) -> None:
         """This function is called periodically during operator control"""
@@ -136,18 +141,12 @@ class MyRobot(commands2.TimedCommandRobot):
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
 
-        # Klingbeil's old manual autonomous command scheduling (before PathPlanner auto.auto files and AutoBuilder)
-        # auto = SEQ_DeployIntake(self.container.ss_swerve_drive, self.container.ss_shooter_spark, self.container.ss_feeder_talon, self.container.ss_intake_spark)
-        # auto.schedule()
-
-
         # Get the selection from the chooser. Some chooser implementations
         # may return a callable that constructs a command, or return an
         # object that already is a command. Be defensive and handle both.
         self.autonomousCommand = self.container.getAutonomousCommand()
 
-        # If the chooser returned a factory (callable), call it to get the
-        # actual command instance.
+        # If the chooser returned a factory (callable), call it to get the actual command instance.
         if callable(self.autonomousCommand):
             try:
                 self.autonomousCommand = self.autonomousCommand()
@@ -167,6 +166,10 @@ class MyRobot(commands2.TimedCommandRobot):
             # Helpful debug information when something unexpected is returned
             if self.autonomousCommand is not None:
                 print(f"Autonomous selection is not scheduleable: {type(self.autonomousCommand)!r} -> {self.autonomousCommand!r}")
+
+        # Klingbeil's old manual autonomous command scheduling (before PathPlanner auto.auto files and AutoBuilder)
+        # auto = SEQ_DeployIntake(self.container.ss_swerve_drive, self.container.ss_shooter_spark, self.container.ss_feeder_talon, self.container.ss_intake_spark)
+        # auto.schedule()
 
     def autonomousPeriodic(self) -> None:
         """This function is called periodically during autonomous"""

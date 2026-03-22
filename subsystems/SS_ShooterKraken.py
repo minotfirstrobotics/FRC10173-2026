@@ -43,8 +43,6 @@ class SS_ShooterKraken(commands2.Subsystem):
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Shooter Setpoint Velocity", self.setpoint_velocity)
 
         self._joystick = joystick
-        self._joystick.rightBumper().whileTrue(self.run_setpoint_velocity_command())
-        # self._joystick.x().onFalse(self.spin_up_and_wait_command())
 
         NamedCommands.registerCommand("Shooter Spin-up to Setpoint", self.spin_up_and_wait_command())
         NamedCommands.registerCommand("Shooter Stop", self.stop_motor_command())
@@ -134,7 +132,7 @@ class SpinUpAndWait_CommDef(commands2.Command):
     def end(self, interrupted):
         # Keep spinning even if interrupted, since this command is just for waiting until up to speed.
         if interrupted:
-            wpilib.reportWarning("SpinUpAndWait_Command was interrupted before reaching target velocity!", stacktrace=False)
+            wpilib.reportWarning("SpinUpAndWait_Command was interrupted before reaching target velocity!", printTrace=False)
         else:
-            wpilib.reportWarning(f"SpinUpAndWait_Command reached target velocity: {self.timer.get():.1f} seconds.", stacktrace=False)
+            wpilib.reportWarning(f"SpinUpAndWait_Command reached target velocity: {self.timer.get():.1f} seconds.", printTrace=False)
         
