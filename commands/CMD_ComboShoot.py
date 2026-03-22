@@ -1,7 +1,7 @@
 import wpilib
 import commands2
 from subsystems import SS_ShooterKraken
-from subsystems import SS_FeederTalon_Power
+from examples import SS_FeederTalon_Power
 from commands2.button import CommandXboxController
 
 

@@ -1,9 +1,9 @@
 from commands2 import SequentialCommandGroup, WaitCommand
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
-from subsystems.SS_ShooterNEO import SS_ShooterNEO, SpinUpAndWait_CommDef
-from subsystems.SS_TurretTalon_Trapezoidal import SS_TurretTalon
-from subsystems.SS_FeederTalon_Power import SS_FeederTalon_Power
-from subsystems.SS_IntakeSIMM import SS_IntakeSIMM
+from examples.SS_ShooterNEO import SS_ShooterNEO, SpinUpAndWait_CommDef
+from examples.SS_TurretTalon_Trapezoidal import SS_TurretTalon
+from examples.SS_FeederTalon_Power import SS_FeederTalon_Power
+from examples.SS_IntakeSIMM import SS_IntakeSIMM
 from subsystems.SS_CANdleLight import SS_CANdleLight
 from subsystems.SS_CameraPose import SS_CameraPose
 

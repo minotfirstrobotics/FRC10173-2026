@@ -7,9 +7,9 @@ from pathplannerlib.auto import AutoBuilder, NamedCommands
 from commands2.button import CommandXboxController
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
 from subsystems.SS_ShooterKraken import SS_ShooterKraken
-from subsystems.SS_TurretTalon_Trapezoidal import SS_TurretTalon
-from subsystems.SS_FeederTalon_Power import SS_FeederTalon_Power
-from subsystems.SS_IntakeSIMM import SS_IntakeSIMM
+from examples.SS_TurretTalon_Trapezoidal import SS_TurretTalon
+from examples.SS_FeederTalon_Power import SS_FeederTalon_Power
+from examples.SS_IntakeSIMM import SS_IntakeSIMM
 from subsystems.SS_CANdleLight import SS_CANdleLight
 from subsystems.SS_CameraPose import SS_CameraPose
 from commands.CMD_ComboShoot import CMD_ComboShoot
@@ -21,7 +21,6 @@ class RobotContainer:
         self.driver = CommandXboxController(0)
         # self.operator = CommandXboxController(1)
         self.ss_shooter_kraken = SS_ShooterKraken(3, self.driver)
-        self.ss_turret_talon = SS_TurretTalon(1, self.driver)
         self.ss_feeder_talon = SS_FeederTalon_Power(0, self.driver)
         self.ss_intake_spark = SS_IntakeSIMM(4, self.driver)
         #self.ss_candle_light_rear = SS_CANdleLight(2)
