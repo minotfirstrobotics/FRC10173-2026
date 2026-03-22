@@ -2,6 +2,7 @@ import commands2
 import wpilib
 from wpimath.units import rotationsToRadians
 from phoenix6 import swerve, SignalLogger
+from wpimath.kinematics import ChassisSpeeds
 from telemetry import Telemetry
 from generated.tuner_constants_2026_GF import TunerConstants
 from wpilib import DriverStation, Timer, SmartDashboard
@@ -58,21 +59,35 @@ class SS_SwerveDrive(commands2.Subsystem):
         )
         self.heading_is_driver_controlled()
 
-        # AutoBuilder.configure(
-        #     pose_supplier=self.get_pose,
-        #     reset_pose=self.reset_pose,
-        #     robot_relative_speeds_supplier=self.get_robot_relative_speeds,
-        #     robot_relative_output=self.drive_robot_relative,
-        #     path_following_controller=PPHolonomicDriveController(
-        #         PIDConstants(0.0, 0.0, 0.0),   # Translation PID (tune these)
-        #         PIDConstants(0.0, 0.0, 0.0),   # Rotation PID (tune these)
-        #     ),
-        #     robot_config=RobotConfig.fromGUISettings(),
-        #     should_flip_path=lambda: DriverStation.getAlliance() == DriverStation.Alliance.kRed,
-        #     drive_subsystem=self
-        # )
+        AutoBuilder.configure(
+            pose_supplier=self.get_pose,
+            reset_pose=self.reset_pose,
+            robot_relative_speeds_supplier=self.get_robot_relative_speeds,
+            output=self.drive_robot_relative,
+            controller=PPHolonomicDriveController(
+                PIDConstants(5.0, 0.0, 0.0),  # Translation PID (tune these values)
+                PIDConstants(5.0, 0.0, 0.0),  # Rotation PID (tune these values)
+            ),
+            robot_config=RobotConfig.fromGUISettings(),
+            should_flip_path=lambda: DriverStation.getAlliance() == DriverStation.Alliance.kRed,
+            drive_subsystem=self
+        )
 
     def controller_bindings(self) -> None:
+    # Guard controller bindings when no joystick is attached. Creating
+    # command bindings when no HID is present causes repeated HAL/WPILib
+    # warnings ("Joystick Button 1 missing (max 0)"). In simulation it is
+    # common to run without a controller connected, so skip bindings when
+    # there are no joysticks detected.
+        try:
+            if DriverStation.getJoystickCount() == 0:
+                # No joystick plugged in; skip creating bindings.
+                return
+        except Exception:
+            # If the DriverStation API isn't available for some reason, be
+            # defensive and proceed to avoid breaking startup.
+            pass
+
         self._joystick.a().onTrue(self.heading_is_auto_controlled_command())
         self._joystick.a().onFalse(self.heading_is_driver_controlled_command())
         # self._joystick.pov(0).whileTrue(self.pov_move_command(1, 0))
@@ -81,7 +96,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         # self._joystick.pov(270).whileTrue(self.pov_move_command(0, -1))
         (self._joystick.back() & self._joystick.b()).whileTrue(self.brake_command())
         (self._joystick.back() & self._joystick.start()).onTrue(self.reset_field_oriented_perspective())
-
+    
     def periodic(self) -> None:
         pose = self.drivetrain.sample_pose_at(Timer.getFPGATimestamp())
         if pose is not None:
@@ -103,10 +118,42 @@ class SS_SwerveDrive(commands2.Subsystem):
         SmartDashboard.putNumber("Swerve/Swerve Pose Y (meters)", pose_translation.Y())
         SmartDashboard.putNumber("Swerve/Swerve Rotation (deg)", pose_rotation.degrees())
         self.field.setRobotPose(self._latest_pose)
-        # Optional: Display other objects (e.g., game pieces)
-        # self.field.getObject("note1").setPose(Pose2d(1, 2, Rotation2d(0)))
 
+    # -------------------------
+    # is the pose for pathplannerlib
+    # -------------------------
+    def get_pose(self) -> Pose2d:
+        return self._latest_pose
 
+    def reset_pose(self, pose: Pose2d) -> None:
+        self.drivetrain.reset_odometry(pose)
+        self._latest_pose = pose
+
+    def get_robot_relative_speeds(self) -> ChassisSpeeds:
+        """Get the current robot-relative chassis speeds.
+
+        The underlying drivetrain may not yet have a valid state (especially
+        during early init or in simulation). Return a zero ChassisSpeeds if the
+        state is unavailable to avoid AttributeError.
+        """
+        state = None
+        try:
+            state = self.drivetrain.get_state()
+        except Exception:
+            # Be defensive: if getting state raises, treat as no motion.
+            state = None
+
+        if state is None:
+            return ChassisSpeeds(0.0, 0.0, 0.0)
+
+        # Some drivetrain implementations may not include 'speeds' attribute
+        # (unlikely), so be defensive.
+        return getattr(state, "speeds", ChassisSpeeds(0.0, 0.0, 0.0))
+
+    def drive_robot_relative(self, robot_relative_speeds: ChassisSpeeds, drive_feedforwards=None) -> None:
+        self.drivetrain.set_control(
+            swerve.requests.ApplyRobotSpeeds().with_speeds(robot_relative_speeds)
+        )
 
     # -------------------------
     # Motor movement functions
@@ -163,6 +210,13 @@ class SS_SwerveDrive(commands2.Subsystem):
         self.drivetrain.apply_request(lambda: swerve.requests.SwerveDriveBrake())
 
     def PIDF_sysID_tuning_bindings(self) -> None:
+    # As above, skip sysid tuning bindings if no joystick is present.
+        try:
+            if DriverStation.getJoystickCount() == 0:
+                return
+        except Exception:
+            pass
+
         (self._joystick.start() & self._joystick.leftBumper()).onTrue(SignalLogger.start)
         (self._joystick.start() & self._joystick.rightBumper()).onTrue(SignalLogger.stop)
 

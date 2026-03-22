@@ -1,0 +1,75 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 10.803555555561577,
+        "y": 7.444336661911555
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 10.075670381921892,
+        "y": 7.4324304457330905
+      },
+      "isLocked": true,
+      "linkedName": "End of red jerk"
+    },
+    {
+      "anchor": {
+        "x": 8.580527817403707,
+        "y": 7.444336661911555
+      },
+      "prevControl": {
+        "x": 8.808606572023233,
+        "y": 7.781117341161604
+      },
+      "nextControl": {
+        "x": 8.39994047917079,
+        "y": 7.177681722763472
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 8.451141226818828,
+        "y": 4.973052781740371
+      },
+      "prevControl": {
+        "x": 8.515395408770344,
+        "y": 5.214654520355269
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "end of eat red"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1,
+      "rotationDegrees": -66.19405648154223
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -71.56505117707796
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 179.8063007310811
+  },
+  "useDefaultConstraints": true
+}

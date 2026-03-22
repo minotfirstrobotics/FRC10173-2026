@@ -31,9 +31,9 @@ class RobotContainer:
 
         
 
-        # self.auto_chooser = AutoBuilder.buildAutoChooser("Autonomous Mode")
-        # SmartDashboard.putData("Default Autonomous", self.auto_chooser)
-
+        # Build auto chooser from PathPlanner auto.auto files in deploy folder
+        self.auto_chooser = AutoBuilder.buildAutoChooser("Tests")
+        SmartDashboard.putData("Autonomous Routine", self.auto_chooser)
         # self.configure_driver_inputs()
         # self.configure_operator_inputs()
 
@@ -44,7 +44,7 @@ class RobotContainer:
         # self.joystick.rightBumper().onTrue(self.shoot_balls_sequence)
         # self.joystick.rightBumper().onFalse(self.ss_shooter_kraken.stop_motor_command())
         # self.joystick.rightBumper().onFalse(self.ss_feeder_talon.stop_motor_command())
-
+        
 
     def configure_driver_inputs(self):
         self.driver.a().whileTrue(self.run_intake_command())
@@ -88,6 +88,74 @@ class MyRobot(commands2.TimedCommandRobot):
         self.localMatchTimer = Timer()
                 
         # self._time_and_driver_replay = (HootAutoReplay().with_timestamp_replay().with_driver_replay() )
+
+    def autonomousInit(self) -> None:
+        """
+        This function is run once when the robot enters autonomous mode.
+        Gets the selected autonomous command from the chooser and schedules it.
+        """
+        self.localMatchTimer.reset()
+        self.localMatchTimer.start()
+        # Get the selection from the chooser. Some chooser implementations
+        # may return a callable that constructs a command, or return an
+        # object that already is a command. Be defensive and handle both.
+        self.autonomousCommand = self.container.getAutonomousCommand()
+
+        # If the chooser returned a factory (callable), call it to get the
+        # actual command instance.
+        if callable(self.autonomousCommand):
+            try:
+                self.autonomousCommand = self.autonomousCommand()
+            except Exception as e:
+                # If the factory raises, log and clear autonomousCommand.
+                print(f"Error creating autonomous command from chooser: {e}")
+                self.autonomousCommand = None
+
+        # If the selected object has a schedule() method, schedule it.
+        if self.autonomousCommand is not None and hasattr(self.autonomousCommand, "schedule"):
+            try:
+                self.autonomousCommand.schedule()
+            except Exception as e:
+                print(f"Failed to schedule autonomous command: {e}")
+                self.autonomousCommand = None
+        else:
+            # Helpful debug information when something unexpected is returned
+            if self.autonomousCommand is not None:
+                print(f"Autonomous selection is not scheduleable: {type(self.autonomousCommand)!r} -> {self.autonomousCommand!r}")
+
+    def autonomousInit(self) -> None:
+        """
+        This function is run once when the robot enters autonomous mode.
+        Gets the selected autonomous command from the chooser and schedules it.
+        """
+        self.localMatchTimer.reset()
+        self.localMatchTimer.start()
+        # Get the selection from the chooser. Some chooser implementations
+        # may return a callable that constructs a command, or return an
+        # object that already is a command. Be defensive and handle both.
+        self.autonomousCommand = self.container.getAutonomousCommand()
+
+        # If the chooser returned a factory (callable), call it to get the
+        # actual command instance.
+        if callable(self.autonomousCommand):
+            try:
+                self.autonomousCommand = self.autonomousCommand()
+            except Exception as e:
+                # If the factory raises, log and clear autonomousCommand.
+                print(f"Error creating autonomous command from chooser: {e}")
+                self.autonomousCommand = None
+
+        # If the selected object has a schedule() method, schedule it.
+        if self.autonomousCommand is not None and hasattr(self.autonomousCommand, "schedule"):
+            try:
+                self.autonomousCommand.schedule()
+            except Exception as e:
+                print(f"Failed to schedule autonomous command: {e}")
+                self.autonomousCommand = None
+        else:
+            # Helpful debug information when something unexpected is returned
+            if self.autonomousCommand is not None:
+                print(f"Autonomous selection is not scheduleable: {type(self.autonomousCommand)!r} -> {self.autonomousCommand!r}")
 
     def robotPeriodic(self) -> None:
         """

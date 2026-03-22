@@ -3,29 +3,45 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.61828590029762,
-        "y": 6.911687651134673
+        "x": 12.77265335235378,
+        "y": 7.444336661911555
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.5974355352492555,
-        "y": 5.891651088169644
+        "x": 13.837111053808892,
+        "y": 7.444336661911555
       },
-      "isLocked": false,
-      "linkedName": "End of Ingress"
+      "isLocked": true,
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 7.61828590029762,
-        "y": 4.555137590680804
+        "x": 14.03871111111713,
+        "y": 7.444336661911555
       },
       "prevControl": {
-        "x": 7.616042829241071,
-        "y": 5.483157261439732
+        "x": 14.564911111117134,
+        "y": 7.484533333331313
+      },
+      "nextControl": {
+        "x": 13.593141789492506,
+        "y": 7.410299406844908
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 10.803555555561577,
+        "y": 7.444336661911555
+      },
+      "prevControl": {
+        "x": 11.203077777783799,
+        "y": 7.416322222220202
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "End of red jerk"
     }
   ],
   "rotationTargets": [],
@@ -42,13 +58,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -86.85830453374787
+    "rotation": 179.8063007310811
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -88.79899110252957
+    "rotation": 179.82965969833543
   },
   "useDefaultConstraints": true
 }
