@@ -1,4 +1,5 @@
 import commands2
+from commands2 import cmd
 import wpilib
 from wpilib import SmartDashboard, Timer, DriverStation
 from wpimath.geometry import Pose2d, Rotation2d
@@ -27,27 +28,27 @@ class RobotContainer:
         self.ss_swerve_drive = SS_SwerveDrive(self.gamepad)
         # self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
 
-        # Build auto chooser from PathPlanner auto.auto files in deploy folder
-        self.auto_chooser = AutoBuilder.buildAutoChooser("Tests")
+        self.auto_chooser = AutoBuilder.buildAutoChooser("simple blue auto")
         SmartDashboard.putData("Autonomous Routine", self.auto_chooser)
 
         self.configure_gamepad_bindings()
         self.configure_swerve_bindings()
 
     def configure_gamepad_bindings(self):
-        self.gamepad.rightBumper().whileTrue(self.ss_shooter.run_setpoint_velocity_command())
+        self.gamepad.rightBumper().whileTrue(cmd.startEnd(self.ss_shooter.set_velocity, 
+                                                                    self.ss_shooter.stop_motor, self.ss_shooter))
         # self.gamepad.leftBumper().whileTrue(self.ss_feeder.run_feeder_command())
         # self.gamepad.a().whileTrue(self.ss_intake.run_intake_command())
 
     def configure_swerve_bindings(self) -> None:
-        self.gamepad.x().onTrue(self.ss_swerve_drive.heading_is_driver_padlocked_command())
-        self.gamepad.x().onFalse(self.ss_swerve_drive.heading_is_driver_controlled_command())
-        # self.gamepad.pov(0).whileTrue(self.pov_move_command(1, 0))
-        # self.gamepad.pov(180).whileTrue(self.pov_move_command(-1, 0))
-        # self.gamepad.pov(90).whileTrue(self.pov_move_command(0, 1))
-        # self.gamepad.pov(270).whileTrue(self.pov_move_command(0, -1))
-        (self.gamepad.back() & self.gamepad.b()).whileTrue(self.ss_swerve_drive.brake_command())
-        (self.gamepad.back() & self.gamepad.start()).onTrue(self.ss_swerve_drive.reset_field_oriented_perspective_command())
+        self.gamepad.x().onTrue(cmd.runOnce(self.ss_swerve_drive.drive_mode_padlocked))
+        self.gamepad.x().onFalse(cmd.runOnce(self.ss_swerve_drive.drive_mode_field_centered))
+        # self.gamepad.pov(0).whileTrue(cmd.startEnd(lambda: self.ss_swerve_drive.pov_move(1, 0), lambda: self.ss_swerve_drive.pov_move(0, 0)) )
+        # self.gamepad.pov(180).whileTrue(cmd.startEnd(lambda: self.ss_swerve_drive.pov_move(-1, 0), lambda: self.ss_swerve_drive.pov_move(0, 0)) )
+        # self.gamepad.pov(90).whileTrue(cmd.startEnd(lambda: self.ss_swerve_drive.pov_move(0, 1), lambda: self.ss_swerve_drive.pov_move(0, 0)) )
+        # self.gamepad.pov(270).whileTrue(cmd.startEnd(lambda: self.ss_swerve_drive.pov_move(0, -1), lambda: self.ss_swerve_drive.pov_move(0, 0)) )
+        (self.gamepad.back() & self.gamepad.b()).whileTrue(cmd.runOnce(self.ss_swerve_drive.brake))
+        (self.gamepad.back() & self.gamepad.start()).onTrue(cmd.runOnce(self.ss_swerve_drive.reset_field_oriented_perspective))
 
     def getAutonomousCommand(self) -> commands2.Command:
         return self.auto_chooser.getSelected()
@@ -85,7 +86,6 @@ class MyRobot(commands2.TimedCommandRobot):
         block in order for anything in the Command-based framework to work.
         """
         # self._time_and_driver_replay.update() # using HootAutoReplay to log and replay timestamp and driver data
-        commands2.CommandScheduler.getInstance().run()
         match_time_from_driver_station = Timer.getMatchTime()
         SmartDashboard.putNumber("Match Time", self.localMatchTimer.get() if match_time_from_driver_station < 0 else match_time_from_driver_station)
 
@@ -113,6 +113,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
         self.autonomousCommand = self.container.getAutonomousCommand()
+        # self.autonomousCommand = SEQ_DeployIntake(self.container.ss_swerve_drive)
         if self.autonomousCommand:
             self.autonomousCommand.schedule()
 

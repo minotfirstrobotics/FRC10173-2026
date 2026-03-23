@@ -40,14 +40,13 @@ class SS_ShooterKraken(commands2.Subsystem):
         self.current_velocity = 0.0
         self.setpoint_velocity = 75 # max rpm 6000 so max rps 100
 
-        
 
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Shooter Current Velocity ", self.current_velocity)
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Shooter Setpoint Velocity", self.setpoint_velocity)
 
         # NamedCommands.registerCommand("Shooter Spin-up to Setpoint", self.spin_up_and_wait_command())
-        NamedCommands.registerCommand("Shooter Setpoint Velocity", self.run_setpoint_velocity_command())
-        NamedCommands.registerCommand("Shooter Stop", self.stop_motor_command())
+        NamedCommands.registerCommand("Shooter Setpoint Velocity", commands2.cmd.runOnce(self.set_velocity))
+        NamedCommands.registerCommand("Shooter Stop", commands2.cmd.runOnce(self.stop_motor))
 
     def _apply_pidf_to_config(self):
         self._config.slot0.k_p = self.P
@@ -92,8 +91,8 @@ class SS_ShooterKraken(commands2.Subsystem):
     # -------------------------
     # Motor movement functions
     # -------------------------
-    def set_velocity(self, target_rps: float) -> None:
-        self.motor.set_control(self.velocity_request.with_velocity(target_rps))
+    def set_velocity(self) -> None:
+        self.motor.set_control(self.velocity_request.with_velocity(self.setpoint_velocity))
 
     def stop_motor(self):
         self.motor.set(0)
@@ -101,13 +100,6 @@ class SS_ShooterKraken(commands2.Subsystem):
     # -------------------------
     # Commands
     # -------------------------
-    def run_setpoint_velocity_command(self):
-        return commands2.cmd.startEnd(lambda: self.set_velocity(self.setpoint_velocity),
-                                      lambda: self.stop_motor(), self)
-        
-    def stop_motor_command(self):
-        return commands2.cmd.runOnce(lambda: self.stop_motor(), self)
-
     def spin_up_and_wait_command(self):
         class SpinUpAndWait_CommDef(commands2.Command):
             def __init__(self, ss_shooter: SS_ShooterKraken):
@@ -119,7 +111,7 @@ class SS_ShooterKraken(commands2.Subsystem):
 
             def initialize(self):
                 self.timer.restart()
-                self.ss_shooter.run_setpoint_velocity_command() # Spin up
+                self.ss_shooter.set_velocity() # Spin up
 
             def execute(self):
                 pass # Command is running
