@@ -20,7 +20,7 @@ class RobotContainer:
     def __init__(self) -> None:
         self.gamepad = CommandXboxController(0)
         DriverStation.silenceJoystickConnectionWarning(True)
-        self.ss_shooter = SS_ShooterKraken(3)
+        # self.ss_shooter = SS_ShooterKraken(3)
         # self.ss_feeder = SS_FeederTalon_Power(0)
         # self.ss_intake = SS_IntakeSIMM(4)
         # self.ss_candle_light_rear = SS_CANdleLight(2)
@@ -35,10 +35,11 @@ class RobotContainer:
         self.configure_swerve_bindings()
 
     def configure_gamepad_bindings(self):
-        self.gamepad.rightBumper().whileTrue(cmd.startEnd(self.ss_shooter.set_velocity, 
-                                                                    self.ss_shooter.stop_motor, self.ss_shooter))
+        # self.gamepad.rightBumper().whileTrue(cmd.startEnd(self.ss_shooter.set_velocity, 
+        #                                                             self.ss_shooter.stop_motor, self.ss_shooter))
         # self.gamepad.leftBumper().whileTrue(self.ss_feeder.run_feeder_command())
         # self.gamepad.a().whileTrue(self.ss_intake.run_intake_command())
+        ...
 
     def configure_swerve_bindings(self) -> None:
         self.gamepad.x().onTrue(cmd.runOnce(self.ss_swerve_drive.drive_mode_padlocked))
