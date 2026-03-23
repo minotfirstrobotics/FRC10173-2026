@@ -105,36 +105,35 @@ class SS_ShooterKraken(commands2.Subsystem):
         return commands2.cmd.startEnd(lambda: self.set_velocity(self.setpoint_velocity),
                                       lambda: self.stop_motor(), self)
         
-
     def stop_motor_command(self):
         return commands2.cmd.runOnce(lambda: self.stop_motor(), self)
 
     def spin_up_and_wait_command(self):
-        return SpinUpAndWait_CommDef(self)
-    
+        class SpinUpAndWait_CommDef(commands2.Command):
+            def __init__(self, ss_shooter: SS_ShooterKraken):
+                super().__init__()
+                self.ss_shooter = ss_shooter
+                self.addRequirements(ss_shooter) # Ensure no other command uses ss_shooter
+                self.timer = wpilib.Timer()
+                self.velocity_tolerance = 5 # RPS tolerance for considering the shooter "up to speed"
 
-class SpinUpAndWait_CommDef(commands2.Command):
-    def __init__(self, ss_shooter: SS_ShooterKraken):
-        super().__init__()
-        self.ss_shooter = ss_shooter
-        self.addRequirements(ss_shooter) # Ensure no other command uses ss_shooter
-        self.timer = wpilib.Timer()
-        self.velocity_tolerance = 5 # RPS tolerance for considering the shooter "up to speed"
+            def initialize(self):
+                self.timer.restart()
+                self.ss_shooter.run_setpoint_velocity_command() # Spin up
 
-    def initialize(self):
-        self.timer.restart()
-        self.ss_shooter.run_setpoint_velocity_command() # Spin up
+            def execute(self):
+                pass # Command is running
 
-    def execute(self):
-        pass # Command is running
+            def isFinished(self):
+                return abs(self.ss_shooter.current_velocity-self.ss_shooter.setpoint_velocity) < self.velocity_tolerance
 
-    def isFinished(self):
-        return abs(self.ss_shooter.current_velocity-self.ss_shooter.setpoint_velocity) < self.velocity_tolerance
+            def end(self, interrupted):
+                # Keep spinning even if interrupted, since this command is just for waiting until up to speed.
+                if interrupted:
+                    wpilib.reportWarning("SpinUpAndWait_Command was interrupted before reaching target velocity!", printTrace=False)
+                else:
+                    wpilib.reportWarning(f"SpinUpAndWait_Command reached target velocity: {self.timer.get():.1f} seconds.", printTrace=False)
+                
+        spin_up_and_wait_command = SpinUpAndWait_CommDef(self)
+        return spin_up_and_wait_command
 
-    def end(self, interrupted):
-        # Keep spinning even if interrupted, since this command is just for waiting until up to speed.
-        if interrupted:
-            wpilib.reportWarning("SpinUpAndWait_Command was interrupted before reaching target velocity!", printTrace=False)
-        else:
-            wpilib.reportWarning(f"SpinUpAndWait_Command reached target velocity: {self.timer.get():.1f} seconds.", printTrace=False)
-        

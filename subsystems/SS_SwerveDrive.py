@@ -141,39 +141,20 @@ class SS_SwerveDrive(commands2.Subsystem):
                     .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
                     .with_rotational_rate(-self._joystick.getRightX() * abs(self._joystick.getRightX() * self._max_angular_rate)) )))
 
-    def heading_is_auto_controlled(self, vx_requested, vy_requested, vrotation_requested) -> None:
-        self.drivetrain.setDefaultCommand(
-            self.drivetrain.apply_request(lambda: (
-                self._drive_field_centered
-                    .with_velocity_x(vx_requested * self._max_speed)
-                    .with_velocity_y(vy_requested * self._max_speed)
-                    .with_rotational_rate(vrotation_requested * self._max_angular_rate)) ))
-
     def heading_is_driver_padlocked(self) -> None:
         self.drivetrain.setDefaultCommand(
             self.drivetrain.apply_request(lambda: (
                 self._drive_facing_direction
                     .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
                     .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
-                    .with_target_direction(Rotation2d(0, 1))      # Desired Heading (e.g., (0,1) = 90 deg)
-                    .with_heading_pid(1, 0, 0) ))  )             # PID for heading control
+                    .with_target_direction(Rotation2d(0, 1)) # Desired Heading (e.g., (0,1) = 90 deg)
+                    .with_heading_pid(1, 0, 0) ))  ) # PID for heading control
 
-    def heading_is_auto_padlocked(self, vx_requested, vy_requested, x_vector, y_vector) -> None:
-        self.drivetrain.setDefaultCommand(
-            self.drivetrain.apply_request(lambda: (
-                self._drive_facing_direction
-                    .with_velocity_x(vx_requested * self._max_speed)
-                    .with_velocity_y(vy_requested * self._max_speed)
-                    .with_target_direction(Rotation2d(x_vector, y_vector))      # Desired Heading (e.g., (0,1) = 90 deg)
-                    .with_heading_pid(1, 0, 0) ))  )             # PID for heading control
-            
     def pov_move(self, direction_x, direction_y) -> None:
         self.drivetrain.apply_request(lambda: (
             self._drive_robot_centered
                 .with_velocity_x(direction_x * self._pov_speed)
-                .with_velocity_y(direction_y * self._pov_speed)
-            )
-        )
+                .with_velocity_y(direction_y * self._pov_speed) ) )
 
     def brake(self) -> None:
         self.drivetrain.apply_request(lambda: swerve.requests.SwerveDriveBrake())
@@ -200,22 +181,25 @@ class SS_SwerveDrive(commands2.Subsystem):
     # Commands
     # -------------------------
     def heading_is_driver_controlled_command(self) -> commands2.Command:
-        return commands2.cmd.runOnce(self.heading_is_driver_controlled)
+        return commands2.cmd.runOnce(lambda: self.heading_is_driver_controlled())
     
-    def heading_is_auto_controlled_command(self, vx_requested=0.0, vy_requested=0.0, vrotation_requested=0.0) -> commands2.Command:
-        return commands2.cmd.runOnce(lambda: self.heading_is_auto_controlled(vx_requested, vy_requested, vrotation_requested))
-
     def heading_is_driver_padlocked_command(self) -> commands2.Command:
-        return commands2.cmd.runOnce(self.heading_is_driver_padlocked)
+        return commands2.cmd.runOnce(lambda: self.heading_is_driver_padlocked())
     
-    def heading_is_auto_padlocked_command(self, vx_requested=0.0, vy_requested=0.0, x_vector=0.0, y_vector=0.2) -> commands2.Command:
-        return commands2.cmd.runOnce(lambda: self.heading_is_auto_padlocked(vx_requested, vy_requested, x_vector, y_vector))
-    
+    def auto_drive_request_command(self, vx_requested, vy_requested, x_vector, y_vector) -> commands2.Command:
+        return commands2.cmd.runOnce(lambda: (
+            self.drivetrain.apply_request(lambda: (
+                self._drive_facing_direction
+                    .with_velocity_x(vx_requested * self._max_speed)
+                    .with_velocity_y(vy_requested * self._max_speed)
+                    .with_target_direction(Rotation2d(x_vector, y_vector)) # Desired Heading (e.g., (0,1) = 90 deg)
+                    .with_heading_pid(1, 0, 0) ))  ) ) # PID for heading control
+
     def pov_move_command(self, direction_x=0.0, direction_y=0.0) -> commands2.Command:
         return commands2.cmd.runOnce(lambda: self.pov_move(direction_x, direction_y))
 
     def brake_command(self) -> commands2.Command:
-        return commands2.cmd.runOnce(self.brake)
+        return commands2.cmd.runOnce(lambda: self.brake())
     
     def reset_field_oriented_perspective_command(self) -> commands2.Command:
         # Resets the rotation of the robot pose to 0 from the ForwardPerspectiveValue.OPERATOR_PERSPECTIVE perspective. 
