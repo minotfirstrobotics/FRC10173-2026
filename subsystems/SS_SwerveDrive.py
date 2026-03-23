@@ -51,7 +51,7 @@ class SS_SwerveDrive(commands2.Subsystem):
             swerve.requests.RobotCentric()
             .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE) )
 
-        self.drive_mode_field_centered()
+        # self.drive_mode_field_centered()
 
         AutoBuilder.configure(
             pose_supplier=self.get_pose,
