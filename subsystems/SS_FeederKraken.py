@@ -31,7 +31,7 @@ class SS_FeederKraken(commands2.Subsystem):
         wpilib.SmartDashboard.putNumber("PIDF/Feeder S", self.S)
         status = self.motor.configurator.apply(self._config)
         if not status.is_ok():
-            wpilib.reportError(f"Kraken config failed: {status}", False)
+            wpilib.reportError(f"Feeder config failed: {status}", False)
 
         self.velocity_request = phoenix6.controls.VelocityDutyCycle(0.0)
         self.voltage_request  = phoenix6.controls.VoltageOut(0.0)

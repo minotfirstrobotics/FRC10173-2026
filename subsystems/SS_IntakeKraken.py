@@ -1,22 +1,20 @@
 import wpilib
 import commands2
-import rev
+import phoenix6
 from pathplannerlib.auto import NamedCommands
 from commands2.button import CommandXboxController
 
 class SS_IntakeKraken(commands2.Subsystem):
     def __init__(self, motor_id: int, joystick: CommandXboxController):
         super().__init__()
-        self.motor = rev.SparkMax(deviceID=motor_id, type=rev.SparkLowLevel.MotorType.kBrushless)
-        self._config = rev.SparkMaxConfig()
-        self._config.setIdleMode(rev.SparkBaseConfig.IdleMode.kBrake)
-        self._config.smartCurrentLimit(30) # amps
+        self.motor = phoenix6.hardware.TalonFX(device_id=motor_id)
+        self._config = phoenix6.configs.TalonFXConfiguration()
+        self._config.motor_output.neutral_mode = phoenix6.signals.NeutralModeValue.COAST
+        self._config.motor_output.inverted = phoenix6.signals.InvertedValue.CLOCKWISE_POSITIVE
 
-        self.motor.configure(self._config, rev.ResetMode.kResetSafeParameters, rev.PersistMode.kPersistParameters)
-
-        # self.motor.setInverted(False)
-        self.encoder = self.motor.getEncoder()
-        self.controller = self.motor.getClosedLoopController()
+        status = self.motor.configurator.apply(self._config)
+        if not status.is_ok():
+            wpilib.reportError(f"Intake config failed: {status}", False)
 
         self.cruising_speed_factor = .62
         self.max_rpm = 7000
@@ -29,8 +27,9 @@ class SS_IntakeKraken(commands2.Subsystem):
         NamedCommands.registerCommand("Intake Stop", self.stop_motor_command())
 
     def periodic(self): # Special function called periodically by the robot
-        wpilib.SmartDashboard.putNumber("SS_Telemetry/Intake Actual Velocity", self.encoder.getVelocity())
-        wpilib.SmartDashboard.putNumber("SS_Telemetry/Intake Setpoint Velocity", self.controller.getSetpoint())
+        wpilib.SmartDashboard.putNumber("SS_Telemetry/Intake Cruise Speed", self.cruising_speed_factor())
+        # wpilib.SmartDashboard.putNumber("SS_Telemetry/Intake Actual Velocity", self._read_encoder_velocity())
+        # wpilib.SmartDashboard.putNumber("SS_Telemetry/Intake Setpoint Velocity", self._read_controller_setpoint())
 
     # -------------------------
     # Motor movement functions
