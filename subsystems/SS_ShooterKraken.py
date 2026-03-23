@@ -5,7 +5,7 @@ from pathplannerlib.auto import NamedCommands
 from commands2.button import CommandXboxController
 
 class SS_ShooterKraken(commands2.Subsystem):
-    def __init__(self, motor_id: int, joystick: CommandXboxController):
+    def __init__(self, motor_id: int):
         super().__init__()
         self.motor = phoenix6.hardware.TalonFX(device_id=motor_id)
         self._config = phoenix6.configs.TalonFXConfiguration()
@@ -39,12 +39,14 @@ class SS_ShooterKraken(commands2.Subsystem):
 
         self.current_velocity = 0.0
         self.setpoint_velocity = 75 # max rpm 6000 so max rps 100
+
+        
+
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Shooter Current Velocity ", self.current_velocity)
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Shooter Setpoint Velocity", self.setpoint_velocity)
 
-        self._joystick = joystick
-
-        NamedCommands.registerCommand("Shooter Spin-up to Setpoint", self.spin_up_and_wait_command())
+        # NamedCommands.registerCommand("Shooter Spin-up to Setpoint", self.spin_up_and_wait_command())
+        NamedCommands.registerCommand("Shooter Setpoint Velocity", self.run_setpoint_velocity_command())
         NamedCommands.registerCommand("Shooter Stop", self.stop_motor_command())
 
     def _apply_pidf_to_config(self):

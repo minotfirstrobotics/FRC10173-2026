@@ -17,67 +17,39 @@ from commands.SEQ_sequences import SEQ_Shoot, SEQ_DeployIntake
 
 class RobotContainer:
     def __init__(self) -> None:
-        self.driver = CommandXboxController(0)
+        self.gamepad = CommandXboxController(0)
         DriverStation.silenceJoystickConnectionWarning(True)
-        # self.operator = CommandXboxController(1)
-        self.ss_shooter_kraken = SS_ShooterKraken(3, self.driver)
-        self.ss_feeder_talon = SS_FeederTalon_Power(0, self.driver)
-        self.ss_intake_spark = SS_IntakeSIMM(4, self.driver)
-        #self.ss_candle_light_rear = SS_CANdleLight(2)
+        self.ss_shooter = SS_ShooterKraken(3)
+        # self.ss_feeder = SS_FeederTalon_Power(0)
+        # self.ss_intake = SS_IntakeSIMM(4)
+        # self.ss_candle_light_rear = SS_CANdleLight(2)
         self.ss_candle_light_front = SS_CANdleLight(5)
-        self.ss_swerve_drive = SS_SwerveDrive(self.driver)
-        self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
+        self.ss_swerve_drive = SS_SwerveDrive(self.gamepad)
+        # self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
 
         # Build auto chooser from PathPlanner auto.auto files in deploy folder
         self.auto_chooser = AutoBuilder.buildAutoChooser("Tests")
         SmartDashboard.putData("Autonomous Routine", self.auto_chooser)
 
-        # self.configure_driver_inputs()
-        # self.configure_operator_inputs()
-        # self.configure_inputs_for_testing_commands()
+        self.configure_gamepad_bindings()
+        self.configure_swerve_bindings()
 
-    '''
-    def configure_driver_inputs(self):
-        self.driver.rightBumper().whileTrue(self.ss_shooter_kraken.run_setpoint_velocity_command())
-        self.driver.a().whileTrue(self.ss_intake_spark.run_intake_command())
-        self.driver.b().whileTrue(self.ss_feeder_talon.run_outtake_command())
-        self.driver.y().whileTrue(self.ss_camera_pose.run_vision_align_command())
-        self.driver.x().whileTrue(self.ss_shooter_kraken.run_shooter_spin_command())
-        self.driver.leftBumper().whileTrue(self.ss_swerve_drive.field_oriented_command())
-        self.driver.leftTrigger(threshold=0.2).whileTrue(self.ss_swerve_drive.precision_mode_command())
-        self.driver.rightBumper().whileTrue(self.ss_swerve_drive.robot_oriented_command())
-        self.driver.rightTrigger(threshold=0.2).whileTrue(self.ss_swerve_drive.boost_mode_command())
-    '''
-        
-    '''
-    def configure_operator_inputs(self):
-        self.operator.y().whileTrue(self.run_vision_align_command())
-        self.operator.x().whileTrue(self.run_shooter_spin_command())
-        self.operator.leftBumper().whileTrue(self.swerve.field_oriented_command())
-        self.operator.leftTrigger(threshold=0.2).whileTrue(self.swerve.precision_mode_command())
-        self.operator.rightBumper().whileTrue(self.swerve.robot_oriented_command())
-        self.operator.rightTrigger(threshold=0.2).whileTrue(self.swerve.boost_mode_command())
-        self.operator.povUp().whileTrue(self.swerve.slow_mode_command())
-        self.operator.povDown().whileTrue(self.swerve.normal_mode_command())
-        self.operator.povLeft().whileTrue(self.swerve.fast_mode_command())
-        self.operator.povRight().whileTrue(self.swerve.turbo_mode_command())
-    '''
+    def configure_gamepad_bindings(self):
+        self.gamepad.rightBumper().whileTrue(self.ss_shooter.run_setpoint_velocity_command())
+        # self.gamepad.leftBumper().whileTrue(self.ss_feeder.run_feeder_command())
+        # self.gamepad.a().whileTrue(self.ss_intake.run_intake_command())
 
-    def configure_inputs_for_testing_commands(self):
-        ''' 
-        This is where you can bind buttons to commands for testing purposes, 
-        without affecting your main driver/operator bindings. 
-        '''
-        # ss_shoot_command = CMD_ComboShoot(self.ss_shooter_kraken, self.ss_feeder_talon, self.driver)
-        # self.driver.rightBumper().onTrue(ss_shoot_command)
-        # self.shoot_balls_sequence = SEQ_Shoot(self.ss_shooter_kraken, self.ss_feeder_talon)
-        # self.driver.rightBumper().onTrue(self.shoot_balls_sequence)
-        # self.driver.rightBumper().onFalse(self.ss_shooter_kraken.stop_motor_command())
-        # self.driver.rightBumper().onFalse(self.ss_feeder_talon.stop_motor_command())
-        # self.driver.x().onFalse(self.spin_up_and_wait_command())
+    def configure_swerve_bindings(self) -> None:
+        self.gamepad.x().onTrue(self.ss_swerve_drive.heading_is_driver_padlocked_command())
+        self.gamepad.x().onFalse(self.ss_swerve_drive.heading_is_driver_controlled_command())
+        # self.gamepad.pov(0).whileTrue(self.pov_move_command(1, 0))
+        # self.gamepad.pov(180).whileTrue(self.pov_move_command(-1, 0))
+        # self.gamepad.pov(90).whileTrue(self.pov_move_command(0, 1))
+        # self.gamepad.pov(270).whileTrue(self.pov_move_command(0, -1))
+        (self.gamepad.back() & self.gamepad.b()).whileTrue(self.ss_swerve_drive.brake_command())
+        (self.gamepad.back() & self.gamepad.start()).onTrue(self.ss_swerve_drive.reset_field_oriented_perspective_command())
 
     def getAutonomousCommand(self) -> commands2.Command:
-        """Get the selected autonomous command from the chooser."""
         return self.auto_chooser.getSelected()
 
 

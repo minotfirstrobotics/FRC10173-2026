@@ -33,7 +33,6 @@ class SS_SwerveDrive(commands2.Subsystem):
         self.field = wpilib.Field2d()
         wpilib.SmartDashboard.putData("Field", self.field)
 
-        self.controller_bindings()
         self.PIDF_sysID_tuning_bindings()
 
         idle = swerve.requests.Idle() # Determine behavior when no other commands are running. 
@@ -73,16 +72,6 @@ class SS_SwerveDrive(commands2.Subsystem):
             should_flip_path=lambda: DriverStation.getAlliance() == DriverStation.Alliance.kRed,
             drive_subsystem=self
         )
-
-    def controller_bindings(self) -> None:
-        self._joystick.a().onTrue(self.heading_is_auto_controlled_command())
-        self._joystick.a().onFalse(self.heading_is_driver_controlled_command())
-        # self._joystick.pov(0).whileTrue(self.pov_move_command(1, 0))
-        # self._joystick.pov(180).whileTrue(self.pov_move_command(-1, 0))
-        # self._joystick.pov(90).whileTrue(self.pov_move_command(0, 1))
-        # self._joystick.pov(270).whileTrue(self.pov_move_command(0, -1))
-        (self._joystick.back() & self._joystick.b()).whileTrue(self.brake_command())
-        (self._joystick.back() & self._joystick.start()).onTrue(self.reset_field_oriented_perspective_command())
     
     def periodic(self) -> None:
         pose = self.drivetrain.sample_pose_at(Timer.getFPGATimestamp())
