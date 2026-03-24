@@ -28,10 +28,10 @@ class RobotContainer:
         self.ss_swerve_drive = SS_SwerveDrive(self.gamepad)
         # self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
 
-        self.auto_chooser = AutoBuilder.buildAutoChooser("3ft")
+        self.auto_chooser = AutoBuilder.buildAutoChooser("None")
         SmartDashboard.putData("Autonomous Routine", self.auto_chooser)
 
-        self.configure_gamepad_bindings()
+        # self.configure_gamepad_bindings()
         self.configure_swerve_bindings()
 
     def configure_gamepad_bindings(self):
