@@ -57,7 +57,7 @@ class SS_SwerveDrive(commands2.Subsystem):
             robot_relative_speeds_supplier=self.get_robot_relative_speeds,
             output=self.drive_robot_relative,
             controller=PPHolonomicDriveController(
-                PIDConstants(5.0, 0.0, 0.0),  # Translation PID (tune these values)
+                PIDConstants(2.0, 0.0, 0.0),  # Translation PID (tune these values)
                 PIDConstants(5.0, 0.0, 0.0),  # Rotation PID (tune these values)
             ),
             robot_config=RobotConfig.fromGUISettings(),
