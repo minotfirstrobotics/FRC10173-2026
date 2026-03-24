@@ -1,6 +1,7 @@
 import wpilib
 import commands2
 import rev
+from warnings import deprecated
 from pathplannerlib.auto import NamedCommands
 from commands2.button import CommandXboxController
 
@@ -72,16 +73,19 @@ class SS_ShooterNEO(commands2.Subsystem):
     # -------------------------
     # Commands
     # -------------------------
+    def spin_up_and_wait_command(self):
+        spin_up_and_wait_command = SpinUpAndWait_CommDef(self)
+        return spin_up_and_wait_command
+
+    @deprecated("Use cmd.startEnd when needed instead of creating a new command for each action.")
     def run_setpoint_velocity_command(self):
         return commands2.cmd.startEnd(lambda: self.set_velocity(self.setpoint_velocity),
                                       lambda: self.stop_motor(), self)
         
-
+    @deprecated("Use cmd.runOnce when needed instead of creating a new command for each action.")
     def stop_motor_command(self):
         return commands2.cmd.runOnce(lambda: self.stop_motor(), self)
 
-    def spin_up_and_wait_command(self):
-        return SpinUpAndWait_CommDef(self)
     
 
 class SpinUpAndWait_CommDef(commands2.Command):
@@ -105,7 +109,7 @@ class SpinUpAndWait_CommDef(commands2.Command):
     def end(self, interrupted):
         # Keep spinning even if interrupted, since this command is just for waiting until up to speed.
         if interrupted:
-            wpilib.reportWarning("SpinUpAndWait_Command was interrupted before reaching target velocity!", stacktrace=False)
+            wpilib.reportWarning("SpinUpAndWait_Command was interrupted before reaching target velocity!", printTrace=False)
         else:
-            wpilib.reportWarning(f"SpinUpAndWait_Command reached target velocity: {self.timer.get():.1f} seconds.", stacktrace=False)
+            wpilib.reportWarning(f"SpinUpAndWait_Command reached target velocity: {self.timer.get():.1f} seconds.", printTrace=False)
         
