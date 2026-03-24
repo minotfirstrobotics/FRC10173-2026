@@ -28,7 +28,7 @@ class RobotContainer:
         self.ss_swerve_drive = SS_SwerveDrive(self.gamepad)
         # self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
 
-        self.auto_chooser = AutoBuilder.buildAutoChooser("simple blue auto")
+        self.auto_chooser = AutoBuilder.buildAutoChooser("3ft")
         SmartDashboard.putData("Autonomous Routine", self.auto_chooser)
 
         self.configure_gamepad_bindings()
@@ -36,7 +36,7 @@ class RobotContainer:
 
     def configure_gamepad_bindings(self):
         # self.gamepad.rightBumper().whileTrue(cmd.startEnd(self.ss_shooter.set_velocity, 
-        #                                                             self.ss_shooter.stop_motor, self.ss_shooter))
+        #                                                   self.ss_shooter.stop_motor, self.ss_shooter))
         # self.gamepad.leftBumper().whileTrue(self.ss_feeder.run_feeder_command())
         # self.gamepad.a().whileTrue(self.ss_intake.run_intake_command())
         ...
@@ -100,6 +100,8 @@ class MyRobot(commands2.TimedCommandRobot):
         """
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
+        self.container.ss_swerve_drive.drive_mode_field_centered()
+
 
     def teleopPeriodic(self) -> None:
         """This function is called periodically during operator control"""
