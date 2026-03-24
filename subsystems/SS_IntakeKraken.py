@@ -18,11 +18,11 @@ class SS_IntakeKraken(commands2.Subsystem):
         self.cruising_speed_factor = .62
         self.max_rpm = 7000
 
-        NamedCommands.registerCommand("Intake Spin", commands2.cmd.startEnd(lambda: self.set_speed(self.cruising_speed_factor), 
-                                                                            lambda: self.stop_motor(), self))
-        NamedCommands.registerCommand("Intake Reverse", commands2.cmd.startEnd(lambda: self.set_speed(-self.cruising_speed_factor), 
-                                                                               lambda: self.stop_motor(), self))
-        NamedCommands.registerCommand("Intake Stop", commands2.cmd.runOnce(lambda: self.stop_motor(), self))
+        NamedCommands.registerCommand("Intake Spin", commands2.cmd.startEnd(self.run_intake_in, 
+                                                                            self.stop_motor, self))
+        NamedCommands.registerCommand("Intake Reverse", commands2.cmd.startEnd(self.run_intake_out, 
+                                                                               self.stop_motor, self))
+        NamedCommands.registerCommand("Intake Stop", commands2.cmd.runOnce(self.stop_motor, self))
 
     def periodic(self): # Special function called periodically by the robot
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Intake Cruise Speed", self.cruising_speed_factor)
@@ -32,8 +32,11 @@ class SS_IntakeKraken(commands2.Subsystem):
     # -------------------------
     # Motor movement functions
     # -------------------------
-    def set_speed(self, speed: float) -> None:
-        self.motor.set(speed)
+    def run_intake_in(self) -> None:
+        self.motor.set(self.cruising_speed_factor)
+
+    def run_intake_out(self) -> None:
+        self.motor.set(-self.cruising_speed_factor)
 
     def stop_motor(self):
         self.motor.set(0)
