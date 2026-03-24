@@ -1,6 +1,7 @@
 import wpilib
 import commands2
 import phoenix6
+from warnings import deprecated
 from pathplannerlib.auto import NamedCommands
 from commands2.button import CommandXboxController
 
@@ -58,13 +59,17 @@ class SS_FeederTalon_Power(commands2.Subsystem):
     # -------------------------
     # Commands
     # -------------------------
+    
+
+    @deprecated("Use cmd.startEnd when scheduling this action.")
     def run_forward_command(self):
         return commands2.cmd.startEnd(lambda: self.set_speed(self.cruising_speed), 
                                       lambda: self.stop_motor(), self)
-    
+
+    @deprecated("Use cmd.startEnd when scheduling this action.")
     def run_reverse_command(self):
         return commands2.cmd.startEnd(lambda: self.set_speed(self.reverse_speed), 
                                       lambda: self.stop_motor(), self)
-
+    @deprecated("Use cmd.runOnce when scheduling this action.")
     def stop_motor_command(self):
         return commands2.cmd.runOnce(lambda: self.stop_motor(), self)
