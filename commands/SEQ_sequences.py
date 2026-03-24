@@ -1,18 +1,18 @@
-from commands2 import SequentialCommandGroup, WaitCommand
+from commands2 import SequentialCommandGroup, WaitCommand, cmd
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
 from examples.SS_ShooterNEO import SS_ShooterNEO, SpinUpAndWait_CommDef
-from examples.SS_TurretTalon_Trapezoidal import SS_TurretTalon
 from examples.SS_FeederTalon_Power import SS_FeederTalon_Power
 from examples.SS_IntakeSIMM import SS_IntakeSIMM
 from subsystems.SS_CANdleLight import SS_CANdleLight
-from subsystems.SS_CameraPose import SS_CameraPose
 
 
 def SEQ_Shoot(shooter: SS_ShooterNEO, feeder: SS_FeederTalon_Power):
     return SequentialCommandGroup(
-        shooter.spin_up_and_wait_command(),
-        shooter.run_setpoint_velocity_command(), # Ensure shooter is running at setpoint while feeder runs
-        feeder.run_forward_command().withTimeout(3.0) # Run feeder for 3 seconds after shooter is up to speed
+        cmd.runOnce(shooter.spin_up_and_wait_command),
+        cmd.runOnce(lambda: shooter.set_velocity(shooter.setpoint_velocity)), # Ensure shooter is running at setpoint while feeder runs
+        cmd.runOnce(lambda: feeder.set_speed(feeder.cruising_speed)).withTimeout(3.0), # Run feeder for 3 seconds after shooter is up to speed
+        cmd.runOnce(feeder.stop_motor).withTimeout(3.0), # Run feeder for 3 seconds after shooter is up to speed
+        cmd.runOnce(shooter.stop_motor).withTimeout(3.0), # Run feeder for 3 seconds after shooter is up to speed
     )
 
 def SEQ_DeployIntake(swerve: SS_SwerveDrive):

@@ -17,13 +17,13 @@ class CMD_ComboShoot(commands2.Command):
 
     def initialize(self):
         self.timer.restart()
-        self.ss_shooter.run_setpoint_velocity_command().schedule() # Spin up shooter
+        self.ss_shooter.set_velocity() # Spin up shooter
 
     def execute(self):
             if abs(self.ss_shooter.current_velocity - self.ss_shooter.setpoint_velocity) < self.velocity_tolerance:
-                 self.ss_feeder.run_forward_command().schedule() # Spin up feeder
+                self.ss_feeder.set_speed(self.ss_feeder.cruising_speed) # Spin up feeder
             else:
-                self.ss_feeder.stop_motor_command().schedule() # Stop feeder if shooter is not up to speed
+                self.ss_feeder.stop_motor() # Stop feeder if shooter is not up to speed
 
     def isFinished(self):
         return not self._joystick.rightBumper().getAsBoolean() # Run until the right bumper is released
