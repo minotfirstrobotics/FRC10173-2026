@@ -26,39 +26,37 @@ class RobotContainer:
         self.ss_candle_light_rear = SS_CANdleLight(2)
         self.ss_candle_light_front = SS_CANdleLight(5)
         self.ss_swerve_drive = SS_SwerveDrive(self.gamepad)
-        self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
+        # self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
 
         self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.gamepad)
         NamedCommands.registerCommand("Combo Shoot", self.cmd_combo_shoot)
         self.seq_shoot = SEQ_Shoot(self.ss_shooter, self.ss_feeder)
         NamedCommands.registerCommand("SEQ Shoot", self.seq_shoot)
-
         self.auto_chooser = AutoBuilder.buildAutoChooser("None") # must be defined after SS's and all registered commands
-
         self.configure_gamepad_bindings()
-        self.configure_swerve_bindings()
 
     def configure_gamepad_bindings(self):
+        ## Operations bindings
         self.gamepad.rightBumper().whileTrue(cmd.startEnd(self.ss_shooter.run_velocity_at_setpoint, 
                                                           self.ss_shooter.stop_motor, self.ss_shooter))
         self.gamepad.leftBumper().whileTrue(cmd.startEnd(self.ss_feeder.run_velocity_at_setpoint,
                                                          self.ss_feeder.stop_motor, self.ss_feeder))
-        self.gamepad.a().onTrue(commands2.cmd.startEnd(self.ss_intake.run_intake_in, 
+        self.gamepad.leftTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(self.ss_intake.run_intake_in, 
                                                        self.ss_intake.stop_motor, self.ss_intake))
-        self.gamepad.b().whileTrue(commands2.cmd.startEnd(self.ss_intake.run_intake_out, 
+        self.gamepad.rightTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(self.ss_intake.run_intake_out, 
                                                           self.ss_intake.stop_motor, self.ss_intake))
         self.gamepad.x().onFalse(SEQ_Shoot(self.ss_shooter, self.ss_feeder))
-        ...
 
-    def configure_swerve_bindings(self) -> None:
-        self.gamepad.x().onTrue(cmd.runOnce(self.ss_swerve_drive.drive_mode_padlocked))
-        self.gamepad.x().onFalse(cmd.runOnce(self.ss_swerve_drive.drive_mode_field_centered))
-        # self.gamepad.pov(0).whileTrue(cmd.startEnd(lambda: self.ss_swerve_drive.pov_move(1, 0), lambda: self.ss_swerve_drive.pov_move(0, 0)) )
+        ## Swerve drive bindings
+        # self.gamepad.a().whileTrue(cmd.startEnd(self.ss_swerve_drive.drive_mode_padlocked,
+        #                                         self.ss_swerve_drive.drive_mode_field_centered))
+        # self.gamepad.a().and_(self.gamepad.back()).onFalse(cmd.runOnce(self.ss_swerve_drive.change_target))
+        # self.gamepad.pov(0).whileTrue(self.ss_swerve_drive.pov_move(1, 0))
         # self.gamepad.pov(180).whileTrue(cmd.startEnd(lambda: self.ss_swerve_drive.pov_move(-1, 0), lambda: self.ss_swerve_drive.pov_move(0, 0)) )
         # self.gamepad.pov(90).whileTrue(cmd.startEnd(lambda: self.ss_swerve_drive.pov_move(0, 1), lambda: self.ss_swerve_drive.pov_move(0, 0)) )
         # self.gamepad.pov(270).whileTrue(cmd.startEnd(lambda: self.ss_swerve_drive.pov_move(0, -1), lambda: self.ss_swerve_drive.pov_move(0, 0)) )
-        (self.gamepad.back() & self.gamepad.b()).whileTrue(cmd.runOnce(self.ss_swerve_drive.brake))
-        (self.gamepad.back() & self.gamepad.start()).onTrue(cmd.runOnce(self.ss_swerve_drive.reset_field_oriented_perspective))
+        self.gamepad.back().and_(self.gamepad.b()).whileTrue(cmd.runOnce(self.ss_swerve_drive.brake))
+        self.gamepad.back().and_(self.gamepad.start()).onTrue(cmd.runOnce(self.ss_swerve_drive.reset_field_oriented_perspective))
 
     def getAutonomousCommand(self) -> commands2.Command:
         return self.auto_chooser.getSelected()
@@ -109,7 +107,8 @@ class MyRobot(commands2.TimedCommandRobot):
         """
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
-        self.container.ss_swerve_drive.drive_mode_field_centered()
+        # self.container.ss_swerve_drive.drive_mode_field_centered()
+        self.container.ss_swerve_drive.drive_mode_padlocked()
 
     def teleopPeriodic(self) -> None:
         """This function is called periodically during operator control"""

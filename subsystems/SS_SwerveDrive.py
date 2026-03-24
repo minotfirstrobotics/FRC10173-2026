@@ -28,6 +28,10 @@ class SS_SwerveDrive(commands2.Subsystem):
         self.drivetrain = TunerConstants.create_drivetrain() # does this need to after swerve configs?
         # self._logger = Telemetry(self._max_speed)
         # self.drivetrain.register_telemetry( lambda state: self._logger.telemeterize(state) )
+        self.target_x = 4.6 if DriverStation.getAlliance() == DriverStation.Alliance.kBlue else 12.0 # meters
+        self.target_y = 4.0 # meters, both are 4
+        self.x_vector_to_target = self.target_x - self._latest_pose.translation().X()
+        self.y_vector_to_target = self.target_y - self._latest_pose.translation().Y()
 
         self.field = wpilib.Field2d()
         wpilib.SmartDashboard.putData("Field", self.field)
@@ -35,8 +39,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         self.PIDF_sysID_tuning_bindings()
         idle = swerve.requests.Idle() # Determine behavior when no other commands are running. 
         Trigger(DriverStation.isDisabled).whileTrue( # This is important to prevent unexpected robot movement when commands end.
-            self.drivetrain.apply_request(lambda: idle).ignoringDisable(True)
-        )
+            self.drivetrain.apply_request(lambda: idle).ignoringDisable(True) )
 
         # Initialize swerve drive configurations
         self._drive_field_centered = (
@@ -51,25 +54,14 @@ class SS_SwerveDrive(commands2.Subsystem):
             swerve.requests.RobotCentric()
             .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE) )
 
-        AutoBuilder.configure(
-            pose_supplier=self.get_pose,
-            reset_pose=self.reset_pose,
-            robot_relative_speeds_supplier=self.get_robot_relative_speeds,
-            output=self.drive_robot_relative,
-            controller=PPHolonomicDriveController(
-                PIDConstants(2.0, 0.0, 0.0),  # Translation PID (tune these values)
-                PIDConstants(5.0, 0.0, 0.0),  # Rotation PID (tune these values)
-            ),
-            robot_config=RobotConfig.fromGUISettings(),
-            should_flip_path=lambda: DriverStation.getAlliance() == DriverStation.Alliance.kRed,
-            drive_subsystem=self
-        )
-    
+        self.setup_pathplanner_auto_builder()
+        
     def periodic(self) -> None:
         pose = self.drivetrain.sample_pose_at(Timer.getFPGATimestamp())
         if pose is not None:
             self._latest_pose = pose
-
+            self.x_vector_to_target = self._latest_pose.translation().X()- self.target_x
+            self.y_vector_to_target = self._latest_pose.translation().Y() - self.target_y
         if wpilib.SmartDashboard.getNumber("SS_Telemetry/Swerve Max Speed", self._max_speed_factor) != self._max_speed_factor:
             self._max_speed_factor = wpilib.SmartDashboard.getNumber("SS_Telemetry/Swerve Max Speed", self._max_speed_factor)
             # place to update any commands that rely on _max_speed if needed
@@ -88,8 +80,106 @@ class SS_SwerveDrive(commands2.Subsystem):
         self.field.setRobotPose(self._latest_pose)
 
     # -------------------------
-    # is the pose for pathplannerlib
+    # Motor movement functions
     # -------------------------
+    def drive_mode_field_centered(self) -> None:
+        self.drivetrain.setDefaultCommand(
+            self.drivetrain.apply_request(lambda: (
+                self._drive_field_centered
+                    .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
+                    .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
+                    .with_rotational_rate(-self._joystick.getRightX() * abs(self._joystick.getRightX()) * self._max_angular_rate)) ))
+
+    def drive_mode_padlocked(self) -> None:
+        self.drivetrain.setDefaultCommand(
+            self.drivetrain.apply_request(lambda: (
+                self._drive_facing_direction
+                    .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
+                    .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
+                    .with_target_direction(Rotation2d(self.x_vector_to_target, self.y_vector_to_target)) # Desired Heading (e.g., (0,1) = 90 deg)
+                    .with_heading_pid(5, 0, 0) ))  ) # PID for heading control
+    
+    def free_rotate_drive_request_command(self, vx_requested, vy_requested, rotational_rate) -> commands2.Command:
+        return self.drivetrain.apply_request(lambda: (
+            self._drive_field_centered
+                .with_velocity_x(vx_requested * self._max_speed)
+                .with_velocity_y(vy_requested * self._max_speed)
+                .with_rotational_rate(rotational_rate * self._max_angular_rate) ))
+
+    def padlocked_drive_request_command(self, vx_requested, vy_requested, x_vector=0.0, y_vector=0.0) -> commands2.Command:
+        if x_vector == 0 and y_vector == 0:
+            x_vector = self.x_vector_to_target
+            y_vector = self.y_vector_to_target
+        return self.drivetrain.apply_request(lambda: (
+            self._drive_facing_direction
+                .with_velocity_x(vx_requested * self._max_speed)
+                .with_velocity_y(vy_requested * self._max_speed)
+                .with_target_direction(Rotation2d(x_vector, y_vector))
+                .with_heading_pid(5, 0, 0) ))
+
+    def pov_move(self, direction_x, direction_y) -> commands2.Command:
+        return self.drivetrain.apply_request(lambda: (
+            self._drive_robot_centered
+                .with_velocity_x(direction_x * self._pov_speed)
+                .with_velocity_y(direction_y * self._pov_speed) ) )
+
+    def brake(self) -> None:
+        self.drivetrain.apply_request(lambda: swerve.requests.SwerveDriveBrake())
+
+    # -------------------------
+    # Utility functions
+    # -------------------------
+    def change_target(self, x=-1.0, y=-1.0) -> None:
+        if x == -1.0 and y == -1.0:
+            if x == 4.6: # blue target
+                self.target_x = 12.0
+            elif x == 12.0: # red target
+                self.target_x = 4.6
+        else:
+            self.target_x = x
+            self.target_y = y
+
+    def PIDF_sysID_tuning_bindings(self) -> None:
+        (self._joystick.start() & self._joystick.leftBumper()).onTrue(SignalLogger.start)
+        (self._joystick.start() & self._joystick.rightBumper()).onTrue(SignalLogger.stop)
+
+        (self._joystick.start() & self._joystick.a()).whileTrue(
+            self.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kForward)
+        )
+        (self._joystick.start() & self._joystick.b()).whileTrue(
+            self.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kReverse)
+        )
+        (self._joystick.start() & self._joystick.y()).whileTrue(
+            self.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kForward)
+        )
+        (self._joystick.start() & self._joystick.x()).whileTrue(
+            self.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kReverse)
+        )
+
+    def reset_field_oriented_perspective(self) -> None:
+        # Resets the rotation of the robot pose to 0 from the ForwardPerspectiveValue.OPERATOR_PERSPECTIVE perspective. 
+        # This makes the current orientation of the robot X forward for field-centric maneuvers.
+        return self.drivetrain.seed_field_centric()
+
+
+    # -------------------------
+    # Pathplannerlib setup and helpers
+    # -------------------------
+    def setup_pathplanner_auto_builder(self) -> None:
+        AutoBuilder.configure(
+            pose_supplier=self.get_pose,
+            reset_pose=self.reset_pose,
+            robot_relative_speeds_supplier=self.get_robot_relative_speeds,
+            output=self.drive_robot_relative,
+            controller=PPHolonomicDriveController(
+                PIDConstants(2.0, 0.0, 0.0),  # Translation PID (tune these values)
+                PIDConstants(5.0, 0.0, 0.0),  # Rotation PID (tune these values)
+            ),
+            robot_config=RobotConfig.fromGUISettings(),
+            should_flip_path=lambda: DriverStation.getAlliance() == DriverStation.Alliance.kRed,
+            drive_subsystem=self
+        )
+
     def get_pose(self) -> Pose2d:
         return self._latest_pose
 
@@ -122,68 +212,3 @@ class SS_SwerveDrive(commands2.Subsystem):
             swerve.requests.ApplyRobotSpeeds().with_speeds(robot_relative_speeds)
         )
 
-    # -------------------------
-    # Motor movement functions
-    # -------------------------
-    def drive_mode_field_centered(self) -> None:
-        self.drivetrain.setDefaultCommand(
-            self.drivetrain.apply_request(lambda: (
-                self._drive_field_centered
-                    .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
-                    .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
-                    .with_rotational_rate(-self._joystick.getRightX() * abs(self._joystick.getRightX()) * self._max_angular_rate)) ))
-
-    def drive_mode_padlocked(self) -> None:
-        self.drivetrain.setDefaultCommand(
-            self.drivetrain.apply_request(lambda: (
-                self._drive_facing_direction
-                    .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
-                    .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
-                    .with_target_direction(Rotation2d(0, 1)) # Desired Heading (e.g., (0,1) = 90 deg)
-                    .with_heading_pid(1, 0, 0) ))  ) # PID for heading control
-    
-    def free_rotate_drive_request_command(self, vx_requested, vy_requested, rotational_rate) -> commands2.Command:
-        return self.drivetrain.apply_request(lambda: (
-            self._drive_field_centered
-                .with_velocity_x(vx_requested * self._max_speed)
-                .with_velocity_y(vy_requested * self._max_speed)
-                .with_rotational_rate(rotational_rate * self._max_angular_rate) ))
-
-    def padlocked_drive_request_command(self, vx_requested, vy_requested, x_vector=1.0, y_vector=0.0) -> commands2.Command:
-        return self.drivetrain.apply_request(lambda: (
-            self._drive_facing_direction
-                .with_velocity_x(vx_requested * self._max_speed)
-                .with_velocity_y(vy_requested * self._max_speed)
-                .with_target_direction(Rotation2d(x_vector, y_vector))
-                .with_heading_pid(2, 0, 0) ))
-
-    def pov_move(self, direction_x, direction_y) -> None:
-        self.drivetrain.apply_request(lambda: (
-            self._drive_robot_centered
-                .with_velocity_x(direction_x * self._pov_speed)
-                .with_velocity_y(direction_y * self._pov_speed) ) )
-
-    def brake(self) -> None:
-        self.drivetrain.apply_request(lambda: swerve.requests.SwerveDriveBrake())
-
-    def PIDF_sysID_tuning_bindings(self) -> None:
-        (self._joystick.start() & self._joystick.leftBumper()).onTrue(SignalLogger.start)
-        (self._joystick.start() & self._joystick.rightBumper()).onTrue(SignalLogger.stop)
-
-        (self._joystick.start() & self._joystick.a()).whileTrue(
-            self.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kForward)
-        )
-        (self._joystick.start() & self._joystick.b()).whileTrue(
-            self.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kReverse)
-        )
-        (self._joystick.start() & self._joystick.y()).whileTrue(
-            self.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kForward)
-        )
-        (self._joystick.start() & self._joystick.x()).whileTrue(
-            self.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kReverse)
-        )
-
-    def reset_field_oriented_perspective(self) -> None:
-        # Resets the rotation of the robot pose to 0 from the ForwardPerspectiveValue.OPERATOR_PERSPECTIVE perspective. 
-        # This makes the current orientation of the robot X forward for field-centric maneuvers.
-        return self.drivetrain.seed_field_centric()
