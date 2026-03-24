@@ -1,6 +1,6 @@
+import wpilib
 import commands2
 from commands2 import cmd
-import wpilib
 from wpilib import SmartDashboard, Timer, DriverStation
 from wpimath.geometry import Pose2d, Rotation2d
 from phoenix6 import HootAutoReplay
@@ -28,8 +28,12 @@ class RobotContainer:
         self.ss_swerve_drive = SS_SwerveDrive(self.gamepad)
         self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
 
-        self.auto_chooser = AutoBuilder.buildAutoChooser("None")
-        SmartDashboard.putData("Autonomous Routine", self.auto_chooser)
+        self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.gamepad)
+        NamedCommands.registerCommand("Combo Shoot", self.cmd_combo_shoot)
+        self.seq_shoot = SEQ_Shoot(self.ss_shooter, self.ss_feeder)
+        NamedCommands.registerCommand("SEQ Shoot", self.seq_shoot)
+
+        self.auto_chooser = AutoBuilder.buildAutoChooser("None") # must be defined after SS's and all registered commands
 
         self.configure_gamepad_bindings()
         self.configure_swerve_bindings()
@@ -39,10 +43,10 @@ class RobotContainer:
                                                           self.ss_shooter.stop_motor, self.ss_shooter))
         self.gamepad.leftBumper().whileTrue(cmd.startEnd(self.ss_feeder.run_velocity_at_setpoint,
                                                          self.ss_feeder.stop_motor, self.ss_feeder))
-        self.gamepad.a().onTrue(commands2.cmd.startEnd(lambda: self.ss_intake.set_speed(self.ss_intake.cruising_speed_factor), 
-                                                       lambda: self.ss_intake.stop_motor(), self.ss_intake))
-        self.gamepad.b().whileTrue(commands2.cmd.startEnd(lambda: self.ss_intake.set_speed(-self.ss_intake.cruising_speed_factor), 
-                                                          lambda: self.ss_intake.stop_motor(), self.ss_intake))
+        self.gamepad.a().onTrue(commands2.cmd.startEnd(self.ss_intake.run_intake_in, 
+                                                       self.ss_intake.stop_motor, self.ss_intake))
+        self.gamepad.b().whileTrue(commands2.cmd.startEnd(self.ss_intake.run_intake_out, 
+                                                          self.ss_intake.stop_motor, self.ss_intake))
         self.gamepad.x().onFalse(SEQ_Shoot(self.ss_shooter, self.ss_feeder))
         ...
 
@@ -106,7 +110,6 @@ class MyRobot(commands2.TimedCommandRobot):
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
         self.container.ss_swerve_drive.drive_mode_field_centered()
-
 
     def teleopPeriodic(self) -> None:
         """This function is called periodically during operator control"""
