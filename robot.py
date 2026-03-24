@@ -35,7 +35,7 @@ class RobotContainer:
         self.configure_swerve_bindings()
 
     def configure_gamepad_bindings(self):
-        # self.gamepad.rightBumper().whileTrue(cmd.startEnd(self.ss_shooter.set_velocity, 
+        # self.gamepad.rightBumper().whileTrue(cmd.startEnd(self.ss_shooter.set_velocity_to_setpoint, 
         #                                                   self.ss_shooter.stop_motor, self.ss_shooter))
         # self.gamepad.leftBumper().whileTrue(self.ss_feeder.run_feeder_command())
         # self.gamepad.a().whileTrue(self.ss_intake.run_intake_command())

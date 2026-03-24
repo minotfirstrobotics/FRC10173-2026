@@ -45,7 +45,7 @@ class SS_ShooterKraken(commands2.Subsystem):
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Shooter Setpoint Velocity", self.setpoint_velocity)
 
         # NamedCommands.registerCommand("Shooter Spin-up to Setpoint", self.spin_up_and_wait_command())
-        NamedCommands.registerCommand("Shooter Setpoint Velocity", commands2.cmd.runOnce(self.set_velocity))
+        NamedCommands.registerCommand("Shooter Setpoint Velocity", commands2.cmd.runOnce(self.set_velocity_to_setpoint))
         NamedCommands.registerCommand("Shooter Stop", commands2.cmd.runOnce(self.stop_motor))
 
     def _apply_pidf_to_config(self):
@@ -91,7 +91,7 @@ class SS_ShooterKraken(commands2.Subsystem):
     # -------------------------
     # Motor movement functions
     # -------------------------
-    def set_velocity(self) -> None:
+    def set_velocity_to_setpoint(self) -> None:
         self.motor.set_control(self.velocity_request.with_velocity(self.setpoint_velocity))
 
     def stop_motor(self):
@@ -111,7 +111,7 @@ class SS_ShooterKraken(commands2.Subsystem):
 
             def initialize(self):
                 self.timer.restart()
-                self.ss_shooter.set_velocity() # Spin up
+                self.ss_shooter.set_velocity_to_setpoint() # Spin up
 
             def execute(self):
                 pass # Command is running
