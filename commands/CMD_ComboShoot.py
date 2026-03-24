@@ -17,7 +17,7 @@ class CMD_ComboShoot(commands2.Command):
 
     def initialize(self):
         self.timer.restart()
-        self.ss_shooter.set_velocity_to_setpoint() # Spin up shooter
+        self.ss_shooter.run_velocity_at_setpoint() # Spin up shooter
 
     def execute(self):
             if abs(self.ss_shooter.current_velocity - self.ss_shooter.setpoint_velocity) < self.velocity_tolerance:

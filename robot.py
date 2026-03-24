@@ -8,8 +8,8 @@ from pathplannerlib.auto import AutoBuilder, NamedCommands
 from commands2.button import CommandXboxController
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
 from subsystems.SS_ShooterKraken import SS_ShooterKraken
-from examples.SS_FeederTalon_Power import SS_FeederTalon_Power
-from examples.SS_IntakeSIMM import SS_IntakeSIMM
+from subsystems.SS_FeederKraken import SS_FeederKraken
+from subsystems.SS_IntakeKraken import SS_IntakeKraken
 from subsystems.SS_CANdleLight import SS_CANdleLight
 from subsystems.SS_CameraPose import SS_CameraPose
 from commands.CMD_ComboShoot import CMD_ComboShoot
@@ -20,25 +20,30 @@ class RobotContainer:
     def __init__(self) -> None:
         self.gamepad = CommandXboxController(0)
         DriverStation.silenceJoystickConnectionWarning(True)
-        # self.ss_shooter = SS_ShooterKraken(3)
-        # self.ss_feeder = SS_FeederTalon_Power(0)
-        # self.ss_intake = SS_IntakeSIMM(4)
-        # self.ss_candle_light_rear = SS_CANdleLight(2)
+        self.ss_shooter = SS_ShooterKraken(3)
+        self.ss_feeder = SS_FeederKraken(1)
+        self.ss_intake = SS_IntakeKraken(4)
+        self.ss_candle_light_rear = SS_CANdleLight(2)
         self.ss_candle_light_front = SS_CANdleLight(5)
         self.ss_swerve_drive = SS_SwerveDrive(self.gamepad)
-        # self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
+        self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
 
         self.auto_chooser = AutoBuilder.buildAutoChooser("None")
         SmartDashboard.putData("Autonomous Routine", self.auto_chooser)
 
-        # self.configure_gamepad_bindings()
+        self.configure_gamepad_bindings()
         self.configure_swerve_bindings()
 
     def configure_gamepad_bindings(self):
-        # self.gamepad.rightBumper().whileTrue(cmd.startEnd(self.ss_shooter.set_velocity_to_setpoint, 
-        #                                                   self.ss_shooter.stop_motor, self.ss_shooter))
-        # self.gamepad.leftBumper().whileTrue(self.ss_feeder.run_feeder_command())
-        # self.gamepad.a().whileTrue(self.ss_intake.run_intake_command())
+        self.gamepad.rightBumper().whileTrue(cmd.startEnd(self.ss_shooter.run_velocity_at_setpoint, 
+                                                          self.ss_shooter.stop_motor, self.ss_shooter))
+        self.gamepad.leftBumper().whileTrue(cmd.startEnd(self.ss_feeder.run_velocity_at_setpoint,
+                                                         self.ss_feeder.stop_motor, self.ss_feeder))
+        self.gamepad.a().onTrue(commands2.cmd.startEnd(lambda: self.ss_intake.set_speed(self.ss_intake.cruising_speed_factor), 
+                                                       lambda: self.ss_intake.stop_motor(), self.ss_intake))
+        self.gamepad.b().whileTrue(commands2.cmd.startEnd(lambda: self.ss_intake.set_speed(-self.ss_intake.cruising_speed_factor), 
+                                                          lambda: self.ss_intake.stop_motor(), self.ss_intake))
+        self.gamepad.x().onFalse(SEQ_Shoot(self.ss_shooter, self.ss_feeder))
         ...
 
     def configure_swerve_bindings(self) -> None:
