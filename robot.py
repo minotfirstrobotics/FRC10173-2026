@@ -33,6 +33,8 @@ class RobotContainer:
         self.seq_shoot = SEQ_Shoot(self.ss_shooter, self.ss_feeder)
         NamedCommands.registerCommand("SEQ Shoot", self.seq_shoot)
         self.auto_chooser = AutoBuilder.buildAutoChooser("None") # must be defined after SS's and all registered commands
+        SmartDashboard.putData("Auto Chooser", self.auto_chooser)
+
         self.configure_gamepad_bindings()
 
     def configure_gamepad_bindings(self):
