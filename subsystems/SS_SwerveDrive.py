@@ -97,7 +97,7 @@ class SS_SwerveDrive(commands2.Subsystem):
                     .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
                     .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
                     .with_target_direction(Rotation2d(self.x_vector_to_target, self.y_vector_to_target)) # Desired Heading (e.g., (0,1) = 90 deg)
-                    .with_heading_pid(5, 0, 0) ))  ) # PID for heading control
+                    .with_heading_pid(20, 0, 0) ))  ) # PID for heading control
     
     def free_rotate_drive_request_command(self, vx_requested, vy_requested, rotational_rate) -> commands2.Command:
         return self.drivetrain.apply_request(lambda: (
@@ -173,12 +173,13 @@ class SS_SwerveDrive(commands2.Subsystem):
             output=self.drive_robot_relative,
             controller=PPHolonomicDriveController(
                 PIDConstants(2.0, 0.0, 0.0),  # Translation PID (tune these values)
-                PIDConstants(5.0, 0.0, 0.0),  # Rotation PID (tune these values)
+                PIDConstants(2.0, 0.0, 0.0),  # Rotation PID (tune these values)
             ),
             robot_config=RobotConfig.fromGUISettings(),
             should_flip_path=lambda: DriverStation.getAlliance() == DriverStation.Alliance.kRed,
             drive_subsystem=self
         )
+
 
     def get_pose(self) -> Pose2d:
         return self._latest_pose
