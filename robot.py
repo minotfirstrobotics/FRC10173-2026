@@ -32,7 +32,7 @@ class RobotContainer:
         NamedCommands.registerCommand("Combo Shoot", self.cmd_combo_shoot)
         self.seq_shoot = SEQ_Shoot(self.ss_shooter, self.ss_feeder)
         NamedCommands.registerCommand("SEQ Shoot", self.seq_shoot)
-        
+
         self.auto_chooser = AutoBuilder.buildAutoChooser("None") # must be defined after SS's and all registered commands
         SmartDashboard.putData("Auto Chooser", self.auto_chooser)
 
@@ -45,9 +45,9 @@ class RobotContainer:
         self.gamepad.leftBumper().whileTrue(cmd.startEnd(self.ss_feeder.run_velocity_at_setpoint,
                                                          self.ss_feeder.stop_motor, self.ss_feeder))
         self.gamepad.leftTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(self.ss_intake.run_intake_in, 
-                                                       self.ss_intake.stop_motor, self.ss_intake))
+                                                                                self.ss_intake.stop_motor, self.ss_intake))
         self.gamepad.rightTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(self.ss_intake.run_intake_out, 
-                                                          self.ss_intake.stop_motor, self.ss_intake))
+                                                                                 self.ss_intake.stop_motor, self.ss_intake))
         self.gamepad.x().onFalse(SEQ_Shoot(self.ss_shooter, self.ss_feeder))
 
         ## Swerve drive bindings

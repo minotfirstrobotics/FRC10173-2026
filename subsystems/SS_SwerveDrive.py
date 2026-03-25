@@ -28,10 +28,6 @@ class SS_SwerveDrive(commands2.Subsystem):
         self.drivetrain = TunerConstants.create_drivetrain() # does this need to after swerve configs?
         # self._logger = Telemetry(self._max_speed)
         # self.drivetrain.register_telemetry( lambda state: self._logger.telemeterize(state) )
-        self.target_x = 4.6 if DriverStation.getAlliance() == DriverStation.Alliance.kBlue else 12.0 # meters
-        self.target_y = 4.0 # meters, both are 4
-        self.x_vector_to_target = self.target_x - self._latest_pose.translation().X()
-        self.y_vector_to_target = self.target_y - self._latest_pose.translation().Y()
 
         self.field = wpilib.Field2d()
         wpilib.SmartDashboard.putData("Field", self.field)
@@ -57,18 +53,30 @@ class SS_SwerveDrive(commands2.Subsystem):
         self.setup_pathplanner_auto_builder()
         
     def periodic(self) -> None:
+ 
         pose = self.drivetrain.sample_pose_at(Timer.getFPGATimestamp())
         if pose is not None:
             self._latest_pose = pose
-            self.x_vector_to_target = self._latest_pose.translation().X()- self.target_x
-            self.y_vector_to_target = self._latest_pose.translation().Y() - self.target_y
-        if wpilib.SmartDashboard.getNumber("SS_Telemetry/Swerve Max Speed", self._max_speed_factor) != self._max_speed_factor:
-            self._max_speed_factor = wpilib.SmartDashboard.getNumber("SS_Telemetry/Swerve Max Speed", self._max_speed_factor)
+            self.target_y = 4.0 # meters, both are 4
+            if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+                self.target_x = 4.6 # meters
+                self.x_vector_to_target = self.target_x - self._latest_pose.translation().X()
+                self.y_vector_to_target = self.target_y - self._latest_pose.translation().Y()
+            else:
+                self.target_x = 12.0 # meters
+                self.x_vector_to_target = self._latest_pose.translation().X() - self.target_x
+                self.y_vector_to_target = self._latest_pose.translation().Y() - self.target_y
+        if wpilib.SmartDashboard.getNumber("Swerve/Swerve Max Speed", self._max_speed_factor) != self._max_speed_factor:
+            self._max_speed_factor = wpilib.SmartDashboard.getNumber("Swerve/Swerve Max Speed", self._max_speed_factor)
             # place to update any commands that rely on _max_speed if needed
         if self._max_speed_factor > 1: # Cap at Drive Speed
             self._max_speed_factor = 1
-            wpilib.SmartDashboard.putNumber("SS_Telemetry/Swerve Max Speed", self._max_speed_factor)
-        
+            wpilib.SmartDashboard.putNumber("Swerve/Swerve Max Speed", self._max_speed_factor)
+        wpilib.SmartDashboard.putNumber("Swerve/Target X Vector", self.x_vector_to_target)
+        wpilib.SmartDashboard.putNumber("Swerve/Target Y Vector", self.y_vector_to_target)
+        wpilib.SmartDashboard.putNumber("Swerve/Target X", self.target_x)
+        wpilib.SmartDashboard.putNumber("Swerve/Target Y", self.target_y)
+
         self._max_speed = self._max_speed_factor * TunerConstants.speed_at_12_volts
 
         # Dashboard output
