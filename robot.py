@@ -20,9 +20,9 @@ class RobotContainer:
     def __init__(self) -> None:
         self.gamepad = CommandXboxController(0)
         DriverStation.silenceJoystickConnectionWarning(True)
-        self.ss_shooter = SS_ShooterKraken(3)
+        self.ss_shooter = SS_ShooterKraken(2)
         self.ss_feeder = SS_FeederKraken(1)
-        self.ss_intake = SS_IntakeKraken(4)
+        # self.ss_intake = SS_IntakeKraken(4)
         self.ss_candle_light_rear = SS_CANdleLight(2)
         self.ss_candle_light_front = SS_CANdleLight(5)
         self.ss_swerve_drive = SS_SwerveDrive(self.gamepad)
