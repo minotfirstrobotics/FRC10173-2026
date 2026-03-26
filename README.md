@@ -1,9 +1,5 @@
 # To Do List:
-* stop SparkMax CAN errors
-* try removing redundant command scheduler
 * flash radio if necessary
-* Intake is sticking
-* Bathtub and belt protection for feeder
 * calculate range to target
 * determine field area and target certain locations
 * determine how to padlock heading to target point

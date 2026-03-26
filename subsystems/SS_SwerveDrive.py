@@ -22,7 +22,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         self._max_angular_rate = rotationsToRadians(0.75)
         self._max_speed_factor = 0.2
         self._max_speed = self._max_speed_factor * TunerConstants.speed_at_12_volts
-        wpilib.SmartDashboard.putNumber("SS_Telemetry/Swerve Max Speed", self._max_speed)
+        wpilib.SmartDashboard.putNumber("Swerve/Swerve Max Speed", self._max_speed)
         self._pov_speed = 0.2
         self._latest_pose = Pose2d()
         self.drivetrain = TunerConstants.create_drivetrain() # does this need to after swerve configs?
