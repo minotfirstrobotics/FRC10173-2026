@@ -44,16 +44,17 @@ class RobotContainer:
                                                           self.ss_shooter.stop_motor, self.ss_shooter))
         self.gamepad.leftBumper().whileTrue(cmd.startEnd(self.ss_feeder.run_velocity_at_setpoint,
                                                          self.ss_feeder.stop_motor, self.ss_feeder))
-        self.gamepad.leftTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(self.ss_intake.run_intake_in, 
-                                                                                self.ss_intake.stop_motor, self.ss_intake))
-        self.gamepad.rightTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(self.ss_intake.run_intake_out, 
-                                                                                 self.ss_intake.stop_motor, self.ss_intake))
+        #self.gamepad.leftTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(self.ss_intake.run_intake_in, 
+                                                                                #self.ss_intake.stop_motor, self.ss_intake))
+        # self.gamepad.rightTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(self.ss_intake.run_intake_out, 
+                                                                                 #self.ss_intake.stop_motor, self.ss_intake))
         self.gamepad.x().onFalse(SEQ_Shoot(self.ss_shooter, self.ss_feeder))
 
         ## Swerve drive bindings
         self.gamepad.a().onTrue(cmd.runOnce(self.ss_swerve_drive.drive_mode_padlocked))
         self.gamepad.a().onFalse(cmd.runOnce(self.ss_swerve_drive.drive_mode_field_centered))
-        # self.gamepad.a().and_(self.gamepad.back()).onFalse(cmd.runOnce(self.ss_swerve_drive.change_target))
+        # self.gamepad.a().and_(self.gamepad.back()).onF
+        # alse(cmd.runOnce(self.ss_swerve_drive.change_target))
         # self.gamepad.pov(0).whileTrue(self.ss_swerve_drive.pov_move(1, 0))
         # self.gamepad.pov(180).whileTrue(cmd.startEnd(lambda: self.ss_swerve_drive.pov_move(-1, 0), lambda: self.ss_swerve_drive.pov_move(0, 0)) )
         # self.gamepad.pov(90).whileTrue(cmd.startEnd(lambda: self.ss_swerve_drive.pov_move(0, 1), lambda: self.ss_swerve_drive.pov_move(0, 0)) )
