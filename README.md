@@ -1,4 +1,5 @@
 # To Do List:
+* PhnX change shooter to ID3
 * flash radio if necessary
 * calculate range to target
 * determine field area and target certain locations

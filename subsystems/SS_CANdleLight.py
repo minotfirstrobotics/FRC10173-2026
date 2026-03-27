@@ -7,11 +7,10 @@ from phoenix6.controls import FireAnimation, SingleFadeAnimation, TwinkleAnimati
 from phoenix6.controls import TwinkleOffAnimation, SolidColor, ColorFlowAnimation
 
 class SS_CANdleLight(commands2.Subsystem):
-    def __init__(self, CANdle_channel: int):
+    def __init__(self, CANdle_channel: int, canbus) -> None:
         super().__init__()
-        self.candle = CANdle(CANdle_channel)
+        self.candle = CANdle(CANdle_channel, canbus)
 
-        # Fluent-style LED config
         configs = CANdleConfiguration()
         configs.led.with_strip_type(StripTypeValue.RGB).with_brightness_scalar(0.5)
 

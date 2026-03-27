@@ -4,9 +4,9 @@ import phoenix6
 from pathplannerlib.auto import NamedCommands
 
 class SS_IntakeKraken(commands2.Subsystem):
-    def __init__(self, motor_id: int):
+    def __init__(self, device_id: int, canbus) -> None:
         super().__init__()
-        self.motor = phoenix6.hardware.TalonFX(device_id=motor_id)
+        self.motor = phoenix6.hardware.TalonFX(device_id, canbus)
         self._config = phoenix6.configs.TalonFXConfiguration()
         self._config.motor_output.neutral_mode = phoenix6.signals.NeutralModeValue.COAST
         self._config.motor_output.inverted = phoenix6.signals.InvertedValue.CLOCKWISE_POSITIVE

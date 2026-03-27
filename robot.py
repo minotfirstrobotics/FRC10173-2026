@@ -6,6 +6,7 @@ from wpimath.geometry import Pose2d, Rotation2d
 from phoenix6 import HootAutoReplay
 from pathplannerlib.auto import AutoBuilder, NamedCommands
 from commands2.button import CommandXboxController
+from generated.tuner_constants_2026_GF import TunerConstants
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
 from subsystems.SS_ShooterKraken import SS_ShooterKraken
 from subsystems.SS_FeederKraken import SS_FeederKraken
@@ -20,11 +21,12 @@ class RobotContainer:
     def __init__(self) -> None:
         self.gamepad = CommandXboxController(0)
         DriverStation.silenceJoystickConnectionWarning(True)
-        self.ss_shooter = SS_ShooterKraken(3)
-        self.ss_feeder = SS_FeederKraken(1)
-        self.ss_intake = SS_IntakeKraken(4)
-        self.ss_candle_light_rear = SS_CANdleLight(2)
-        self.ss_candle_light_front = SS_CANdleLight(5)
+        self.canbus = TunerConstants.canbus
+        self.ss_shooter = SS_ShooterKraken(3, self.canbus)
+        self.ss_feeder = SS_FeederKraken(1, self.canbus)
+        self.ss_intake = SS_IntakeKraken(4, self.canbus)
+        self.ss_candle_light_rear = SS_CANdleLight(2, self.canbus)
+        self.ss_candle_light_front = SS_CANdleLight(5, self.canbus)
         self.ss_swerve_drive = SS_SwerveDrive(self.gamepad)
         # self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
 
