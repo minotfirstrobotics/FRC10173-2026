@@ -26,7 +26,7 @@ class RobotContainer:
         self.ss_candle_light_rear = SS_CANdleLight(2)
         self.ss_candle_light_front = SS_CANdleLight(5)
         self.ss_swerve_drive = SS_SwerveDrive(self.gamepad)
-        # self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
+        self.ss_camera_pose = SS_CameraPose(self.ss_swerve_drive)
 
         self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.gamepad)
         NamedCommands.registerCommand("Combo Shoot", self.cmd_combo_shoot)
