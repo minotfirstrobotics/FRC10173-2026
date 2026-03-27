@@ -28,9 +28,10 @@ class SS_FeederKraken(commands2.Subsystem):
         wpilib.SmartDashboard.putNumber("PIDF/Feeder D", self.D)
         wpilib.SmartDashboard.putNumber("PIDF/Feeder FF", self.FF)
         wpilib.SmartDashboard.putNumber("PIDF/Feeder S", self.S)
-        status = self.motor.configurator.apply(self._config)
-        if not status.is_ok():
-            wpilib.reportError(f"Feeder config failed: {status}", False)
+        self.status = self.motor.configurator.apply(self._config)
+        if not self.status.is_ok():
+            wpilib.reportError(f"Feeder config failed: {self.status}", False)
+        wpilib.SmartDashboard.putBoolean("SS_Telemetry/Feeder Config Success", self.status.is_ok())
 
         self.velocity_request = phoenix6.controls.VelocityDutyCycle(0.0)
         self.voltage_request  = phoenix6.controls.VoltageOut(0.0)
@@ -81,9 +82,11 @@ class SS_FeederKraken(commands2.Subsystem):
             self.S = dashboard_s
             self._apply_pidf_to_config()
 
-            status = self.motor.configurator.apply(self._config)
-            if not status.is_ok():
-                wpilib.reportError(f"Kraken PID update failed: {status}", False)
+            self.status = self.motor.configurator.apply(self._config)
+            if not self.status.is_ok():
+                wpilib.reportError(f"Kraken PID update failed: {self.status}", False)
+            wpilib.SmartDashboard.putBoolean("SS_Telemetry/Feeder Config Success", self.status.is_ok())
+
 
     # -------------------------
     # Motor movement functions

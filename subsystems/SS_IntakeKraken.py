@@ -11,9 +11,10 @@ class SS_IntakeKraken(commands2.Subsystem):
         self._config.motor_output.neutral_mode = phoenix6.signals.NeutralModeValue.COAST
         self._config.motor_output.inverted = phoenix6.signals.InvertedValue.CLOCKWISE_POSITIVE
 
-        status = self.motor.configurator.apply(self._config)
-        if not status.is_ok():
-            wpilib.reportError(f"Intake config failed: {status}", False)
+        self.status = self.motor.configurator.apply(self._config)
+        if not self.status.is_ok():
+            wpilib.reportError(f"Intake config failed: {self.status}", False)
+        wpilib.SmartDashboard.putBoolean("SS_Telemetry/Intake Config Success", self.status.is_ok())
 
         self.cruising_speed_factor = .62
         self.max_rpm = 7000
