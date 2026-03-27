@@ -60,12 +60,12 @@ class SS_SwerveDrive(commands2.Subsystem):
             self.target_y = 4.0 # meters, both are 4
             if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
                 self.target_x = 4.6 # meters
-                self.x_vector_to_target = self.target_x - self._latest_pose.translation().X()
-                self.y_vector_to_target = self.target_y - self._latest_pose.translation().Y()
-            else:
-                self.target_x = 12.0 # meters
                 self.x_vector_to_target = self._latest_pose.translation().X() - self.target_x
                 self.y_vector_to_target = self._latest_pose.translation().Y() - self.target_y
+            else:
+                self.target_x = 12.0 # meters
+                self.x_vector_to_target = self.target_x - self._latest_pose.translation().X()
+                self.y_vector_to_target = self.target_y - self._latest_pose.translation().Y()
         if wpilib.SmartDashboard.getNumber("Swerve/Swerve Max Speed", self._max_speed_factor) != self._max_speed_factor:
             self._max_speed_factor = wpilib.SmartDashboard.getNumber("Swerve/Swerve Max Speed", self._max_speed_factor)
             # place to update any commands that rely on _max_speed if needed
