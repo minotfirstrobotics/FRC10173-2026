@@ -4,8 +4,8 @@ from wpimath.units import rotationsToRadians
 from phoenix6 import swerve, SignalLogger
 from wpimath.kinematics import ChassisSpeeds
 from telemetry import Telemetry
-# from generated.tuner_constants_2026_GF import TunerConstants
-from generated.tuner_constants_2025_old import TunerConstants
+from generated.tuner_constants_2026_GF import TunerConstants
+# from generated.tuner_constants_2025_old import TunerConstants
 from wpilib import DriverStation, Timer, SmartDashboard
 from wpimath.geometry import Pose2d, Rotation2d
 from commands2.button import Trigger
@@ -28,6 +28,10 @@ class SS_SwerveDrive(commands2.Subsystem):
         self.drivetrain = TunerConstants.create_drivetrain() # does this need to after swerve configs?
         # self._logger = Telemetry(self._max_speed)
         # self.drivetrain.register_telemetry( lambda state: self._logger.telemeterize(state) )
+        self.x_vector_to_target = 0.0
+        self.y_vector_to_target = 0.0
+        self.target_x = 0.0
+        self.target_y = 0.0
 
         self.field = wpilib.Field2d()
         wpilib.SmartDashboard.putData("Field", self.field)

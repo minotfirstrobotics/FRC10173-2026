@@ -9,7 +9,7 @@ class SS_ShooterKraken(commands2.Subsystem):
         self.motor = phoenix6.hardware.TalonFX(device_id, canbus)
         self._config = phoenix6.configs.TalonFXConfiguration()
         self._config.motor_output.neutral_mode = phoenix6.signals.NeutralModeValue.COAST
-        self._config.motor_output.inverted = phoenix6.signals.InvertedValue.CLOCKWISE_POSITIVE
+        self._config.motor_output.inverted = phoenix6.signals.InvertedValue.COUNTER_CLOCKWISE_POSITIVE
 
         self._config.current_limits.stator_current_limit_enable = True
         self._config.current_limits.stator_current_limit = 80.0
@@ -38,7 +38,7 @@ class SS_ShooterKraken(commands2.Subsystem):
         self.voltage_request  = phoenix6.controls.VoltageOut(0.0)
 
         self.current_velocity = 0.0
-        self.setpoint_velocity = 75 # max rpm 6000 so max rps 100
+        self.setpoint_velocity = 0 # max rpm 6000 so max rps 100
 
 
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Shooter Current Velocity ", self.current_velocity)
@@ -59,8 +59,8 @@ class SS_ShooterKraken(commands2.Subsystem):
         if wpilib.SmartDashboard.getNumber("SS_Telemetry/Shooter Setpoint Velocity", self.setpoint_velocity) != self.setpoint_velocity:
             self.setpoint_velocity = wpilib.SmartDashboard.getNumber("SS_Telemetry/Shooter Setpoint Velocity", self.setpoint_velocity)
             # place to update any commands that rely on setpoint_velocity if needed
-        if self.setpoint_velocity > 95: # max rps 100
-            self.setpoint_velocity = 95
+        if self.setpoint_velocity > 5000: # max rps 100
+            self.setpoint_velocity = 5000
             wpilib.SmartDashboard.putNumber("SS_Telemetry/Shooter Setpoint Velocity", self.setpoint_velocity)
         self.current_velocity = self.motor.get_rotor_velocity().value
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Shooter Current Velocity ", self.current_velocity)

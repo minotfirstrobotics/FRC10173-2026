@@ -37,7 +37,7 @@ class SS_FeederKraken(commands2.Subsystem):
         self.voltage_request  = phoenix6.controls.VoltageOut(0.0)
 
         self.current_velocity = 0.0
-        self.setpoint_velocity = 87.5 # max rpm 7000 so max rps 116.67
+        self.setpoint_velocity = 2087.5 # max rpm 7000 so max rps 116.67
 
 
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Feeder Current Velocity ", self.current_velocity)
@@ -57,8 +57,8 @@ class SS_FeederKraken(commands2.Subsystem):
         if wpilib.SmartDashboard.getNumber("SS_Telemetry/Feeder Setpoint Velocity", self.setpoint_velocity) != self.setpoint_velocity:
             self.setpoint_velocity = wpilib.SmartDashboard.getNumber("SS_Telemetry/Feeder Setpoint Velocity", self.setpoint_velocity)
             # place to update any commands that rely on setpoint_velocity if needed
-        if self.setpoint_velocity > 110: # max rps 116.67
-            self.setpoint_velocity = 110
+        if self.setpoint_velocity > 5110: # max rps 116.67
+            self.setpoint_velocity = 5110
             wpilib.SmartDashboard.putNumber("SS_Telemetry/Feeder Setpoint Velocity", self.setpoint_velocity)
         self.current_velocity = self.motor.get_rotor_velocity().value
         wpilib.SmartDashboard.putNumber("SS_Telemetry/Feeder Current Velocity ", self.current_velocity)

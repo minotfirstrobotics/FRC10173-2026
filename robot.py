@@ -116,8 +116,8 @@ class MyRobot(commands2.TimedCommandRobot):
         """
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
-        # self.container.ss_swerve_drive.drive_mode_field_centered()
-        self.container.ss_swerve_drive.drive_mode_padlocked()
+        self.container.ss_swerve_drive.drive_mode_field_centered()
+        # self.container.ss_swerve_drive.drive_mode_padlocked()
 
     def teleopPeriodic(self) -> None:
         """This function is called periodically during operator control"""
