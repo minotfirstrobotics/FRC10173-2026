@@ -1,12 +1,13 @@
 from commands2 import SequentialCommandGroup, WaitCommand, cmd
+from subsystems.SS_Kraken import SS_Kraken
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
-from subsystems.SS_ShooterKraken import SS_ShooterKraken
-from subsystems.SS_FeederKraken import SS_FeederKraken
-from subsystems.SS_IntakeKraken import SS_IntakeKraken
+from examples.SS_ShooterKraken import SS_ShooterKraken
+from examples.SS_FeederKraken import SS_FeederKraken
+from examples.SS_IntakeKraken import SS_IntakeKraken
 from subsystems.SS_CANdleLight import SS_CANdleLight
 
 
-def SEQ_Shoot(shooter: SS_ShooterKraken, feeder: SS_FeederKraken):
+def SEQ_Shoot(shooter: SS_Kraken, feeder: SS_Kraken):
     return SequentialCommandGroup(
         cmd.runOnce(shooter.spin_up_and_wait_command),
         cmd.runOnce(lambda: shooter.run_velocity_at_setpoint), # Ensure shooter is running at setpoint while feeder runs

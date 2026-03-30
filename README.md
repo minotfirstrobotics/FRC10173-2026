@@ -1,15 +1,7 @@
 # To Do List:
-* PhnX change shooter to ID3
-* flash radio if necessary
 * calculate range to target
 * determine field area and target certain locations
-* determine how to padlock heading to target point
-* Get photonvision for other 2 cams
-* Tune PIDF/mm for turret and choose trapezoid vs pidf
-* Enable autonomous choice on dashboard
-* Build autonomous 
-* Make climbing gear and strategy
-* fix RobotContainer controller maps
+* Get photonvision
 * Determine logging strategies (SignalLogger.enable_auto_logging(True), hoot, etc )
 
 # Dependencies:
@@ -29,9 +21,3 @@
 
 # CTRE Commands
 * ./owlet -f wpilog "input.hoot" "output.wpilog"
-
-# Camera USB ports on LeftPhotonVision
-* USB3 port is back.
-* TopRight is front.
-* BottomLeft is left.
-* BottomRight is right.

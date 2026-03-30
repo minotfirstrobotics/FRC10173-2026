@@ -1,11 +1,12 @@
 import wpilib
 import commands2
-from subsystems.SS_ShooterKraken import SS_ShooterKraken
-from subsystems.SS_FeederKraken import SS_FeederKraken
+from subsystems.SS_Kraken import SS_Kraken
+from examples.SS_ShooterKraken import SS_ShooterKraken
+from examples.SS_FeederKraken import SS_FeederKraken
 from commands2.button import CommandXboxController
 
 class CMD_ComboShoot(commands2.Command):
-    def __init__(self, ss_shooter: SS_ShooterKraken, ss_feeder: SS_FeederKraken, joystick: CommandXboxController):
+    def __init__(self, ss_shooter: SS_Kraken, ss_feeder: SS_Kraken, joystick: CommandXboxController):
         super().__init__()
         self.ss_shooter = ss_shooter
         self.ss_feeder = ss_feeder
@@ -19,7 +20,7 @@ class CMD_ComboShoot(commands2.Command):
         self.ss_shooter.run_velocity_at_setpoint() # Spin up shooter
 
     def execute(self):
-            if abs(self.ss_shooter.current_velocity - self.ss_shooter.setpoint_velocity) < self.velocity_tolerance:
+            if abs(self.ss_shooter.velocity_actual - self.ss_shooter.velocity_setpoint) < self.velocity_tolerance:
                 self.ss_feeder.run_velocity_at_setpoint() # Spin feeder
             else:
                 self.ss_feeder.stop_motor() # Stop feeder if shooter is no longer at speed

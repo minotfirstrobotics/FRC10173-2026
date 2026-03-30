@@ -8,9 +8,10 @@ from pathplannerlib.auto import AutoBuilder, NamedCommands
 from commands2.button import CommandXboxController
 from generated.tuner_constants_2026_GF import TunerConstants
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
-from subsystems.SS_ShooterKraken import SS_ShooterKraken
-from subsystems.SS_FeederKraken import SS_FeederKraken
-from subsystems.SS_IntakeKraken import SS_IntakeKraken
+from subsystems.SS_Kraken import SS_Kraken
+from examples.SS_ShooterKraken import SS_ShooterKraken
+from examples.SS_FeederKraken import SS_FeederKraken
+from examples.SS_IntakeKraken import SS_IntakeKraken
 from subsystems.SS_CANdleLight import SS_CANdleLight
 from subsystems.SS_CameraPose import SS_CameraPose
 from commands.CMD_ComboShoot import CMD_ComboShoot
@@ -22,19 +23,22 @@ class RobotContainer:
         self.gamepad = None or CommandXboxController(0)
         DriverStation.silenceJoystickConnectionWarning(True)
         self.canbus = TunerConstants.canbus
-        self.ss_shooter = None or SS_ShooterKraken(3, self.canbus)
-        self.ss_feeder = None or SS_FeederKraken(1, self.canbus)
-        self.ss_intake = None #or SS_IntakeKraken(4, self.canbus)
-        self.ss_candle_light_rear = None or SS_CANdleLight(2, self.canbus)
-        self.ss_candle_light_front = None or SS_CANdleLight(5, self.canbus)
+        # self.ss_shooter = None or SS_ShooterKraken(3, self.canbus)
+        self.ss_shooter = None or SS_Kraken(3, self.canbus, "Shooter", max_rps=100, velocity_setpoint=40, p=0.01, i=0.0, d=0.0, ff=0.01, s=0.0)
+        # self.ss_feeder = None or SS_FeederKraken(1, self.canbus)
+        self.ss_feeder = None or SS_Kraken(1, self.canbus, "Feeder", inverted=True, percent_power_setpoint=0.62)
+        # self.ss_intake = None #or SS_IntakeKraken(4, self.canbus)
+        self.ss_intake = None #SS_Kraken(4, self.canbus, "Intake", inverted=True, max_rps=120, percent_power_setpoint=0.62)
+        # self.ss_candle_light_rear = None or SS_CANdleLight(2, self.canbus)
+        # self.ss_candle_light_front = None or SS_CANdleLight(5, self.canbus)
         self.ss_swerve_drive = None or SS_SwerveDrive(self.gamepad)
         # self.ss_camera_pose = None or SS_CameraPose(self.ss_swerve_drive)
 
+        # ------------------ Complex Commands and Auto Builder ------------------
         self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.gamepad)
         NamedCommands.registerCommand("Combo Shoot", self.cmd_combo_shoot)
         self.seq_shoot = SEQ_Shoot(self.ss_shooter, self.ss_feeder)
         NamedCommands.registerCommand("SEQ Shoot", self.seq_shoot)
-
         self.auto_chooser = AutoBuilder.buildAutoChooser("None") # must be defined after SS's and all registered commands
         SmartDashboard.putData("Auto Chooser", self.auto_chooser)
 
