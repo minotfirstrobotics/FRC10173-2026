@@ -24,7 +24,7 @@ class RobotContainer:
         DriverStation.silenceJoystickConnectionWarning(True)
         self.canbus = TunerConstants.canbus
         # self.ss_shooter = None or SS_ShooterKraken(3, self.canbus)
-        self.ss_shooter = None or SS_Kraken(3, self.canbus, "Shooter", max_rps=100, velocity_setpoint=40, p=0.01, i=0.0, d=0.0, ff=0.01, s=0.0)
+        self.ss_shooter = None or SS_Kraken(3, self.canbus, "Shooter", max_rps=100, velocity_setpoint=40, kp=0.01, ki=0.0, kd=0.0, kv=0.01, ks=0.0)
         # self.ss_feeder = None or SS_FeederKraken(1, self.canbus)
         self.ss_feeder = None or SS_Kraken(1, self.canbus, "Feeder", inverted=True, percent_power_setpoint=0.62)
         # self.ss_intake = None #or SS_IntakeKraken(4, self.canbus)
@@ -42,9 +42,11 @@ class RobotContainer:
         self.auto_chooser = AutoBuilder.buildAutoChooser("None") # must be defined after SS's and all registered commands
         SmartDashboard.putData("Auto Chooser", self.auto_chooser)
 
-        self.configure_gamepad_bindings()
+        if self.gamepad:
+             self.configure_gamepad_bindings()
 
     def configure_gamepad_bindings(self):
+
         ## Operations bindings
         if self.ss_shooter:
             self.gamepad.rightBumper().whileTrue(cmd.startEnd(
@@ -61,6 +63,10 @@ class RobotContainer:
             self.gamepad.x().onFalse(SEQ_Shoot(self.ss_shooter, self.ss_feeder))
 
         if self.ss_swerve_drive:
+            ## Set starting drive mode to field-centered, and allow toggling to padlocked with the A button
+            self.ss_swerve_drive.drive_mode_field_centered()
+            # self.ss_swerve_drive.drive_mode_padlocked()
+
             self.gamepad.a().onTrue(cmd.runOnce(self.ss_swerve_drive.drive_mode_padlocked))
             self.gamepad.a().onFalse(cmd.runOnce(self.ss_swerve_drive.drive_mode_field_centered))
             # self.gamepad.a().and_(self.gamepad.back()).onFalse(cmd.runOnce(self.ss_swerve_drive.change_target))
@@ -120,8 +126,6 @@ class MyRobot(commands2.TimedCommandRobot):
         """
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
-        self.container.ss_swerve_drive.drive_mode_field_centered()
-        # self.container.ss_swerve_drive.drive_mode_padlocked()
 
     def teleopPeriodic(self) -> None:
         """This function is called periodically during operator control"""
