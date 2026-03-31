@@ -17,7 +17,6 @@ from subsystems.SS_CameraPose import SS_CameraPose
 from commands.CMD_ComboShoot import CMD_ComboShoot
 from commands.SEQ_sequences import SEQ_Shoot, SEQ_DeployIntake
 
-
 class RobotContainer:
     def __init__(self) -> None:
         self.gamepad = None or CommandXboxController(0)
@@ -27,8 +26,8 @@ class RobotContainer:
         self.ss_feeder = None or SS_Kraken(1, self.canbus, "Feeder", inverted=True, percent_power_setpoint=0.62)
         self.ss_intake = None or SS_Kraken(4, self.canbus, "Intake", inverted=True, max_rps=120, percent_power_setpoint=0.62)
         self.ss_extend = None or SS_Kraken(6, self.canbus, "Deploy Intake", kp=3, ki=0.5, Vmax=2, Amax=2, Jerk=10)
-        # self.ss_candle_light_rear = None or SS_CANdleLight(2, self.canbus)
-        # self.ss_candle_light_front = None or SS_CANdleLight(5, self.canbus)
+        self.ss_candle_light_rear = None #or SS_CANdleLight(2, self.canbus)
+        self.ss_candle_light_front = None #or SS_CANdleLight(5, self.canbus)
         self.ss_swerve_drive = None or SS_SwerveDrive(self.gamepad)
         # self.ss_camera_pose = None or SS_CameraPose(self.ss_swerve_drive)
 
@@ -57,8 +56,6 @@ class RobotContainer:
         wpilib.SmartDashboard.putData("Mechanism", self.mech2d)
 
     def configure_gamepad_bindings(self):
-
-        ## Operations bindings
         if self.ss_shooter:
             self.gamepad.rightBumper().whileTrue(cmd.startEnd(
                 self.ss_shooter.run_velocity_at_setpoint, self.ss_shooter.stop_motor, self.ss_shooter))
@@ -109,6 +106,10 @@ class MyRobot(commands2.TimedCommandRobot):
         self.container = RobotContainer()
         self.localMatchTimer = Timer()
         # self._time_and_driver_replay = (HootAutoReplay().with_timestamp_replay().with_driver_replay() )
+        if self.container.ss_candle_light_front:
+            self.container.ss_candle_light_front.set_all_leds_RGBW(0, 255, 0) # Set front CANdle to green
+        if self.container.ss_candle_light_rear:
+            self.container.ss_candle_light_rear.set_all_leds_RGBW(255, 165, 0) # Set rear CANdle to orange
 
     def robotPeriodic(self) -> None:
         """
@@ -126,7 +127,6 @@ class MyRobot(commands2.TimedCommandRobot):
         # self._time_and_driver_replay.update() # using HootAutoReplay to log and replay timestamp and driver data
         match_time_from_driver_station = Timer.getMatchTime()
         SmartDashboard.putNumber("Match Time", self.localMatchTimer.get() if match_time_from_driver_station < 0 else match_time_from_driver_station)
-        
         if self.container.ss_intake:
             self.container.intake2d.setLength(self.container.ss_intake.velocity_actual/10)
         if self.container.ss_feeder:
@@ -145,6 +145,16 @@ class MyRobot(commands2.TimedCommandRobot):
         """
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
+        if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
+            if self.container.ss_candle_light_front:
+                self.container.ss_candle_light_front.set_all_leds_RGBW(255, 0, 0)
+            if self.container.ss_candle_light_rear:
+                self.container.ss_candle_light_rear.set_all_leds_RGBW(255, 0, 0)
+        else:
+            if self.container.ss_candle_light_front:
+                self.container.ss_candle_light_front.set_all_leds_RGBW(0, 0, 255)
+            if self.container.ss_candle_light_rear:
+                self.container.ss_candle_light_rear.set_all_leds_RGBW(0, 0, 255)
 
     def teleopPeriodic(self) -> None:
         """This function is called periodically during operator control"""

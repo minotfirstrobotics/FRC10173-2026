@@ -51,30 +51,3 @@ class SS_CANdleLight(commands2.Subsystem):
 
     def set_animation_twinkle_off(self):
         self.candle.set_control(TwinkleOffAnimation(led_start_index=0, led_end_index=7))
-
-    # --------------------------
-    # Commands
-    # --------------------------
-    def set_LED_color_command(self, red: int, green: int, blue: int, white: int = 0):
-        return commands2.cmd.runOnce(lambda: self.set_all_leds_RGBW(red, green, blue, white), self)
-    
-    def set_LED_off_command(self):
-        return commands2.cmd.runOnce(lambda: self.set_all_leds_RGBW(red=0, green=0, blue=0, white=0), self)
-        
-    def set_fire_animation_command(self):
-        return commands2.cmd.runOnce(lambda: self.set_animation_fire(), self)
-    
-    def set_twinkle_animation_command(self):
-        return commands2.cmd.runOnce(lambda: self.set_animation_twinkle(), self)
-    
-    def set_animation_single_fade_command(self, red: int, green: int, blue: int, white: int = 0, frame_rate: int = 30):
-        return commands2.cmd.runOnce(lambda: self.set_animation_single_fade(red, green, blue, white, frame_rate), self)
-    
-    def set_larson_animation_command(self, red: int, green: int, blue: int, white: int = 0, frame_rate: int = 30):
-        return commands2.cmd.runOnce(lambda: self.set_animation_larson(red, green, blue, white, frame_rate), self)
-
-    def set_color_flow_animation_command(self, frame_rate: int = 30):
-        return commands2.cmd.runOnce(lambda: self.set_animation_color_flow(frame_rate), self)
-
-    def set_twinkle_off_animation_command(self):
-        return commands2.cmd.runOnce(lambda: self.set_animation_twinkle_off(), self)
