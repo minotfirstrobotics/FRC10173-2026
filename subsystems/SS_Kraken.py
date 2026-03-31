@@ -11,7 +11,6 @@ class SS_Kraken(commands2.Subsystem):
                  max_rps: int=100, velocity_setpoint: float=0.0, percent_power_setpoint: float=0.0,
                  kp: float=0.00, ki: float=0.0, kd: float=0.0, kv: float=0.0, ks: float=0.0,
                  ka: float=0.0, kg: float=0.0, Vmax: float=2.0, Amax: float=2.0, Jerk: float=10.0) -> None:
-        super().__init__()
         self.motor = phoenix6.hardware.TalonFX(device_id, canbus)
 
         self.dashboard_name = dashboard_name

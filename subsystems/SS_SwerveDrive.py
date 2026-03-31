@@ -17,7 +17,6 @@ from wpilib import DriverStation
 
 class SS_SwerveDrive(commands2.Subsystem):
     def __init__(self, joystick) -> None:
-        super().__init__()
         self._joystick = joystick
         self._max_angular_rate = rotationsToRadians(0.75)
         self._max_speed_factor = 0.2

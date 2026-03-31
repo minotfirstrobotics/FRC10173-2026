@@ -8,7 +8,6 @@ from phoenix6.controls import TwinkleOffAnimation, SolidColor, ColorFlowAnimatio
 
 class SS_CANdleLight(commands2.Subsystem):
     def __init__(self, CANdle_channel: int, canbus) -> None:
-        super().__init__()
         self.candle = CANdle(CANdle_channel, canbus)
 
         configs = CANdleConfiguration()
