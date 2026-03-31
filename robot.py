@@ -23,12 +23,10 @@ class RobotContainer:
         self.gamepad = None or CommandXboxController(0)
         DriverStation.silenceJoystickConnectionWarning(True)
         self.canbus = TunerConstants.canbus
-        # self.ss_shooter = None or SS_ShooterKraken(3, self.canbus)
         self.ss_shooter = None or SS_Kraken(3, self.canbus, "Shooter", max_rps=100, velocity_setpoint=40, kp=0.01, ki=0.0, kd=0.0, kv=0.01, ks=0.0)
-        # self.ss_feeder = None or SS_FeederKraken(1, self.canbus)
         self.ss_feeder = None or SS_Kraken(1, self.canbus, "Feeder", inverted=True, percent_power_setpoint=0.62)
-        # self.ss_intake = None #or SS_IntakeKraken(4, self.canbus)
-        self.ss_intake = None #SS_Kraken(4, self.canbus, "Intake", inverted=True, max_rps=120, percent_power_setpoint=0.62)
+        self.ss_intake = None or SS_Kraken(4, self.canbus, "Intake", inverted=True, max_rps=120, percent_power_setpoint=0.62)
+        self.ss_extend = None or SS_Kraken(6, self.canbus, "Deploy Intake", kp=3, ki=0.5, Vmax=2, Amax=2, Jerk=10)
         # self.ss_candle_light_rear = None or SS_CANdleLight(2, self.canbus)
         # self.ss_candle_light_front = None or SS_CANdleLight(5, self.canbus)
         self.ss_swerve_drive = None or SS_SwerveDrive(self.gamepad)
@@ -45,12 +43,17 @@ class RobotContainer:
         if self.gamepad:
              self.configure_gamepad_bindings()
 
-        # 1. Create the mechanism
+        # ------------------- Simulated Mechanism2d Setup ------------------
         self.mech2d = wpilib.Mechanism2d(10, 10)  # Width, Height
         self.root2d = self.mech2d.getRoot("root", 5, 2)
-        self.intake2d = self.root2d.appendLigament("intake", 4, 135, 6, Color8Bit(0, 0, 255))
-        self.feeder2d = self.root2d.appendLigament("feeder", 4, 90, 6, Color8Bit(0, 255, 0))
-        self.shooter2d = self.root2d.appendLigament("shooter", 4, 45, 6, Color8Bit(255, 0, 0))
+        if self.ss_intake:
+            self.intake2d = self.root2d.appendLigament("intake", 4, 135, 6, Color8Bit(0, 0, 255))
+        if self.ss_feeder:
+            self.feeder2d = self.root2d.appendLigament("feeder", 4, 90, 6, Color8Bit(0, 255, 0))
+        if self.ss_shooter:
+            self.shooter2d = self.root2d.appendLigament("shooter", 4, -135, 6, Color8Bit(255, 0, 0))
+        if self.ss_extend:
+            self.extend2d = self.root2d.appendLigament("extend", 2, 90, 3, Color8Bit(255, 255, 255))
         wpilib.SmartDashboard.putData("Mechanism", self.mech2d)
 
     def configure_gamepad_bindings(self):
@@ -64,9 +67,9 @@ class RobotContainer:
                 self.ss_feeder.run_velocity_at_setpoint, self.ss_feeder.stop_motor, self.ss_feeder))
         if self.ss_intake:
             self.gamepad.leftTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(
-                self.ss_intake.run_intake_in, self.ss_intake.stop_motor, self.ss_intake))
+                self.ss_intake.run_voltage_percent_forward, self.ss_intake.stop_motor, self.ss_intake))
             self.gamepad.rightTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(
-                self.ss_intake.run_intake_out, self.ss_intake.stop_motor, self.ss_intake))
+                self.ss_intake.run_voltage_percent_reverse, self.ss_intake.stop_motor, self.ss_intake))
         if self.ss_shooter and self.ss_feeder:
             self.gamepad.x().onFalse(SEQ_Shoot(self.ss_shooter, self.ss_feeder))
 
@@ -123,9 +126,15 @@ class MyRobot(commands2.TimedCommandRobot):
         # self._time_and_driver_replay.update() # using HootAutoReplay to log and replay timestamp and driver data
         match_time_from_driver_station = Timer.getMatchTime()
         SmartDashboard.putNumber("Match Time", self.localMatchTimer.get() if match_time_from_driver_station < 0 else match_time_from_driver_station)
-        self.container.intake2d.setLength(4)#self.container.ss_intake.velocity_actual if self.container.ss_intake else 0)
-        self.container.feeder2d.setLength(4)#self.container.ss_feeder.velocity_actual if self.container.ss_feeder else 0)
-        self.container.shooter2d.setLength(4)#self.container.ss_shooter.velocity_actual/500 if self.container.ss_shooter else 0)
+        
+        if self.container.ss_intake:
+            self.container.intake2d.setLength(self.container.ss_intake.velocity_actual/10)
+        if self.container.ss_feeder:
+            self.container.feeder2d.setLength(self.container.ss_feeder.velocity_actual/10)
+        if self.container.ss_shooter:
+            self.container.shooter2d.setLength(self.container.ss_shooter.velocity_actual/10)
+        if self.container.ss_extend:
+            self.container.extend2d.setAngle(90 - self.container.ss_extend.position_actual*90/2)
 
     def teleopInit(self) -> None:
         """
@@ -171,7 +180,25 @@ class MyRobot(commands2.TimedCommandRobot):
     def testInit(self) -> None:
         """Cancels all running commands at the start of test mode"""
         commands2.CommandScheduler.getInstance().cancelAll()
-        self.container.ss_swerve_drive.drive_mode_padlocked()
+        # self.container.ss_extend.stop_motor()
+        self.container.ss_extend.set_position(3)
+        '''self.container.ss_swerve_drive.drive_mode_padlocked()
+        if self.container.ss_shooter:
+            self.container.ss_shooter.velocity_setpoint = 50
+            self.container.ss_shooter.run_velocity_at_setpoint()
+        if self.container.ss_feeder:
+            self.container.ss_feeder.percent_power_setpoint = .5
+            self.container.ss_feeder.run_voltage_percent_forward()
+        if self.container.ss_intake:
+            self.container.ss_intake.percent_power_setpoint = .5
+            self.container.ss_intake.run_voltage_percent_forward()'''
 
+    def testPeriodic(self) -> None:
+        """This function is called periodically during test mode"""
+        pass
+
+    def testExit(self) -> None:
+        self.container.ss_extend.set_position(0)
+    
 if __name__ == "__main__":
     wpilib.run(MyRobot)

@@ -22,6 +22,7 @@ class SS_Kraken(commands2.Subsystem):
         self._setup_hardware_configuration(inverted, brake_mode)
         self._apply_pidf_to_config(kp, ki, kd, kv, ks, ka, kg, Vmax, Amax, Jerk)
         self.requested_position = 0.0
+        self.position_actual = 0.0
         self.motor.set_position(self.requested_position) # pidf reset encoder position to 0 on startup
 
         self._put_telemetry_on_dashboard()
@@ -70,6 +71,7 @@ class SS_Kraken(commands2.Subsystem):
         SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name} Velocity Actual", self.velocity_actual)
         SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name} Velocity Setpoint", self.velocity_setpoint)
         SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name} Power Percent Setpoint", self.percent_power_setpoint)
+        SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name} Position Actual", self.position_actual)
         SmartDashboard.putNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} kP", self.kP)
         SmartDashboard.putNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} kI", self.kI)
         SmartDashboard.putNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} kD", self.kD)
@@ -94,6 +96,7 @@ class SS_Kraken(commands2.Subsystem):
     # Periodic tasks - dashboard updates and config changes
     # -------------------------
     def periodic(self):
+        self.position_actual = self.motor.get_position().value
         self.velocity_actual = self.motor.get_velocity().value
         SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name} Velocity Actual", self.velocity_actual)
         dashboard_velocity_setpoint = SmartDashboard.getNumber(f"SS_Telemetry/{self.dashboard_name} Velocity Setpoint", self.velocity_setpoint)
@@ -105,6 +108,7 @@ class SS_Kraken(commands2.Subsystem):
             self.percent_power_setpoint = max(min(dashboard_power_percent_setpoint, 1.0), -1.0)
             SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name} Power Percent Setpoint", self.percent_power_setpoint)
 
+        dashboard_p = SmartDashboard.getNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} Position Actual", self.position_actual)
         dashboard_p = SmartDashboard.getNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} kP", self.kP)
         dashboard_i = SmartDashboard.getNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} kI", self.kI)
         dashboard_d = SmartDashboard.getNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} kD", self.kD)
