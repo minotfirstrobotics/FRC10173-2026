@@ -1,7 +1,7 @@
 import wpilib
 import commands2
 from commands2 import cmd
-from wpilib import SmartDashboard, Timer, DriverStation
+from wpilib import Color8Bit, SmartDashboard, Timer, DriverStation
 from wpimath.geometry import Pose2d, Rotation2d
 from phoenix6 import HootAutoReplay
 from pathplannerlib.auto import AutoBuilder, NamedCommands
@@ -44,6 +44,14 @@ class RobotContainer:
 
         if self.gamepad:
              self.configure_gamepad_bindings()
+
+        # 1. Create the mechanism
+        self.mech2d = wpilib.Mechanism2d(10, 10)  # Width, Height
+        self.root2d = self.mech2d.getRoot("root", 5, 2)
+        self.intake2d = self.root2d.appendLigament("intake", 4, 135, 6, Color8Bit(0, 0, 255))
+        self.feeder2d = self.root2d.appendLigament("feeder", 4, 90, 6, Color8Bit(0, 255, 0))
+        self.shooter2d = self.root2d.appendLigament("shooter", 4, 45, 6, Color8Bit(255, 0, 0))
+        wpilib.SmartDashboard.putData("Mechanism", self.mech2d)
 
     def configure_gamepad_bindings(self):
 
@@ -115,7 +123,9 @@ class MyRobot(commands2.TimedCommandRobot):
         # self._time_and_driver_replay.update() # using HootAutoReplay to log and replay timestamp and driver data
         match_time_from_driver_station = Timer.getMatchTime()
         SmartDashboard.putNumber("Match Time", self.localMatchTimer.get() if match_time_from_driver_station < 0 else match_time_from_driver_station)
-
+        self.container.intake2d.setLength(4)#self.container.ss_intake.velocity_actual if self.container.ss_intake else 0)
+        self.container.feeder2d.setLength(4)#self.container.ss_feeder.velocity_actual if self.container.ss_feeder else 0)
+        self.container.shooter2d.setLength(4)#self.container.ss_shooter.velocity_actual/500 if self.container.ss_shooter else 0)
 
     def teleopInit(self) -> None:
         """
@@ -161,7 +171,7 @@ class MyRobot(commands2.TimedCommandRobot):
     def testInit(self) -> None:
         """Cancels all running commands at the start of test mode"""
         commands2.CommandScheduler.getInstance().cancelAll()
-
+        self.container.ss_swerve_drive.drive_mode_padlocked()
 
 if __name__ == "__main__":
     wpilib.run(MyRobot)
