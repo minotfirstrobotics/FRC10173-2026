@@ -21,7 +21,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         self._max_angular_rate = rotationsToRadians(0.75)
         self._max_speed_factor = 0.2
         self._max_speed = self._max_speed_factor * TunerConstants.speed_at_12_volts
-        wpilib.SmartDashboard.putNumber("Swerve/Swerve Max Speed", self._max_speed)
+        wpilib.SmartDashboard.putNumber("Swerve/Swerve Max Speed Factor", self._max_speed)
         self._pov_speed = 0.2
         self._latest_pose = Pose2d()
         self.drivetrain = TunerConstants.create_drivetrain() # does this need to after swerve configs?
@@ -29,6 +29,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         # self.drivetrain.register_telemetry( lambda state: self._logger.telemeterize(state) )
         self.x_vector_to_target = 0.0
         self.y_vector_to_target = 0.0
+        self.range_to_target = 0.0
         self.target_x = 0.0
         self.target_y = 0.0
 
@@ -53,28 +54,24 @@ class SS_SwerveDrive(commands2.Subsystem):
             swerve.requests.RobotCentric()
             .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE) )
 
-        self.setup_pathplanner_auto_builder()
+        self._setup_padlock_target_chooser()
+        self._setup_pathplanner_auto_builder()
         
     def periodic(self) -> None:
- 
         pose = self.drivetrain.sample_pose_at(Timer.getFPGATimestamp())
         if pose is not None:
             self._latest_pose = pose
-            self.target_y = 4.0 # meters, both are 4
-            if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
-                self.target_x = 4.6 # meters
-                self.x_vector_to_target = self._latest_pose.translation().X() - self.target_x
-                self.y_vector_to_target = self._latest_pose.translation().Y() - self.target_y
-            else:
-                self.target_x = 12.0 # meters
-                self.x_vector_to_target = self.target_x - self._latest_pose.translation().X()
-                self.y_vector_to_target = self.target_y - self._latest_pose.translation().Y()
-        if wpilib.SmartDashboard.getNumber("Swerve/Swerve Max Speed", self._max_speed_factor) != self._max_speed_factor:
-            self._max_speed_factor = wpilib.SmartDashboard.getNumber("Swerve/Swerve Max Speed", self._max_speed_factor)
-            # place to update any commands that rely on _max_speed if needed
-        if self._max_speed_factor > 1: # Cap at Drive Speed
-            self._max_speed_factor = 1
-            wpilib.SmartDashboard.putNumber("Swerve/Swerve Max Speed", self._max_speed_factor)
+            self.target_x, self.target_y = self._determine_padlock_target(pose)
+            self.x_vector_to_target = self.target_x - self._latest_pose.translation().X()
+            self.y_vector_to_target = self.target_y - self._latest_pose.translation().Y()
+            if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
+                self.x_vector_to_target = -self.x_vector_to_target
+                self.y_vector_to_target = -self.y_vector_to_target
+            self.range_to_target = (self.x_vector_to_target**2 + self.y_vector_to_target**2)**0.5
+
+        dashboard_max_speed = wpilib.SmartDashboard.getNumber("Swerve/Swerve Max Speed Factor", self._max_speed_factor)
+        if dashboard_max_speed != self._max_speed_factor:
+            self._max_speed_factor = max(min(dashboard_max_speed, 1.0), 0.0) # Clamp between 0 and 1
         wpilib.SmartDashboard.putNumber("Swerve/Target X Vector", self.x_vector_to_target)
         wpilib.SmartDashboard.putNumber("Swerve/Target Y Vector", self.y_vector_to_target)
         wpilib.SmartDashboard.putNumber("Swerve/Target X", self.target_x)
@@ -82,7 +79,7 @@ class SS_SwerveDrive(commands2.Subsystem):
 
         self._max_speed = self._max_speed_factor * TunerConstants.speed_at_12_volts
 
-        # Dashboard output
+        # Dashboard pose output
         pose_translation = self._latest_pose.translation()
         pose_rotation = self._latest_pose.rotation()
         SmartDashboard.putNumber("Swerve/Swerve Pose X (meters)", pose_translation.X())
@@ -90,8 +87,28 @@ class SS_SwerveDrive(commands2.Subsystem):
         SmartDashboard.putNumber("Swerve/Swerve Rotation (deg)", pose_rotation.degrees())
         self.field.setRobotPose(self._latest_pose)
 
+    def _determine_padlock_target(self, pose: Pose2d) -> tuple:
+        selected_target = self._padlock_target_chooser.getSelected()
+        if selected_target == (-1.0, -1.0) or selected_target is None: 
+            # If "Auto Targetting" is selected, choose target based on alliance and position
+            if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+                if pose.translation().X() < 4.6:
+                    selected_target = (4.6, 4.0)
+                elif pose.translation().Y() > 4.0:
+                    selected_target = (4.0, 6.0)
+                else:
+                    selected_target = (4.0, 2.0)
+            elif DriverStation.getAlliance() == DriverStation.Alliance.kRed:
+                if pose.translation().X() < 12.0:
+                    selected_target = (12.0, 4.0)
+                elif pose.translation().Y() > 4.0:
+                    selected_target = (12.0, 6.0)
+                else:
+                    selected_target = (12.0, 2.0)
+        return selected_target
+
     # -------------------------
-    # Motor movement functions
+    # Drive mode switching for joystick/gamepad control
     # -------------------------
     def drive_mode_field_centered(self) -> None:
         self.drivetrain.setDefaultCommand(
@@ -110,6 +127,17 @@ class SS_SwerveDrive(commands2.Subsystem):
                     .with_target_direction(Rotation2d(self.x_vector_to_target, self.y_vector_to_target)) # Desired Heading (e.g., (0,1) = 90 deg)
                     .with_heading_pid(20, 0, 0) ))  ) # PID for heading control
     
+    def drive_mode_robot_centered(self) -> None:
+        self.drivetrain.setDefaultCommand(
+            self.drivetrain.apply_request(lambda: (
+                self._drive_robot_centered
+                    .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
+                    .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
+                    .with_rotational_rate(-self._joystick.getRightX() * abs(self._joystick.getRightX()) * self._max_angular_rate)) ))
+
+    # -------------------------
+    # Drive requests for automated movement
+    # -------------------------
     def free_rotate_drive_request_command(self, vx_requested, vy_requested, rotational_rate) -> commands2.Command:
         return self.drivetrain.apply_request(lambda: (
             self._drive_field_centered
@@ -128,11 +156,12 @@ class SS_SwerveDrive(commands2.Subsystem):
                 .with_target_direction(Rotation2d(x_vector, y_vector))
                 .with_heading_pid(5, 0, 0) ))
 
-    def pov_move(self, direction_x, direction_y) -> commands2.Command:
+    def robot_pov_drive_request_command(self, direction_x, direction_y) -> commands2.Command:
         return self.drivetrain.apply_request(lambda: (
             self._drive_robot_centered
                 .with_velocity_x(direction_x * self._pov_speed)
-                .with_velocity_y(direction_y * self._pov_speed) ) )
+                .with_velocity_y(direction_y * self._pov_speed)
+                .with_rotational_rate(0) ) )
 
     def brake(self) -> None:
         self.drivetrain.apply_request(lambda: swerve.requests.SwerveDriveBrake())
@@ -140,16 +169,6 @@ class SS_SwerveDrive(commands2.Subsystem):
     # -------------------------
     # Utility functions
     # -------------------------
-    def change_target(self, x=-1.0, y=-1.0) -> None:
-        if x == -1.0 and y == -1.0:
-            if x == 4.6: # blue target
-                self.target_x = 12.0
-            elif x == 12.0: # red target
-                self.target_x = 4.6
-        else:
-            self.target_x = x
-            self.target_y = y
-
     def PIDF_sysID_tuning_bindings(self) -> None:
         (self._joystick.start() & self._joystick.leftBumper()).onTrue(SignalLogger.start)
         (self._joystick.start() & self._joystick.rightBumper()).onTrue(SignalLogger.stop)
@@ -176,7 +195,7 @@ class SS_SwerveDrive(commands2.Subsystem):
     # -------------------------
     # Pathplannerlib setup and helpers
     # -------------------------
-    def setup_pathplanner_auto_builder(self) -> None:
+    def _setup_pathplanner_auto_builder(self) -> None:
         AutoBuilder.configure(
             pose_supplier=self.get_pose,
             reset_pose=self.reset_pose,
@@ -224,3 +243,14 @@ class SS_SwerveDrive(commands2.Subsystem):
             swerve.requests.ApplyRobotSpeeds().with_speeds(robot_relative_speeds)
         )
 
+    def _setup_padlock_target_chooser(self):
+        # This is an example of how you might set up a dashboard chooser to select between different padlock targets (e.g., different scoring locations)
+        self._padlock_target_chooser = wpilib.SendableChooser()
+        self._padlock_target_chooser.setDefaultOption("Auto Targetting", (-1.0, -1.0)) # Choose a target based on alliance and position
+        self._padlock_target_chooser.addOption("Blue Target", (4.6, 4.0)) # Blue alliance target
+        self._padlock_target_chooser.addOption("Blue Top Zone", (4.0, 6.0)) # Red alliance target
+        self._padlock_target_chooser.addOption("Blue Bottom Zone", (4.0, 2.0)) # Red alliance target
+        self._padlock_target_chooser.addOption("Red Target", (12.0, 4.0)) # Red alliance target
+        self._padlock_target_chooser.addOption("Red Top Zone", (12.6, 6.0)) # Red alliance target
+        self._padlock_target_chooser.addOption("Red Bottom Zone", (12.6, 2.0)) # Red alliance target
+        wpilib.SmartDashboard.putData("Swerve/Padlock Target Chooser", self._padlock_target_chooser)
