@@ -46,7 +46,7 @@ class RobotContainer:
             self.gamepad.rightTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(
                 self.ss_intake.run_voltage_percent_reverse, self.ss_intake.stop_motor, self.ss_intake))
             self.gamepad.y().whileTrue(cmd.startEnd(
-                lambda: self.ss_intake.set_position(1.5), self.ss_intake.stop_motor, self.ss_intake))
+                lambda: self.ss_extend.set_position(1.5), self.ss_extend.stop_motor, self.ss_intake))
         if self.ss_shooter and self.ss_feeder:
             self.gamepad.x().onFalse(SEQ_shoot(self.ss_shooter, self.ss_feeder))
 
@@ -149,7 +149,7 @@ class MyRobot(commands2.TimedCommandRobot):
                 self.container.ss_candle_light_right.set_all_leds_RGBW(255, 0, 0)
             if self.container.ss_candle_light_left:
                 self.container.ss_candle_light_left.set_all_leds_RGBW(255, 0, 0)
-        else:
+        elif DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
             if self.container.ss_candle_light_right:
                 self.container.ss_candle_light_right.set_all_leds_RGBW(0, 0, 255)
             if self.container.ss_candle_light_left:
