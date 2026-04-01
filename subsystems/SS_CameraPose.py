@@ -38,15 +38,19 @@ class SS_CameraPose(commands2.Subsystem):
         if not result.hasTargets():
             return
 
-        # calculate pos based on cams
-        est = self.estimator.estimate(result)
+        # calculate pos based on cams (use one of these)
+        est = self.estimator.estimatePnpDistanceTrigSolvePose(result)
+        est = self.estimator.estimateCoprocMultiTagPose(result)
+        est = self.estimator.estimateLowestAmbiguityPose(result)
+
         if est is None:
             return
 
         # send to swerve
         self.swerve_drive.drivetrain.add_vision_measurement(
             est.estimatedPose.toPose2d(),
-            est.timestampSeconds
+            est.timestampSeconds,
+            vision_measurement_std_devs = [1.1, 1.1, 50.0] # distrust of x, y in meters, heading in degrees
         )
 
         # Dashboard
