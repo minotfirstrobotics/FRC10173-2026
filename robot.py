@@ -22,10 +22,10 @@ class RobotContainer:
         self.gamepad = None or CommandXboxController(0)
         DriverStation.silenceJoystickConnectionWarning(True)
         self.canbus = TunerConstants.canbus
-        self.ss_shooter = None or SS_Kraken(3, self.canbus, "Shooter", max_rps=100, velocity_setpoint=40, kp=0.01, ki=0.0, kd=0.0, kv=0.01, ks=0.0)
-        self.ss_feeder = None or SS_Kraken(1, self.canbus, "Feeder", inverted=True, percent_power_setpoint=0.62)
-        self.ss_intake = None or SS_Kraken(4, self.canbus, "Intake", inverted=True, max_rps=120, percent_power_setpoint=0.62)
-        self.ss_extend = None or SS_Kraken(6, self.canbus, "Deploy Intake", kp=3, ki=0.5, Vmax=2, Amax=2, Jerk=10)
+        self.ss_shooter = None or SS_Kraken(3, self.canbus, "Shooter", inverted=True, max_rps=100, velocity_setpoint=40, kp=0.01, ki=0.0, kd=0.0, kv=0.01, ks=0.0)
+        self.ss_feeder = None or SS_Kraken(1, self.canbus, "Feeder", velocity_setpoint=40, percent_power_setpoint=0.62)
+        self.ss_intake = None or SS_Kraken(4, self.canbus, "Intake", max_rps=120, percent_power_setpoint=0.62)
+        self.ss_extend = None or SS_Kraken(6, self.canbus, "Extend Intake", inverted=True, brake_mode=True, kp=3, ki=0.5, Vmax=2, Amax=2, Jerk=10)
         self.ss_candle_light_rear = None #or SS_CANdleLight(2, self.canbus)
         self.ss_candle_light_front = None #or SS_CANdleLight(5, self.canbus)
         self.ss_swerve_drive = None or SS_SwerveDrive(self.gamepad)
@@ -190,8 +190,11 @@ class MyRobot(commands2.TimedCommandRobot):
     def testInit(self) -> None:
         """Cancels all running commands at the start of test mode"""
         commands2.CommandScheduler.getInstance().cancelAll()
+        self.container.ss_extend.stop_motor()
+        self.container.ss_extend.set_position(1.5)
+
         # self.container.ss_extend.stop_motor()
-        self.container.ss_extend.set_position(3)
+        # self.container.ss_extend.set_position(3)
         '''self.container.ss_swerve_drive.drive_mode_padlocked()
         if self.container.ss_shooter:
             self.container.ss_shooter.velocity_setpoint = 50
@@ -205,10 +208,10 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def testPeriodic(self) -> None:
         """This function is called periodically during test mode"""
-        pass
 
     def testExit(self) -> None:
-        self.container.ss_extend.set_position(0)
+        self.container.ss_extend.stop_motor()
+        # self.container.ss_extend.set_position(0)
     
 if __name__ == "__main__":
     wpilib.run(MyRobot)

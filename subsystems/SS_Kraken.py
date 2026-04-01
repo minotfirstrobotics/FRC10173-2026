@@ -9,7 +9,7 @@ class SS_Kraken(commands2.Subsystem):
     def __init__(self, device_id: int, canbus: CANBus, dashboard_name: str, 
                  inverted: bool=False, brake_mode: bool=False,
                  max_rps: int=100, velocity_setpoint: float=0.0, percent_power_setpoint: float=0.0,
-                 kp: float=0.00, ki: float=0.0, kd: float=0.0, kv: float=0.0, ks: float=0.0,
+                 kp: float=1.00, ki: float=0.0, kd: float=0.0, kv: float=0.0, ks: float=0.0,
                  ka: float=0.0, kg: float=0.0, Vmax: float=2.0, Amax: float=2.0, Jerk: float=10.0) -> None:
         self.motor = phoenix6.hardware.TalonFX(device_id, canbus)
 
@@ -143,7 +143,8 @@ class SS_Kraken(commands2.Subsystem):
         self.requested_position = target_rotations
 
     def stop_motor(self):
-        self.motor.stopMotor()
+        self.motor.set(0.0)
+        # self.motor.stopMotor()
 
     # -------------------------
     # Commands
