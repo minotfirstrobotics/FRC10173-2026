@@ -50,7 +50,7 @@ class SS_CameraPose(commands2.Subsystem):
         self.swerve_drive.drivetrain.add_vision_measurement(
             est.estimatedPose.toPose2d(),
             est.timestampSeconds,
-            vision_measurement_std_devs = [1.1, 1.1, 50.0] # distrust of x, y in meters, heading in degrees
+            vision_measurement_std_devs = [.3, .3, 5.0] # distrust of x, y in meters, heading in degrees
         )
 
         # Dashboard
