@@ -1,11 +1,16 @@
 # To Do List:
-* get CANDles working
 * build extension helper bungies
+* determine why bot drifts toward target in simulation
+* get CANDles working
 * Get photonvision apriltagging - app configured and rio coded
 * Get photonvision streaming
 * calculate range to target
 * determine field area and target certain locations
 * Determine logging strategies (SignalLogger.enable_auto_logging(True), hoot, etc )
+* dropdown selector on dashboard for drive mode
+* dropdown selector on dashboard for CANDle animations
+* battery voltage mapped to CANDle brightness
+
 
 # Dependencies:
 
