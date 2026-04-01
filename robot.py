@@ -23,7 +23,7 @@ class RobotContainer:
         DriverStation.silenceJoystickConnectionWarning(True)
         self.canbus = TunerConstants.canbus
         self.ss_shooter = None or SS_Kraken(3, self.canbus, "Shooter", inverted=True, max_rps=100, velocity_setpoint=40, kp=0.01, ki=0.0, kd=0.0, kv=0.01, ks=0.0)
-        self.ss_feeder = None or SS_Kraken(1, self.canbus, "Feeder", velocity_setpoint=40, percent_power_setpoint=0.62)
+        self.ss_feeder = None or SS_Kraken(1, self.canbus, "Feeder", kp=1.0, velocity_setpoint=40, percent_power_setpoint=0.62)
         self.ss_intake = None or SS_Kraken(4, self.canbus, "Intake", max_rps=120, percent_power_setpoint=0.62)
         self.ss_extend = None or SS_Kraken(6, self.canbus, "Extend Intake", inverted=True, brake_mode=True, kp=3, ki=0.5, Vmax=2, Amax=2, Jerk=10)
         self.ss_candle_light_rear = None #or SS_CANdleLight(2, self.canbus)
@@ -42,6 +42,9 @@ class RobotContainer:
         if self.gamepad:
              self.configure_gamepad_bindings()
 
+        self._setup_simulated_mechanism2d()
+
+    def _setup_simulated_mechanism2d(self):
         # ------------------- Simulated Mechanism2d Setup ------------------
         self.mech2d = wpilib.Mechanism2d(10, 10)  # Width, Height
         self.root2d = self.mech2d.getRoot("root", 5, 2)
