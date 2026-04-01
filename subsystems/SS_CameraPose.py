@@ -10,15 +10,15 @@ class SS_CameraPose(commands2.Subsystem):
         super().__init__()
         self.swerve_drive = swerve_drive
 
-        # load load feild 
+        # load load field 
         self.field_layout = AprilTagFieldLayout.loadField(AprilTagField.kDefaultField)
 
         # set camera
         self.frontcam = PhotonCamera("FrontCamera")
 
-        # we need to mesure this 
+        # we need to measure this 
         self.robot_to_frontcam = Transform3d(
-            Translation3d(0.2, 0.0, 0.5),
+            Translation3d(1.0, 2.0, 0.5), # meters forward, left, up from robot center
             Rotation3d(0.0, 0.0, 0.0)
         )
 

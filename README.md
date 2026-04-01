@@ -1,7 +1,10 @@
 # To Do List:
+* get CANDles working
+* build extension helper bungies
+* Get photonvision apriltagging - app configured and rio coded
+* Get photonvision streaming
 * calculate range to target
 * determine field area and target certain locations
-* Get photonvision
 * Determine logging strategies (SignalLogger.enable_auto_logging(True), hoot, etc )
 
 # Dependencies:

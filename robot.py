@@ -9,13 +9,9 @@ from commands2.button import CommandXboxController
 from generated.tuner_constants_2026_GF import TunerConstants
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
 from subsystems.SS_Kraken import SS_Kraken
-from examples.SS_ShooterKraken import SS_ShooterKraken
-from examples.SS_FeederKraken import SS_FeederKraken
-from examples.SS_IntakeKraken import SS_IntakeKraken
 from subsystems.SS_CANdleLight import SS_CANdleLight
 from subsystems.SS_CameraPose import SS_CameraPose
-from commands.CMD_ComboShoot import CMD_ComboShoot
-from commands.SEQ_sequences import SEQ_Shoot, SEQ_DeployIntake
+from commands.complex_and_sequences import CMD_ComboShoot, SEQ_Shoot, SEQ_DeployIntake
 
 class RobotContainer:
     def __init__(self) -> None:
@@ -25,38 +21,17 @@ class RobotContainer:
         self.ss_shooter = None or SS_Kraken(3, self.canbus, "Shooter", inverted=True, max_rps=100, velocity_setpoint=40, kp=0.01, ki=0.0, kd=0.0, kv=0.01, ks=0.0)
         self.ss_feeder = None or SS_Kraken(1, self.canbus, "Feeder", kp=1.0, velocity_setpoint=40, percent_power_setpoint=0.62)
         self.ss_intake = None or SS_Kraken(4, self.canbus, "Intake", max_rps=120, percent_power_setpoint=0.62)
-        self.ss_extend = None or SS_Kraken(6, self.canbus, "Extend Intake", inverted=True, brake_mode=True, kp=3, ki=0.5, Vmax=2, Amax=2, Jerk=10)
-        self.ss_candle_light_rear = None #or SS_CANdleLight(2, self.canbus)
-        self.ss_candle_light_front = None #or SS_CANdleLight(5, self.canbus)
+        self.ss_extend = None or SS_Kraken(6, self.canbus, "Extension", inverted=True, brake_mode=True, kp=3, ki=0.5, Vmax=2, Amax=2, Jerk=10)
+        self.ss_candle_light_left = None #or SS_CANdleLight(2, self.canbus)
+        self.ss_candle_light_right = None #or SS_CANdleLight(5, self.canbus)
         self.ss_swerve_drive = None or SS_SwerveDrive(self.gamepad)
         # self.ss_camera_pose = None or SS_CameraPose(self.ss_swerve_drive)
 
-        # ------------------ Complex Commands and Auto Builder ------------------
-        self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.gamepad)
-        NamedCommands.registerCommand("Combo Shoot", self.cmd_combo_shoot)
-        self.seq_shoot = SEQ_Shoot(self.ss_shooter, self.ss_feeder)
-        NamedCommands.registerCommand("SEQ Shoot", self.seq_shoot)
-        self.auto_chooser = AutoBuilder.buildAutoChooser("None") # must be defined after SS's and all registered commands
-        SmartDashboard.putData("Auto Chooser", self.auto_chooser)
+        self._build_complex_commands_and_autochooser()
+        self._setup_simulated_mechanism2d()
 
         if self.gamepad:
              self.configure_gamepad_bindings()
-
-        self._setup_simulated_mechanism2d()
-
-    def _setup_simulated_mechanism2d(self):
-        # ------------------- Simulated Mechanism2d Setup ------------------
-        self.mech2d = wpilib.Mechanism2d(10, 10)  # Width, Height
-        self.root2d = self.mech2d.getRoot("root", 5, 2)
-        if self.ss_intake:
-            self.intake2d = self.root2d.appendLigament("intake", 4, 135, 6, Color8Bit(0, 0, 255))
-        if self.ss_feeder:
-            self.feeder2d = self.root2d.appendLigament("feeder", 4, 90, 6, Color8Bit(0, 255, 0))
-        if self.ss_shooter:
-            self.shooter2d = self.root2d.appendLigament("shooter", 4, -135, 6, Color8Bit(255, 0, 0))
-        if self.ss_extend:
-            self.extend2d = self.root2d.appendLigament("extend", 2, 90, 3, Color8Bit(255, 255, 255))
-        wpilib.SmartDashboard.putData("Mechanism", self.mech2d)
 
     def configure_gamepad_bindings(self):
         if self.ss_shooter:
@@ -88,6 +63,27 @@ class RobotContainer:
             self.gamepad.back().and_(self.gamepad.b()).whileTrue(cmd.runOnce(self.ss_swerve_drive.brake))
             self.gamepad.back().and_(self.gamepad.start()).onTrue(cmd.runOnce(self.ss_swerve_drive.reset_field_oriented_perspective))
 
+    def _build_complex_commands_and_autochooser(self):
+        self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.gamepad)
+        NamedCommands.registerCommand("Combo Shoot", self.cmd_combo_shoot)
+        self.seq_shoot = SEQ_Shoot(self.ss_shooter, self.ss_feeder)
+        NamedCommands.registerCommand("SEQ Shoot", self.seq_shoot)
+        self.auto_chooser = AutoBuilder.buildAutoChooser("None") # must be defined after SS's and all registered commands
+        SmartDashboard.putData("Auto Chooser", self.auto_chooser)
+
+    def _setup_simulated_mechanism2d(self):
+        self.mech2d = wpilib.Mechanism2d(10, 10)  # Width, Height
+        self.root2d = self.mech2d.getRoot("root", 5, 2)
+        if self.ss_intake:
+            self.intake2d = self.root2d.appendLigament("intake", 4, 135, 6, Color8Bit(0, 0, 255))
+        if self.ss_feeder:
+            self.feeder2d = self.root2d.appendLigament("feeder", 4, 90, 6, Color8Bit(0, 255, 0))
+        if self.ss_shooter:
+            self.shooter2d = self.root2d.appendLigament("shooter", 4, -135, 6, Color8Bit(255, 0, 0))
+        if self.ss_extend:
+            self.extend2d = self.root2d.appendLigament("extend", 2, 90, 3, Color8Bit(255, 255, 255))
+        wpilib.SmartDashboard.putData("Mechanism", self.mech2d)
+
     def getAutonomousCommand(self) -> commands2.Command:
         return self.auto_chooser.getSelected()
 
@@ -109,10 +105,10 @@ class MyRobot(commands2.TimedCommandRobot):
         self.container = RobotContainer()
         self.localMatchTimer = Timer()
         # self._time_and_driver_replay = (HootAutoReplay().with_timestamp_replay().with_driver_replay() )
-        if self.container.ss_candle_light_front:
-            self.container.ss_candle_light_front.set_all_leds_RGBW(0, 255, 0) # Set front CANdle to green
-        if self.container.ss_candle_light_rear:
-            self.container.ss_candle_light_rear.set_all_leds_RGBW(255, 165, 0) # Set rear CANdle to orange
+        if self.container.ss_candle_light_right:
+            self.container.ss_candle_light_right.set_all_leds_RGBW(0, 255, 0) # Set front CANdle to green
+        if self.container.ss_candle_light_left:
+            self.container.ss_candle_light_left.set_all_leds_RGBW(255, 165, 0) # Set rear CANdle to orange
 
     def robotPeriodic(self) -> None:
         """
@@ -149,15 +145,15 @@ class MyRobot(commands2.TimedCommandRobot):
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
         if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
-            if self.container.ss_candle_light_front:
-                self.container.ss_candle_light_front.set_all_leds_RGBW(255, 0, 0)
-            if self.container.ss_candle_light_rear:
-                self.container.ss_candle_light_rear.set_all_leds_RGBW(255, 0, 0)
+            if self.container.ss_candle_light_right:
+                self.container.ss_candle_light_right.set_all_leds_RGBW(255, 0, 0)
+            if self.container.ss_candle_light_left:
+                self.container.ss_candle_light_left.set_all_leds_RGBW(255, 0, 0)
         else:
-            if self.container.ss_candle_light_front:
-                self.container.ss_candle_light_front.set_all_leds_RGBW(0, 0, 255)
-            if self.container.ss_candle_light_rear:
-                self.container.ss_candle_light_rear.set_all_leds_RGBW(0, 0, 255)
+            if self.container.ss_candle_light_right:
+                self.container.ss_candle_light_right.set_all_leds_RGBW(0, 0, 255)
+            if self.container.ss_candle_light_left:
+                self.container.ss_candle_light_left.set_all_leds_RGBW(0, 0, 255)
 
     def teleopPeriodic(self) -> None:
         """This function is called periodically during operator control"""
