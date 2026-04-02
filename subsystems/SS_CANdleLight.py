@@ -1,3 +1,4 @@
+import wpilib
 import commands2
 from phoenix6.hardware import CANdle
 from phoenix6.configs import CANdleConfiguration
@@ -7,19 +8,40 @@ from phoenix6.controls import FireAnimation, SingleFadeAnimation, TwinkleAnimati
 from phoenix6.controls import TwinkleOffAnimation, SolidColor, ColorFlowAnimation
 
 class SS_CANdleLight(commands2.Subsystem):
-    def __init__(self, CANdle_channel: int, canbus) -> None:
+    def __init__(self, CANdle_channel: int, canbus, dashboard_name: str) -> None:
         self.candle = CANdle(CANdle_channel, canbus)
-
+        self.dashboard_name = dashboard_name
         configs = CANdleConfiguration()
         configs.led.with_strip_type(StripTypeValue.RGB).with_brightness_scalar(0.5)
 
         configs.candle_features = CANdleFeaturesConfigs()
         #configs.candle_features.with_enable5_v_rail(True)
         self.candle.configurator.apply(configs)
-        self.set_all_leds_RGBW(red=0, green=0, blue=255) # Set all LEDs to blue
+        if wpilib.DriverStation.getAlliance() == wpilib.DriverStation.Alliance.kRed:
+            alliance_color_solid = lambda: self.set_all_leds_RGBW(red=255, green=0, blue=0)
+        elif wpilib.DriverStation.getAlliance() == wpilib.DriverStation.Alliance.kBlue:
+            alliance_color_solid = lambda: self.set_all_leds_RGBW(red=0, green=0, blue=255)
+        else:
+            alliance_color_solid = lambda: self.set_all_leds_RGBW(red=255, green=255, blue=255)
+        self.selected_animation = alliance_color_solid
+        self.selected_animation()
+        self._color_chooser = wpilib.SendableChooser()
+        self._color_chooser.setDefaultOption("Alliance Color Solid", alliance_color_solid) # Choose a target based on alliance and position
+        self._color_chooser.addOption("Fire", self.set_animation_fire)
+        self._color_chooser.addOption("Twinkle", self.set_animation_twinkle)
+        self._color_chooser.addOption("Single Fade Red", lambda: self.set_animation_single_fade(red=255, green=0, blue=0))
+        self._color_chooser.addOption("Single Fade Blue", lambda: self.set_animation_single_fade(red=0, green=0, blue=255))
+        self._color_chooser.addOption("Larson Red", lambda: self.set_animation_larson(red=255, green=0, blue=0))
+        self._color_chooser.addOption("Larson Blue", lambda: self.set_animation_larson(red=0, green=0, blue=255))
+        self._color_chooser.addOption("Color Flow", self.set_animation_color_flow)
+        self._color_chooser.addOption("Twinkle Off", self.set_animation_twinkle_off)
+        wpilib.SmartDashboard.putData(f"SS_Telemetry/{self.dashboard_name} Animation", self._color_chooser)
 
     def periodic(self):
-        pass
+        # This method will be called once per scheduler run
+        if self._color_chooser.getSelected() != self.selected_animation:
+            self.selected_animation = self._color_chooser.getSelected()
+            self.selected_animation()
 
     # --------------------------
     # LED control functions
