@@ -1,7 +1,5 @@
 # To Do List:
-* build extension helper bungies
 * determine why bot drifts toward target in simulation
-* get CANDles working
 * Get photonvision apriltagging - app configured and rio coded
 * Get photonvision streaming
 * calculate range to target
