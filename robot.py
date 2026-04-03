@@ -19,11 +19,11 @@ class RobotContainer:
         DriverStation.silenceJoystickConnectionWarning(True)
         self.canbus = TunerConstants.canbus
         self.ss_shooter = None or SS_Kraken(3, self.canbus, "Shooter", inverted=True, max_rps=100, velocity_setpoint=40, kp=0.01, ki=0.0, kd=0.0, kv=0.01, ks=0.0)
-        self.ss_feeder = None or SS_Kraken(1, self.canbus, "Feeder", kp=1.0, velocity_setpoint=40, percent_power_setpoint=0.62)
-        self.ss_intake = None or SS_Kraken(4, self.canbus, "Intake", max_rps=120, percent_power_setpoint=0.62)
-        self.ss_extend = None or SS_Kraken(6, self.canbus, "Extension", inverted=True, brake_mode=True, kp=3, ki=0.5, Vmax=2, Amax=2, Jerk=10)
-        self.ss_candle_light_left = None or SS_CANdleLight(2, self.canbus, "Left CANdle")
-        self.ss_candle_light_right = None or SS_CANdleLight(5, self.canbus, "Right CANdle")
+        self.ss_feeder = None or SS_Kraken(1, self.canbus, "Feeder", kp=1.0, velocity_setpoint=40, percent_power_setpoint=0.5)
+        self.ss_intake = None or SS_Kraken(4, self.canbus, "Intake", max_rps=120, percent_power_setpoint=0.5)
+        self.ss_extend = None or SS_Kraken(6, self.canbus, "Extension", inverted=True, brake_mode=True, kp=5, ki=0.5, Vmax=1, Amax=1, Jerk=5)
+        self.ss_candle_light_left = None or SS_CANdleLight(2, self.canbus, "Left")
+        self.ss_candle_light_right = None or SS_CANdleLight(5, self.canbus, "Right")
         self.ss_swerve_drive = None or SS_SwerveDrive(self.gamepad)
         self.ss_camera_pose = None or SS_CameraPose(self.ss_swerve_drive)
 
