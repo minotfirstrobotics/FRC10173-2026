@@ -8,6 +8,7 @@
 * dropdown selector on dashboard for drive mode
 * dropdown selector on dashboard for CANDle animations
 * battery voltage mapped to CANDle brightness
+* add position_setpoint to SS_Kraken
 
 
 # Dependencies:
