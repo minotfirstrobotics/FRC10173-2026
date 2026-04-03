@@ -56,10 +56,13 @@ class SS_Kraken(commands2.Subsystem):
         self._config.slot0.k_s = self.kS = new_s # optional static feedforward for overcoming static friction
         self._config.slot0.k_a = self.kA = new_a # optional acceleration feedforward for compensating inertia
         self._config.slot0.k_g = self.kG = new_g # optional gravity feedforward for compensating gravity effects
+        self.Vmax = new_Vmax
+        self.Amax = new_Amax
+        self.Jerk = new_Jerk
         if self.Vmax or self.Amax or self.Jerk:
-            self._config.motion_magic.motion_magic_cruise_velocity = self.Vmax = new_Vmax
-            self._config.motion_magic.motion_magic_acceleration = self.Amax = new_Amax
-            self._config.motion_magic.motion_magic_jerk = self.Jerk = new_Jerk
+            self._config.motion_magic.motion_magic_cruise_velocity = self.Vmax
+            self._config.motion_magic.motion_magic_acceleration = self.Amax
+            self._config.motion_magic.motion_magic_jerk = self.Jerk
         #self._config.feedback.sensor_to_mechanism_ratio = 100.0
 
         self.status = self.motor.configurator.apply(self._config)
