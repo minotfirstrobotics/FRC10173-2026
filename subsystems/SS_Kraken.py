@@ -134,17 +134,25 @@ class SS_Kraken(commands2.Subsystem):
     # -------------------------
     # Motor movement functions
     # -------------------------
-    def run_velocity_at_setpoint(self) -> None:
+    def run_velocity_at_setpoint(self, setpoint:float = None) -> None:
+        if setpoint is None:
+            setpoint = self.velocity_setpoint
         """Needs PIDF settings and max_rps to be configured appropriately for good performance."""
-        self.motor.set_control(self.velocity_request.with_velocity(self.velocity_setpoint))
+        self.motor.set_control(self.velocity_request.with_velocity(setpoint))
 
-    def run_voltage_percent_forward(self) -> None:
-        self.motor.set(self.percent_power_setpoint)
+    def run_voltage_percent_forward(self, setpoint:float = None) -> None:
+        if setpoint is None:
+            setpoint = self.velocity_setpoint
+        self.motor.set(setpoint)
 
-    def run_voltage_percent_reverse(self) -> None:
-        self.motor.set(-self.percent_power_setpoint)
+    def run_voltage_percent_reverse(self, setpoint:float = None) -> None:
+        if setpoint is None:
+            setpoint = self.velocity_setpoint
+        self.motor.set(-setpoint)
 
-    def set_position(self, target_rotations: float) -> None:
+    def set_position(self, target_rotations: float = None) -> None:
+        if target_rotations is None:
+            target_rotations = self.requested_position
         self.motor.set_control(self.position_request_with_trapezoid.with_position(float(target_rotations)))
         self.requested_position = target_rotations
 

@@ -1,6 +1,6 @@
 import wpilib
 import commands2
-from commands2 import SequentialCommandGroup, WaitCommand, cmd
+from commands2 import WaitCommand, cmd
 from commands2.button import CommandXboxController
 from subsystems.SS_Kraken import SS_Kraken
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
@@ -8,7 +8,7 @@ from subsystems.SS_CANdleLight import SS_CANdleLight
 
 
 def SEQ_shoot(shooter: SS_Kraken, feeder: SS_Kraken):
-    return SequentialCommandGroup(
+    return commands2.SequentialCommandGroup(
         cmd.runOnce(shooter.spin_up_and_wait_command),
         cmd.runOnce(lambda: shooter.run_velocity_at_setpoint), # Ensure shooter is running at setpoint while feeder runs
         cmd.runOnce(lambda: feeder.run_velocity_at_setpoint).withTimeout(3.0), # Run feeder for 3 seconds after shooter is up to speed
@@ -17,17 +17,23 @@ def SEQ_shoot(shooter: SS_Kraken, feeder: SS_Kraken):
     )
 
 def SEQ_extend_intake(extender: SS_Kraken):
-    return SequentialCommandGroup(
+    return commands2.SequentialCommandGroup(
         cmd.runOnce(lambda: extender.set_position(1.5)).withTimeout(2.0),
         cmd.runOnce(extender.stop_motor)
     )
 
 def SEQ_auto_shake_intake(swerve: SS_SwerveDrive):
-    return SequentialCommandGroup(
+    return commands2.SequentialCommandGroup(
         swerve.padlocked_drive_request_command(vx_requested=0.5, vy_requested=0.0, x_vector=1.0, y_vector=0.0).withTimeout(2.0),
         swerve.padlocked_drive_request_command(vx_requested=-1.5, vy_requested=0.0, x_vector=1.0, y_vector=0.0).withTimeout(1.0),
         swerve.padlocked_drive_request_command(vx_requested=2.0, vy_requested=0.0, x_vector=1.0, y_vector=0.0).withTimeout(0.2),
         swerve.padlocked_drive_request_command(vx_requested=-0.0, vy_requested=0.0, x_vector=1.0, y_vector=0.0).withTimeout(0.5),
+    )
+
+def CMD_deploy_intake(extender: SS_Kraken, shooter: SS_Kraken):
+    return commands2.ParallelCommandGroup(
+        cmd.runOnce(lambda: extender.set_position(3)).withTimeout(2.0),
+        cmd.runOnce(shooter.run_voltage_percent_reverse).withTimeout(2.0)
     )
 
 class CMD_ComboShoot(commands2.Command):
