@@ -35,7 +35,7 @@ class SS_CANdleLight(commands2.Subsystem):
         self._color_chooser.addOption("Larson Blue", lambda: self.set_animation_larson(red=0, green=0, blue=255))
         self._color_chooser.addOption("Color Flow", self.set_animation_color_flow)
         self._color_chooser.addOption("Twinkle Off", self.set_animation_twinkle_off)
-        wpilib.SmartDashboard.putData(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Animation", self._color_chooser)
+        wpilib.SmartDashboard.putData(f"SS_Telemetry/CANDle {self.dashboard_name}/{self.dashboard_name} CANDle Animation", self._color_chooser)
 
     def periodic(self):
         # This method will be called once per scheduler run
