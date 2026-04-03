@@ -172,9 +172,12 @@ class MyRobot(commands2.TimedCommandRobot):
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
         self.autonomousCommand = self.container.getAutonomousCommand()
-        # self.autonomousCommand = SEQ_extend_intake(self.container.ss_swerve_drive)
-        if self.autonomousCommand:
-            self.autonomousCommand.schedule()
+        
+        if not self.autonomousCommand:
+            print("No autonomous command selected.")
+            return
+
+        self.autonomousCommand.schedule()
 
     def autonomousPeriodic(self) -> None:
         """This function is called periodically during autonomous"""
