@@ -20,8 +20,8 @@
         "y": 6.79473309608541
       },
       "prevControl": {
-        "x": 7.165913404507712,
-        "y": 7.0112394470315165
+        "x": 7.165913404507711,
+        "y": 7.011239447031519
       },
       "nextControl": {
         "x": 7.415913404507711,
@@ -47,7 +47,20 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "Deploy_Intake",
+      "waypointRelativePos": 0.0,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "Run_Intake",
+      "waypointRelativePos": 1.0101282916947831,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
