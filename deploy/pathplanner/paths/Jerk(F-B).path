@@ -3,45 +3,45 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 12.77265335235378,
-        "y": 7.444336661911555
+        "x": 3.625,
+        "y": 7.5
       },
       "prevControl": null,
       "nextControl": {
-        "x": 13.837111053808892,
-        "y": 7.444336661911555
+        "x": 4.625,
+        "y": 7.5
       },
       "isLocked": true,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 14.03871111111713,
-        "y": 7.444336661911555
+        "x": 6.5,
+        "y": 7.5
       },
       "prevControl": {
-        "x": 14.564911111117134,
-        "y": 7.484533333331313
+        "x": 6.25,
+        "y": 7.5
       },
       "nextControl": {
-        "x": 13.593141789492506,
-        "y": 7.410299406844908
+        "x": 6.75,
+        "y": 7.5
       },
-      "isLocked": false,
+      "isLocked": true,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 10.803555555561577,
-        "y": 7.444336661911555
+        "x": 5.0,
+        "y": 7.5
       },
       "prevControl": {
-        "x": 11.203077777783799,
-        "y": 7.416322222220202
+        "x": 6.0,
+        "y": 7.5
       },
       "nextControl": null,
-      "isLocked": false,
-      "linkedName": "End of red jerk"
+      "isLocked": true,
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -58,13 +58,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 179.8063007310811
+    "rotation": 0.0
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 179.82965969833543
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }
