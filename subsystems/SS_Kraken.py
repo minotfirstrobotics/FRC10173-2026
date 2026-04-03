@@ -99,6 +99,7 @@ class SS_Kraken(commands2.Subsystem):
     # Periodic tasks - dashboard updates and config changes
     # -------------------------
     def periodic(self):
+        self._put_telemetry_on_dashboard()
         self.position_actual = self.motor.get_position().value
         self.velocity_actual = self.motor.get_velocity().value
         SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Velocity Actual", self.velocity_actual)
