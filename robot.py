@@ -18,14 +18,14 @@ class RobotContainer:
         self.gamepad = None or CommandXboxController(0)
         DriverStation.silenceJoystickConnectionWarning(True)
         self.canbus = TunerConstants.canbus
-        self.ss_shooter = None or SS_Kraken(3, self.canbus, "Shooter", inverted=True, max_rps=100, velocity_setpoint=40, kp=0.01, ki=0.0, kd=0.0, kv=0.01, ks=0.0)
-        self.ss_feeder = None or SS_Kraken(1, self.canbus, "Feeder", kp=1.0, velocity_setpoint=40, percent_power_setpoint=0.62)
-        self.ss_intake = None or SS_Kraken(4, self.canbus, "Intake", max_rps=120, percent_power_setpoint=0.62)
-        self.ss_extend = None or SS_Kraken(6, self.canbus, "Extension", inverted=True, brake_mode=True, kp=3, ki=0.5, Vmax=2, Amax=2, Jerk=10)
-        self.ss_candle_light_left = None or SS_CANdleLight(2, self.canbus, "Left CANdle")
-        self.ss_candle_light_right = None or SS_CANdleLight(5, self.canbus, "Right CANdle")
+        self.ss_shooter = None or SS_Kraken(3, self.canbus, "Shooter", inverted=True, max_rps=100, velocity_setpoint=40, kp=0.08, ki=0.0, kd=0.0, kv=0.012, ks=0.0)
+        self.ss_feeder = None or SS_Kraken(1, self.canbus, "Feeder", kp=1.0, velocity_setpoint=40, percent_power_setpoint=0.5)
+        self.ss_intake = None or SS_Kraken(4, self.canbus, "Intake", max_rps=120, percent_power_setpoint=0.5)
+        self.ss_extend = None or SS_Kraken(6, self.canbus, "Extension", inverted=True, brake_mode=True, kp=5, ki=0.5, Vmax=.5, Amax=.5, Jerk=2.5)
+        self.ss_candle_light_left = None or SS_CANdleLight(2, self.canbus, "Left")
+        self.ss_candle_light_right = None or SS_CANdleLight(5, self.canbus, "Right")
         self.ss_swerve_drive = None or SS_SwerveDrive(self.gamepad)
-        self.ss_camera_pose = None or SS_CameraPose(self.ss_swerve_drive)
+        self.ss_camera_pose = None# or SS_CameraPose(self.ss_swerve_drive)
 
         self._build_complex_commands_and_autochooser()
         self._setup_simulated_mechanism2d()
@@ -42,11 +42,11 @@ class RobotContainer:
                 self.ss_feeder.run_velocity_at_setpoint, self.ss_feeder.stop_motor, self.ss_feeder))
         if self.ss_intake:
             self.gamepad.leftTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(
-                self.ss_intake.run_voltage_percent_forward, self.ss_intake.stop_motor, self.ss_intake))
-            self.gamepad.rightTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(
                 self.ss_intake.run_voltage_percent_reverse, self.ss_intake.stop_motor, self.ss_intake))
+            self.gamepad.rightTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(
+                self.ss_intake.run_voltage_percent_forward, self.ss_intake.stop_motor, self.ss_intake))
             self.gamepad.y().whileTrue(cmd.startEnd(
-                lambda: self.ss_extend.set_position(1.5), self.ss_extend.stop_motor, self.ss_intake))
+                lambda: self.ss_extend.set_position(3), self.ss_extend.stop_motor, self.ss_intake))
         if self.ss_shooter and self.ss_feeder:
             self.gamepad.x().onFalse(SEQ_shoot(self.ss_shooter, self.ss_feeder))
 
@@ -68,6 +68,10 @@ class RobotContainer:
         NamedCommands.registerCommand("Combo Shoot", self.cmd_combo_shoot)
         self.seq_shoot = SEQ_shoot(self.ss_shooter, self.ss_feeder)
         NamedCommands.registerCommand("SEQ Shoot", self.seq_shoot)
+        self.deploy_intake = cmd.runOnce(lambda: self.ss_extend.set_position(1.5), self.ss_extend)
+        NamedCommands.registerCommand("Deploy_Intake", self.deploy_intake)
+        self.run_intake = cmd.startEnd(self.ss_intake.run_voltage_percent_forward, self.ss_intake.stop_motor, self.ss_intake)
+        NamedCommands.registerCommand("Run_Intake", self.run_intake)
         self.auto_chooser = AutoBuilder.buildAutoChooser("None") # must be defined after SS's and all registered commands
         SmartDashboard.putData("Auto Chooser", self.auto_chooser)
 

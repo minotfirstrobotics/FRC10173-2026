@@ -10,7 +10,7 @@ class SS_Kraken(commands2.Subsystem):
                  inverted: bool=False, brake_mode: bool=False,
                  max_rps: int=100, velocity_setpoint: float=0.0, percent_power_setpoint: float=0.0,
                  kp: float=0.0, ki: float=0.0, kd: float=0.0, kv: float=0.0, ks: float=0.0,
-                 ka: float=0.0, kg: float=0.0, Vmax: float=2.0, Amax: float=2.0, Jerk: float=10.0) -> None:
+                 ka: float=0.0, kg: float=0.0, Vmax: float=0.0, Amax: float=0.0, Jerk: float=0.0) -> None:
         self.motor = phoenix6.hardware.TalonFX(device_id, canbus)
 
         self.dashboard_name = dashboard_name
@@ -49,6 +49,7 @@ class SS_Kraken(commands2.Subsystem):
 
     def _apply_pidf_to_config(self, new_p, new_i, new_d, new_v, new_s, 
                               new_a, new_g, new_Vmax, new_Amax, new_Jerk):
+        wpilib.reportWarning(f"Applying PIDF config to {self.dashboard_name}: kP={new_p}, kI={new_i}, kD={new_d}, kV={new_v}, kS={new_s}, kA={new_a}, kG={new_g}, Vmax={new_Vmax}, Amax={new_Amax}, Jerk={new_Jerk}", printTrace=False)
         self._config.slot0.k_p = self.kP = new_p
         self._config.slot0.k_i = self.kI = new_i
         self._config.slot0.k_d = self.kD = new_d
@@ -56,9 +57,13 @@ class SS_Kraken(commands2.Subsystem):
         self._config.slot0.k_s = self.kS = new_s # optional static feedforward for overcoming static friction
         self._config.slot0.k_a = self.kA = new_a # optional acceleration feedforward for compensating inertia
         self._config.slot0.k_g = self.kG = new_g # optional gravity feedforward for compensating gravity effects
-        self._config.motion_magic.motion_magic_cruise_velocity = self.Vmax = new_Vmax
-        self._config.motion_magic.motion_magic_acceleration = self.Amax = new_Amax
-        self._config.motion_magic.motion_magic_jerk = self.Jerk = new_Jerk
+        self.Vmax = new_Vmax
+        self.Amax = new_Amax
+        self.Jerk = new_Jerk
+        if self.Vmax or self.Amax or self.Jerk:
+            self._config.motion_magic.motion_magic_cruise_velocity = self.Vmax
+            self._config.motion_magic.motion_magic_acceleration = self.Amax
+            self._config.motion_magic.motion_magic_jerk = self.Jerk
         #self._config.feedback.sensor_to_mechanism_ratio = 100.0
 
         self.status = self.motor.configurator.apply(self._config)
@@ -123,22 +128,31 @@ class SS_Kraken(commands2.Subsystem):
             dashboard_Vmax != self.Vmax or dashboard_Amax != self.Amax or dashboard_Jerk != self.Jerk):
             self._apply_pidf_to_config(dashboard_p, dashboard_i, dashboard_d, dashboard_v, dashboard_s, 
                                        dashboard_a, dashboard_g, dashboard_Vmax, dashboard_Amax, dashboard_Jerk)
+        self._put_telemetry_on_dashboard()
 
 
     # -------------------------
     # Motor movement functions
     # -------------------------
-    def run_velocity_at_setpoint(self) -> None:
+    def run_velocity_at_setpoint(self, setpoint:float = None) -> None:
+        if setpoint is None:
+            setpoint = self.velocity_setpoint
         """Needs PIDF settings and max_rps to be configured appropriately for good performance."""
-        self.motor.set_control(self.velocity_request.with_velocity(self.velocity_setpoint))
+        self.motor.set_control(self.velocity_request.with_velocity(setpoint))
 
-    def run_voltage_percent_forward(self) -> None:
-        self.motor.set(self.percent_power_setpoint)
+    def run_voltage_percent_forward(self, setpoint:float = None) -> None:
+        if setpoint is None:
+            setpoint = self.velocity_setpoint
+        self.motor.set(setpoint)
 
-    def run_voltage_percent_reverse(self) -> None:
-        self.motor.set(-self.percent_power_setpoint)
+    def run_voltage_percent_reverse(self, setpoint:float = None) -> None:
+        if setpoint is None:
+            setpoint = self.velocity_setpoint
+        self.motor.set(-setpoint)
 
-    def set_position(self, target_rotations: float) -> None:
+    def set_position(self, target_rotations: float = None) -> None:
+        if target_rotations is None:
+            target_rotations = self.requested_position
         self.motor.set_control(self.position_request_with_trapezoid.with_position(float(target_rotations)))
         self.requested_position = target_rotations
 
