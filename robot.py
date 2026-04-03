@@ -4,7 +4,7 @@ from commands2 import cmd
 from wpilib import Color8Bit, SmartDashboard, Timer, DriverStation
 from wpimath.geometry import Pose2d, Rotation2d
 from phoenix6 import HootAutoReplay
-from pathplannerlib.auto import AutoBuilder, NamedCommands
+from pathplannerlib.auto import AutoBuilder, NamedCommands, PathConstraints
 from commands2.button import CommandXboxController
 from generated.tuner_constants_2026_GF import TunerConstants
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
@@ -16,6 +16,7 @@ from commands.complex_and_sequences import CMD_ComboShoot, SEQ_shoot, SEQ_extend
 class RobotContainer:
     def __init__(self) -> None:
         self.gamepad = None or CommandXboxController(0)
+        self.operator = None or CommandXboxController(1)
         DriverStation.silenceJoystickConnectionWarning(True)
         self.canbus = TunerConstants.canbus
         self.ss_shooter = None or SS_Kraken(3, self.canbus, "Shooter", inverted=True, max_rps=100, velocity_setpoint=40, kp=0.08, ki=0.0, kd=0.0, kv=0.012, ks=0.0)
@@ -30,23 +31,17 @@ class RobotContainer:
         self._build_complex_commands_and_autochooser()
         self._setup_simulated_mechanism2d()
 
-        if self.gamepad:
-             self.configure_gamepad_bindings()
+        if self.gamepad: self.configure_gamepad_bindings()
 
     def configure_gamepad_bindings(self):
         if self.ss_shooter:
-            self.gamepad.rightBumper().whileTrue(cmd.startEnd(
-                self.ss_shooter.run_velocity_at_setpoint, self.ss_shooter.stop_motor, self.ss_shooter))
+            self.gamepad.rightBumper().whileTrue(cmd.startEnd(self.ss_shooter.run_velocity_at_setpoint, self.ss_shooter.stop_motor, self.ss_shooter))
         if self.ss_feeder:
-            self.gamepad.leftBumper().whileTrue(cmd.startEnd(
-                self.ss_feeder.run_velocity_at_setpoint, self.ss_feeder.stop_motor, self.ss_feeder))
+            self.gamepad.leftBumper().whileTrue(cmd.startEnd(self.ss_feeder.run_velocity_at_setpoint, self.ss_feeder.stop_motor, self.ss_feeder))
         if self.ss_intake:
-            self.gamepad.leftTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(
-                self.ss_intake.run_voltage_percent_reverse, self.ss_intake.stop_motor, self.ss_intake))
-            self.gamepad.rightTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(
-                self.ss_intake.run_voltage_percent_forward, self.ss_intake.stop_motor, self.ss_intake))
-            self.gamepad.y().whileTrue(cmd.startEnd(
-                lambda: self.ss_extend.set_position(3), self.ss_extend.stop_motor, self.ss_intake))
+            self.gamepad.leftTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(self.ss_intake.run_voltage_percent_reverse, self.ss_intake.stop_motor, self.ss_intake))
+            self.gamepad.rightTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(self.ss_intake.run_voltage_percent_forward, self.ss_intake.stop_motor, self.ss_intake))
+            self.gamepad.y().whileTrue(cmd.startEnd(lambda: self.ss_extend.set_position(3), self.ss_extend.stop_motor, self.ss_intake))
         if self.ss_shooter and self.ss_feeder:
             self.gamepad.x().onFalse(SEQ_shoot(self.ss_shooter, self.ss_feeder))
 
@@ -56,10 +51,10 @@ class RobotContainer:
             self.gamepad.a().onTrue(cmd.runOnce(self.ss_swerve_drive.drive_mode_padlocked))
             self.gamepad.a().onFalse(cmd.runOnce(self.ss_swerve_drive.drive_mode_field_centered))
             # self.gamepad.a().and_(self.gamepad.back()).onFalse(cmd.runOnce(self.ss_swerve_drive.change_target))
-            # self.gamepad.pov(0).whileTrue(self.ss_swerve_drive.robot_pov_drive_request_command(1, 0))
-            # self.gamepad.pov(180).whileTrue(cmd.startEnd(lambda: self.ss_swerve_drive.robot_pov_drive_request_command(-1, 0), lambda: self.ss_swerve_drive.robot_pov_drive_request_command(0, 0)) )
-            # self.gamepad.pov(90).whileTrue(cmd.startEnd(lambda: self.ss_swerve_drive.robot_pov_drive_request_command(0, 1), lambda: self.ss_swerve_drive.robot_pov_drive_request_command(0, 0)) )
-            # self.gamepad.pov(270).whileTrue(cmd.startEnd(lambda: self.ss_swerve_drive.robot_pov_drive_request_command(0, -1), lambda: self.ss_swerve_drive.robot_pov_drive_request_command(0, 0)) )
+            # self.gamepad.pov(45).whileTrue(self.ss_swerve_drive.robot_pov_drive_request_command(1, 0))
+            # self.gamepad.pov(135).whileTrue(cmd.startEnd(lambda: self.ss_swerve_drive.robot_pov_drive_request_command(-1, 0), lambda: self.ss_swerve_drive.robot_pov_drive_request_command(0, 0)) )
+            # self.gamepad.pov(225).whileTrue(cmd.startEnd(lambda: self.ss_swerve_drive.robot_pov_drive_request_command(0, 1), lambda: self.ss_swerve_drive.robot_pov_drive_request_command(0, 0)) )
+            # self.gamepad.pov(315).whileTrue(cmd.startEnd(lambda: self.ss_swerve_drive.robot_pov_drive_request_command(0, -1), lambda: self.ss_swerve_drive.robot_pov_drive_request_command(0, 0)) )
             self.gamepad.back().and_(self.gamepad.b()).whileTrue(cmd.runOnce(self.ss_swerve_drive.brake))
             self.gamepad.back().and_(self.gamepad.start()).onTrue(cmd.runOnce(self.ss_swerve_drive.reset_field_oriented_perspective))
 
