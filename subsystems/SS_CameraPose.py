@@ -14,23 +14,24 @@ class SS_CameraPose(commands2.Subsystem):
         self.field_layout = AprilTagFieldLayout.loadField(AprilTagField.kDefaultField)
 
         # set camera
-        self.frontcam = PhotonCamera("FrontCamera")
+        self.rightcam = PhotonCamera("RightCamera")
+        self.leftcam = PhotonCamera("LeftCamera") # unused for now, but we can add it later if we want
 
         # we need to measure this 
-        self.robot_to_frontcam = Transform3d(
+        self.robot_to_rightcam = Transform3d(
             Translation3d(0.3048, 0.3302, 0.4826), # meters forward, left, up from robot center
-            Rotation3d(0.0, 0.0, 0.0)
+            Rotation3d(0.0, 0.0, 0.0) # radians roll, pitch, yaw from robot forward
         )
 
         # pos estimation
         self.estimator = PhotonPoseEstimator(
             self.field_layout,
-            self.robot_to_frontcam
+            self.robot_to_rightcam
         )
 
     def periodic(self):
         # grab cams 
-        results = self.frontcam.getAllUnreadResults()
+        results = self.rightcam.getAllUnreadResults()
         if not results:
             return
 
