@@ -18,7 +18,7 @@ class SS_CameraPose(commands2.Subsystem):
 
         # we need to measure this 
         self.robot_to_frontcam = Transform3d(
-            Translation3d(0.0, 0.0, 0.0), # meters forward, left, up from robot center
+            Translation3d(0.3048, 0.3302, 0.4826), # meters forward, left, up from robot center
             Rotation3d(0.0, 0.0, 0.0)
         )
 
