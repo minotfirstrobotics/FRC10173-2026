@@ -105,7 +105,7 @@ class SS_Kraken(commands2.Subsystem):
         SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Velocity Actual", self.velocity_actual)
         dashboard_velocity_setpoint = SmartDashboard.getNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Velocity Setpoint", self.velocity_setpoint)
         if dashboard_velocity_setpoint != self.velocity_setpoint:
-            self.velocity_setpoint = min(dashboard_velocity_setpoint, self.max_rps)
+            self.velocity_setpoint = max(min(dashboard_velocity_setpoint, self.max_rps), -self.max_rps)
             SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Velocity Setpoint", self.velocity_setpoint)
         dashboard_power_percent_setpoint = SmartDashboard.getNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Power Percent Setpoint", self.percent_power_setpoint)
         if dashboard_power_percent_setpoint != self.percent_power_setpoint:
