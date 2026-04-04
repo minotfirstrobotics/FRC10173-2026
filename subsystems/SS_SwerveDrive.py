@@ -1,5 +1,7 @@
 import commands2
 import wpilib
+from wpimath import applyDeadband
+from wpimath.filter import SlewRateLimiter
 from wpimath.units import rotationsToRadians
 from phoenix6 import swerve, SignalLogger
 from wpimath.kinematics import ChassisSpeeds
@@ -24,9 +26,12 @@ class SS_SwerveDrive(commands2.Subsystem):
         wpilib.SmartDashboard.putNumber("Swerve/Swerve Max Speed Factor", self._max_speed)
         self._pov_speed = 0.2
         self._latest_pose = Pose2d()
+        self._last_heading = Rotation2d()
         self.drivetrain = TunerConstants.create_drivetrain() # does this need to after swerve configs?
         # self._logger = Telemetry(self._max_speed)
         # self.drivetrain.register_telemetry( lambda state: self._logger.telemeterize(state) )
+        self._right_x_limiter = SlewRateLimiter(0.25)
+        self._right_y_limiter = SlewRateLimiter(1.5)
         self.x_vector_to_target = 0.0
         self.y_vector_to_target = 0.0
         self.range_to_target = 0.0
@@ -117,6 +122,34 @@ class SS_SwerveDrive(commands2.Subsystem):
                     .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
                     .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
                     .with_rotational_rate(-self._joystick.getRightX() * abs(self._joystick.getRightX()) * self._max_angular_rate)) ))
+
+    def drive_mode_angular(self):
+        return self.drivetrain.apply_request(lambda: (
+            self._drive_facing_direction
+                .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
+                .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
+                .with_target_direction(self._heading_from_right_stick())
+                .with_heading_pid(7, 0, 0)
+        ))
+
+    def _heading_from_right_stick(self) -> Rotation2d:
+        rx = self._joystick.getRightX()
+        ry = self._joystick.getRightY()
+
+        mag = (rx * rx + ry * ry) ** 0.5
+
+        # Only update heading when stick is intentionally moved
+        if mag > 0.20:
+            self._last_heading = Rotation2d(rx, ry)
+
+        return self._last_heading
+
+    def _smoothed_axis(self, raw_axis: float, limiter: SlewRateLimiter,
+                    deadband: float = 0.12, square_input: bool = False) -> float:
+        axis = applyDeadband(raw_axis, deadband)
+        if square_input:
+            axis = axis * abs(axis)
+        return limiter.calculate(axis)
 
     def drive_mode_padlocked(self) -> None:
         self.drivetrain.setDefaultCommand(

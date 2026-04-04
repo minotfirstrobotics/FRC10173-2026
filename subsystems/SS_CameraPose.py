@@ -9,6 +9,12 @@ class SS_CameraPose(commands2.Subsystem):
     def __init__(self, swerve_drive):
         super().__init__()
         self.swerve_drive = swerve_drive
+        if not wpilib.RobotBase.isReal():
+            print("PhotonVision disabled in simulation")
+            self.rightcam = None
+            self.leftcam = None
+            self.estimator = None
+            return
 
         # load load field 
         self.field_layout = AprilTagFieldLayout.loadField(AprilTagField.kDefaultField)

@@ -34,7 +34,10 @@ class RobotContainer:
         if self.gamepad: self.configure_gamepad_bindings()
 
     def configure_gamepad_bindings(self):
-        if self.ss_shooter:
+        self.ss_swerve_drive.drivetrain.setDefaultCommand(self.ss_swerve_drive.drive_mode_angular())
+        if self.ss_shooter and self.ss_feeder:
+            self.gamepad.rightBumper().whileTrue(CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.gamepad))
+        elif self.ss_shooter:
             self.gamepad.rightBumper().whileTrue(cmd.startEnd(self.ss_shooter.run_velocity_at_setpoint, self.ss_shooter.stop_motor, self.ss_shooter))
         if self.ss_feeder:
             self.gamepad.leftBumper().whileTrue(cmd.startEnd(self.ss_feeder.run_velocity_at_setpoint, self.ss_feeder.stop_motor, self.ss_feeder))
@@ -43,20 +46,26 @@ class RobotContainer:
             self.gamepad.rightTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(self.ss_intake.run_voltage_percent_forward, self.ss_intake.stop_motor, self.ss_intake))
             self.gamepad.y().whileTrue(cmd.startEnd(lambda: self.ss_extend.set_position(3), self.ss_extend.stop_motor, self.ss_intake))
         if self.ss_shooter and self.ss_feeder:
-            self.gamepad.x().onFalse(SEQ_shoot(self.ss_shooter, self.ss_feeder))
+            self.gamepad.x().onTrue(SEQ_shoot(self.ss_shooter, self.ss_feeder))
 
         if self.ss_swerve_drive:
-            ## Set starting drive mode to field-centered, and allow toggling to padlocked with the A button
-            self.ss_swerve_drive.drive_mode_field_centered()
+
+            # A button toggles padlock mode
             self.gamepad.a().onTrue(cmd.runOnce(self.ss_swerve_drive.drive_mode_padlocked))
             self.gamepad.a().onFalse(cmd.runOnce(self.ss_swerve_drive.drive_mode_field_centered))
-            # self.gamepad.a().and_(self.gamepad.back()).onFalse(cmd.runOnce(self.ss_swerve_drive.change_target))
-            # self.gamepad.pov(45).whileTrue(self.ss_swerve_drive.robot_pov_drive_request_command(1, 0))
-            # self.gamepad.pov(135).whileTrue(cmd.startEnd(lambda: self.ss_swerve_drive.robot_pov_drive_request_command(-1, 0), lambda: self.ss_swerve_drive.robot_pov_drive_request_command(0, 0)) )
-            # self.gamepad.pov(225).whileTrue(cmd.startEnd(lambda: self.ss_swerve_drive.robot_pov_drive_request_command(0, 1), lambda: self.ss_swerve_drive.robot_pov_drive_request_command(0, 0)) )
-            # self.gamepad.pov(315).whileTrue(cmd.startEnd(lambda: self.ss_swerve_drive.robot_pov_drive_request_command(0, -1), lambda: self.ss_swerve_drive.robot_pov_drive_request_command(0, 0)) )
-            self.gamepad.back().and_(self.gamepad.b()).whileTrue(cmd.runOnce(self.ss_swerve_drive.brake))
-            self.gamepad.back().and_(self.gamepad.start()).onTrue(cmd.runOnce(self.ss_swerve_drive.reset_field_oriented_perspective))
+
+            # B button hold → padlock to target
+            #self.gamepad.b().whileTrue(self.ss_swerve_drive.hold_padlock_goal_command())
+
+            # Brake
+            self.gamepad.back().and_(self.gamepad.b()).whileTrue(
+                cmd.runOnce(self.ss_swerve_drive.brake)
+            )
+
+            # Reset field orientation
+            self.gamepad.back().and_(self.gamepad.start()).onTrue(
+                cmd.runOnce(self.ss_swerve_drive.reset_field_oriented_perspective)
+            )
 
     def _build_complex_commands_and_autochooser(self):
         self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.gamepad)
