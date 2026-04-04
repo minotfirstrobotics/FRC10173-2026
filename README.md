@@ -12,7 +12,6 @@
 * move_to_position_and_wait in SS_kraken
 * 
 
-
 # Dependencies:
 
 * pip install robotpy
