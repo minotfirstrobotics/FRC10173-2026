@@ -15,13 +15,13 @@ class SS_CameraPose(commands2.Subsystem):
 
         # set camera
         self.rightcam = PhotonCamera("RightCamera")
-        self.leftcam = PhotonCamera("LeftCamera") # unused for now, but we can add it later if we want
+        #self.leftcam = PhotonCamera("LeftCamera") # unused for now, but we can add it later if we want
 
         # we need to measure this 
-        self.robot_to_leftcam = Transform3d(
-            Translation3d(0.3048, -0.3302, 0.4826), # meters forward, right, up from robot center
-            Rotation3d(0.0, 0.0, 0.0) # radians roll, pitch, yaw from robot forward
-        )
+        #self.robot_to_leftcam = Transform3d(
+       #     Translation3d(0.3048, -0.3302, 0.4826), # meters forward, right, up from robot center
+      #      Rotation3d(0.0, 0.0, 0.0) # radians roll, pitch, yaw from robot forward
+      #  )
         self.robot_to_rightcam = Transform3d(
             Translation3d(0.3048, 0.3302, 0.4826), # meters forward, left, up from robot center
             Rotation3d(0.0, 0.0, 0.0) # radians roll, pitch, yaw from robot forward
@@ -31,7 +31,7 @@ class SS_CameraPose(commands2.Subsystem):
         self.estimator = PhotonPoseEstimator(
             self.field_layout,
             self.robot_to_rightcam,
-            self.robot_to_leftcam
+           # self.robot_to_leftcam
         )
 
     def periodic(self):
