@@ -86,7 +86,6 @@ class SS_Kraken(commands2.Subsystem):
         SmartDashboard.putNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} Vmax", self.Vmax)
         SmartDashboard.putNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} Amax", self.Amax)
         SmartDashboard.putNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} Jerk", self.Jerk)
-        SmartDashboard.putNumber("Battery Voltage", self.voltage)
 
     def _register_pathplanner_commands(self):
         # NamedCommands.registerCommand(f"{self.dashboard_name}/{self.dashboard_name} Spin-up to Setpoint", self.spin_up_and_wait_command())
@@ -101,7 +100,6 @@ class SS_Kraken(commands2.Subsystem):
     # Periodic tasks - dashboard updates and config changes
     # -------------------------
     def periodic(self):
-        self.voltage = wpilib.RobotController.getBatteryVoltage()
         self.position_actual = self.motor.get_position().value
         self.velocity_actual = self.motor.get_velocity().value
         SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Velocity Actual", self.velocity_actual)

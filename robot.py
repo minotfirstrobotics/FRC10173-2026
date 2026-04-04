@@ -130,6 +130,8 @@ class MyRobot(commands2.TimedCommandRobot):
         # self._time_and_driver_replay.update() # using HootAutoReplay to log and replay timestamp and driver data
         match_time_from_driver_station = Timer.getMatchTime()
         SmartDashboard.putNumber("Match Time", self.localMatchTimer.get() if match_time_from_driver_station < 0 else match_time_from_driver_station)
+        voltage = wpilib.RobotController.getBatteryVoltage()
+        SmartDashboard.putNumber("Battery Voltage", voltage)
         if self.container.ss_intake:
             self.container.intake2d.setLength(self.container.ss_intake.velocity_actual/10)
         if self.container.ss_feeder:
