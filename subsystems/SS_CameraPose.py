@@ -45,8 +45,8 @@ class SS_CameraPose(commands2.Subsystem):
             return
 
         # calculate pos based on cams (use one of these)
-        est = self.estimator.estimatePnpDistanceTrigSolvePose(result)
-        est = self.estimator.estimateCoprocMultiTagPose(result)
+        #est = self.estimator.estimatePnpDistanceTrigSolvePose(result)
+        #est = self.estimator.estimateCoprocMultiTagPose(result)
         est = self.estimator.estimateLowestAmbiguityPose(result)
 
         if est is None:
