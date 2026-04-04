@@ -3,6 +3,7 @@ import phoenix6
 import commands2
 from phoenix6 import CANBus
 from wpilib import SmartDashboard
+from ntcore import NetworkTableInstance
 from pathplannerlib.auto import NamedCommands
 
 class SS_Kraken(commands2.Subsystem):
@@ -24,7 +25,7 @@ class SS_Kraken(commands2.Subsystem):
         self.position_actual = 0.0
         self.motor.set_position(self.requested_position) # pidf reset encoder position to 0 on startup
 
-        self._put_telemetry_on_dashboard()
+        self._put_telemetry_on_dashboard(first_time=True)
         self._register_pathplanner_commands()
 
     def _setup_hardware_configuration(self, inverted: bool=False, brake_mode: bool=False):
@@ -71,7 +72,7 @@ class SS_Kraken(commands2.Subsystem):
             wpilib.reportError(f"Kraken PID update failed: {self.status}", False)
         SmartDashboard.putBoolean(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Config Success", self.status.is_ok())
 
-    def _put_telemetry_on_dashboard(self):
+    def _put_telemetry_on_dashboard(self, first_time: bool=False):
         SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Velocity Actual", self.velocity_actual)
         SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Velocity Setpoint", self.velocity_setpoint)
         SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Power Percent Setpoint", self.percent_power_setpoint)
@@ -86,6 +87,18 @@ class SS_Kraken(commands2.Subsystem):
         SmartDashboard.putNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} Vmax", self.Vmax)
         SmartDashboard.putNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} Amax", self.Amax)
         SmartDashboard.putNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} Jerk", self.Jerk)
+        if first_time:
+            nt_pidf = NetworkTableInstance.getDefault().getTable(f"PIDF/{self.dashboard_name}")
+            self._nt_kP = nt_pidf.getEntry(f"{self.dashboard_name} kP")
+            self._nt_kI = nt_pidf.getEntry(f"{self.dashboard_name} kI")
+            self._nt_kD = nt_pidf.getEntry(f"{self.dashboard_name} kD")
+            self._nt_kV = nt_pidf.getEntry(f"{self.dashboard_name} kV")
+            self._nt_kS = nt_pidf.getEntry(f"{self.dashboard_name} kS")
+            self._nt_kA = nt_pidf.getEntry(f"{self.dashboard_name} kA")
+            self._nt_kG = nt_pidf.getEntry(f"{self.dashboard_name} kG")
+            self._nt_Vmax = nt_pidf.getEntry(f"{self.dashboard_name} Vmax")
+            self._nt_Amax = nt_pidf.getEntry(f"{self.dashboard_name} Amax")
+            self._nt_Jerk = nt_pidf.getEntry(f"{self.dashboard_name} Jerk")
 
     def _register_pathplanner_commands(self):
         # NamedCommands.registerCommand(f"{self.dashboard_name}/{self.dashboard_name} Spin-up to Setpoint", self.spin_up_and_wait_command())
@@ -100,35 +113,38 @@ class SS_Kraken(commands2.Subsystem):
     # Periodic tasks - dashboard updates and config changes
     # -------------------------
     def periodic(self):
-        self.position_actual = self.motor.get_position().value
+        SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Position Actual", self.position_actual)
         self.velocity_actual = self.motor.get_velocity().value
         SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Velocity Actual", self.velocity_actual)
         dashboard_velocity_setpoint = SmartDashboard.getNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Velocity Setpoint", self.velocity_setpoint)
-        if dashboard_velocity_setpoint != self.velocity_setpoint:
-            self.velocity_setpoint = min(dashboard_velocity_setpoint, self.max_rps)
-            SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Velocity Setpoint", self.velocity_setpoint)
-        dashboard_power_percent_setpoint = SmartDashboard.getNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Power Percent Setpoint", self.percent_power_setpoint)
-        if dashboard_power_percent_setpoint != self.percent_power_setpoint:
-            self.percent_power_setpoint = max(min(dashboard_power_percent_setpoint, 1.0), -1.0)
-            SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Power Percent Setpoint", self.percent_power_setpoint)
 
-        dashboard_p = SmartDashboard.getNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} Position Actual", self.position_actual)
-        dashboard_p = SmartDashboard.getNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} kP", self.kP)
-        dashboard_i = SmartDashboard.getNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} kI", self.kI)
-        dashboard_d = SmartDashboard.getNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} kD", self.kD)
-        dashboard_v = SmartDashboard.getNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} kV", self.kV)
-        dashboard_s = SmartDashboard.getNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} kS", self.kS)
-        dashboard_a = SmartDashboard.getNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} kA", self.kA)
-        dashboard_g = SmartDashboard.getNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} kG", self.kG)
-        dashboard_Vmax = SmartDashboard.getNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} Vmax", self.Vmax)
-        dashboard_Amax = SmartDashboard.getNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} Amax", self.Amax)
-        dashboard_Jerk = SmartDashboard.getNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} Jerk", self.Jerk)
-        if (dashboard_p != self.kP or dashboard_i != self.kI or dashboard_d != self.kD or 
-            dashboard_v != self.kV or dashboard_s != self.kS or dashboard_a != self.kA or dashboard_g != self.kG or
-            dashboard_Vmax != self.Vmax or dashboard_Amax != self.Amax or dashboard_Jerk != self.Jerk):
-            self._apply_pidf_to_config(dashboard_p, dashboard_i, dashboard_d, dashboard_v, dashboard_s, 
-                                       dashboard_a, dashboard_g, dashboard_Vmax, dashboard_Amax, dashboard_Jerk)
-        self._put_telemetry_on_dashboard()
+        self._periodic_counter = getattr(self, '_periodic_counter', 0) + 1
+        if self._periodic_counter % 5 == 0:  # Every 100ms instead of every 20ms
+            self.position_actual = self.motor.get_position().value
+            if dashboard_velocity_setpoint != self.velocity_setpoint:
+                self.velocity_setpoint = max(min(dashboard_velocity_setpoint, self.max_rps), -self.max_rps)
+                SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Velocity Setpoint", self.velocity_setpoint)
+            dashboard_power_percent_setpoint = SmartDashboard.getNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Power Percent Setpoint", self.percent_power_setpoint)
+            if dashboard_power_percent_setpoint != self.percent_power_setpoint:
+                self.percent_power_setpoint = max(min(dashboard_power_percent_setpoint, 1.0), -1.0)
+                SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Power Percent Setpoint", self.percent_power_setpoint)
+
+            dashboard_p = self._nt_kP.getDouble(self.kP)
+            dashboard_i = self._nt_kI.getDouble(self.kI)
+            dashboard_d = self._nt_kD.getDouble(self.kD)
+            dashboard_v = self._nt_kV.getDouble(self.kV)
+            dashboard_s = self._nt_kS.getDouble(self.kS)
+            dashboard_a = self._nt_kA.getDouble(self.kA)
+            dashboard_g = self._nt_kG.getDouble(self.kG)
+            dashboard_Vmax = self._nt_Vmax.getDouble(self.Vmax)
+            dashboard_Amax = self._nt_Amax.getDouble(self.Amax)
+            dashboard_Jerk = self._nt_Jerk.getDouble(self.Jerk)
+            if (dashboard_p != self.kP or dashboard_i != self.kI or dashboard_d != self.kD or 
+                dashboard_v != self.kV or dashboard_s != self.kS or dashboard_a != self.kA or dashboard_g != self.kG or
+                dashboard_Vmax != self.Vmax or dashboard_Amax != self.Amax or dashboard_Jerk != self.Jerk):
+                self._apply_pidf_to_config(dashboard_p, dashboard_i, dashboard_d, dashboard_v, dashboard_s, 
+                                        dashboard_a, dashboard_g, dashboard_Vmax, dashboard_Amax, dashboard_Jerk)
+            self._put_telemetry_on_dashboard()
 
 
     # -------------------------
