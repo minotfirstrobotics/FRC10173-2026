@@ -9,11 +9,12 @@ from subsystems.SS_CANdleLight import SS_CANdleLight
 
 def SEQ_shoot(shooter: SS_Kraken, feeder: SS_Kraken):
     return commands2.SequentialCommandGroup(
-        cmd.runOnce(shooter.spin_up_and_wait_command),
-        cmd.runOnce(lambda: shooter.run_velocity_at_setpoint), # Ensure shooter is running at setpoint while feeder runs
-        cmd.runOnce(lambda: feeder.run_velocity_at_setpoint).withTimeout(3.0), # Run feeder for 3 seconds after shooter is up to speed
-        cmd.runOnce(feeder.stop_motor).withTimeout(3.0), # Run feeder for 3 seconds after shooter is up to speed
-        cmd.runOnce(shooter.stop_motor).withTimeout(3.0), # Run feeder for 3 seconds after shooter is up to speed
+        cmd.runOnce(shooter.spin_up_and_wait_command), # Wait for shooter to reach set speed
+        cmd.run(lambda: shooter.run_velocity_at_setpoint).deadlineWith( # Ensure shooter is running at setpoint while feeder runs
+            cmd.run(lambda: feeder.run_velocity_at_setpoint).withTimeout(3.0) # Run feeder for 3 seconds
+        ),
+        cmd.runOnce(feeder.stop_motor), # Stop Feeder
+        cmd.runOnce(shooter.stop_motor), # Stop Shooter
     )
 
 def SEQ_extend_intake(extender: SS_Kraken):
