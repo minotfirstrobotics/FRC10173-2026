@@ -11,7 +11,7 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "deadline",
           "data": {
             "commands": [
               {
@@ -27,6 +27,18 @@
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Return+Target"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "SEQ_Shoot"
           }
         }
       ]

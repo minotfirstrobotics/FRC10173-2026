@@ -1,0 +1,81 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "Deploy_Intake"
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Big Scoop"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Run_Intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Unload_Tunn"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Unload"
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Take_All_Balls"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Run_Intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Short_Return"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "SEQ_Shoot"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
