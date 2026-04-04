@@ -11,7 +11,7 @@ from subsystems.SS_SwerveDrive import SS_SwerveDrive
 from subsystems.SS_Kraken import SS_Kraken
 from subsystems.SS_CANdleLight import SS_CANdleLight
 from subsystems.SS_CameraPose import SS_CameraPose
-from commands.complex_and_sequences import CMD_ComboShoot, SEQ_shoot, SEQ_extend_intake
+from commands.complex_and_sequences import CMD_ComboShoot, SEQ_shoot, SEQ_extend_intake, CMD_deploy_intake
 
 class RobotContainer:
     def __init__(self) -> None:
@@ -68,7 +68,7 @@ class RobotContainer:
         NamedCommands.registerCommand("Combo Shoot", self.cmd_combo_shoot)
         self.seq_shoot = SEQ_shoot(self.ss_shooter, self.ss_feeder)
         NamedCommands.registerCommand("SEQ Shoot", self.seq_shoot)
-        self.deploy_intake = cmd.runOnce(lambda: self.ss_extend.set_position(1.5), self.ss_extend)
+        self.deploy_intake = CMD_deploy_intake(self.ss_extend, self.ss_shooter)
         NamedCommands.registerCommand("Deploy Intake", self.deploy_intake)
         self.run_intake = cmd.startEnd(self.ss_intake.run_voltage_percent_forward, self.ss_intake.stop_motor, self.ss_intake)
         NamedCommands.registerCommand("Run Intake", self.run_intake)
