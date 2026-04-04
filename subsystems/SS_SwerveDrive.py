@@ -69,9 +69,6 @@ class SS_SwerveDrive(commands2.Subsystem):
             self.target_x, self.target_y = self._determine_padlock_target(pose)
             self.x_vector_to_target = self.target_x - self._latest_pose.translation().X()
             self.y_vector_to_target = self.target_y - self._latest_pose.translation().Y()
-            if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
-                self.x_vector_to_target = -self.x_vector_to_target
-                self.y_vector_to_target = -self.y_vector_to_target
             self.range_to_target = (self.x_vector_to_target**2 + self.y_vector_to_target**2)**0.5
 
         dashboard_max_speed = wpilib.SmartDashboard.getNumber("Swerve/Swerve Max Speed Factor", self._max_speed_factor)
@@ -116,12 +113,11 @@ class SS_SwerveDrive(commands2.Subsystem):
     # Drive mode switching for joystick/gamepad control
     # -------------------------
     def drive_mode_field_centered(self) -> None:
-        self.drivetrain.setDefaultCommand(
-            self.drivetrain.apply_request(lambda: (
+            return self.drivetrain.apply_request(lambda: (
                 self._drive_field_centered
                     .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
                     .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
-                    .with_rotational_rate(-self._joystick.getRightX() * abs(self._joystick.getRightX()) * self._max_angular_rate)) ))
+                    .with_rotational_rate(-self._joystick.getRightX() * abs(self._joystick.getRightX()) * self._max_angular_rate)) )
 
     def drive_mode_angular(self):
         return self.drivetrain.apply_request(lambda: (
@@ -151,22 +147,22 @@ class SS_SwerveDrive(commands2.Subsystem):
             axis = axis * abs(axis)
         return limiter.calculate(axis)
 
-    def drive_mode_padlocked(self) -> None:
-        self.drivetrain.setDefaultCommand(
-            self.drivetrain.apply_request(lambda: (
+    def drive_mode_padlocked(self) -> commands2.Command:
+
+            return self.drivetrain.apply_request(lambda: (
                 self._drive_facing_direction
                     .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
                     .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
-                    .with_target_direction(Rotation2d(self.x_vector_to_target, self.y_vector_to_target)) # Desired Heading (e.g., (0,1) = 90 deg)
-                    .with_heading_pid(20, 0, 0) ))  ) # PID for heading control
+                    .with_target_direction(self.heading)
+                    .with_heading_pid(20, 0, 0) ))   # PID for heading control
     
     def drive_mode_robot_centered(self) -> None:
-        self.drivetrain.setDefaultCommand(
-            self.drivetrain.apply_request(lambda: (
+
+            return self.drivetrain.apply_request(lambda: (
                 self._drive_robot_centered
                     .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
                     .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
-                    .with_rotational_rate(-self._joystick.getRightX() * abs(self._joystick.getRightX()) * self._max_angular_rate)) ))
+                    .with_rotational_rate(-self._joystick.getRightX() * abs(self._joystick.getRightX()) * self._max_angular_rate)) )
 
     # -------------------------
     # Drive requests for automated movement
@@ -188,6 +184,38 @@ class SS_SwerveDrive(commands2.Subsystem):
                 .with_velocity_y(vy_requested * self._max_speed)
                 .with_target_direction(Rotation2d(x_vector, y_vector))
                 .with_heading_pid(5, 0, 0) ))
+
+    def target_goal(self) -> None:
+        if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+            tx, ty = (4.6, 4.0)
+        else:
+            tx, ty = (12.0, 4.0)
+
+        self._forced_padlock_target = (tx, ty)
+        self.target_x = tx
+        self.target_y = ty
+
+        try:
+            pose = self._latest_pose
+            self.x_vector_to_target = tx - pose.translation().X()
+            self.y_vector_to_target = ty - pose.translation().Y()
+        except:
+            self.x_vector_to_target = tx
+            self.y_vector_to_target = ty
+
+        self.range_to_target = (self.x_vector_to_target**2 + self.y_vector_to_target**2)**0.5
+        wpilib.SmartDashboard.putBoolean("Swerve/Padlock Engaged", True)
+
+    def release_padlock_goal(self) -> None:
+        self._forced_padlock_target = None
+        wpilib.SmartDashboard.putBoolean("Swerve/Padlock Engaged", False)
+
+    def hold_padlock_goal_command(self) -> commands2.Command:
+        return commands2.cmd.startEnd(
+            self.target_goal,
+            self.release_padlock_goal,
+            self,
+        )
 
     def robot_pov_drive_request_command(self, direction_x, direction_y) -> commands2.Command:
         return self.drivetrain.apply_request(lambda: (

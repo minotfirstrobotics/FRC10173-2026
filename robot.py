@@ -30,11 +30,12 @@ class RobotContainer:
 
         self._build_complex_commands_and_autochooser()
         self._setup_simulated_mechanism2d()
+        self.defaultdrivemode = self.ss_swerve_drive.drive_mode_angular()
 
         if self.gamepad: self.configure_gamepad_bindings()
 
     def configure_gamepad_bindings(self):
-        self.ss_swerve_drive.drivetrain.setDefaultCommand(self.ss_swerve_drive.drive_mode_angular())
+        self.ss_swerve_drive.drivetrain.setDefaultCommand(self.defaultdrivemode)
         if self.ss_shooter and self.ss_feeder:
             self.gamepad.rightBumper().whileTrue(CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.gamepad))
         elif self.ss_shooter:
@@ -51,8 +52,9 @@ class RobotContainer:
         if self.ss_swerve_drive:
 
             # A button toggles padlock mode
-            self.gamepad.a().onTrue(cmd.runOnce(self.ss_swerve_drive.drive_mode_padlocked))
-            self.gamepad.a().onFalse(cmd.runOnce(self.ss_swerve_drive.drive_mode_field_centered))
+            self.gamepad.a().onTrue(self.ss_swerve_drive.drive_mode_padlocked())
+            self.gamepad.a().onFalse(self.defaultdrivemode)
+
 
             # B button hold → padlock to target
             #self.gamepad.b().whileTrue(self.ss_swerve_drive.hold_padlock_goal_command())
