@@ -11,7 +11,7 @@ class SS_Kraken(commands2.Subsystem):
                  inverted: bool=False, brake_mode: bool=False,
                  max_rps: int=100, velocity_setpoint: float=0.0, percent_power_setpoint: float=0.0,
                  kp: float=0.0, ki: float=0.0, kd: float=0.0, kv: float=0.0, ks: float=0.0,
-                 ka: float=0.0, kg: float=0.0, Vmax: float=0.0, Amax: float=0.0, Jerk: float=0.0) -> None:
+                 ka: float=0.0, kg: float=0.0, vmax: float=0.0, amax: float=0.0, jerk: float=0.0) -> None:
         self.motor = phoenix6.hardware.TalonFX(device_id, canbus)
 
         self.dashboard_name = dashboard_name
@@ -20,7 +20,7 @@ class SS_Kraken(commands2.Subsystem):
         self.velocity_setpoint = velocity_setpoint
         self.velocity_actual = 0.0
         self._setup_hardware_configuration(inverted, brake_mode)
-        self._apply_pidf_to_config(kp, ki, kd, kv, ks, ka, kg, Vmax, Amax, Jerk)
+        self._apply_pidf_to_config(kp, ki, kd, kv, ks, ka, kg, vmax, amax, jerk)
         self.requested_position = 0.0
         self.position_actual = 0.0
         self._periodic_counter = 0
@@ -50,8 +50,7 @@ class SS_Kraken(commands2.Subsystem):
         self.position_request_with_trapezoid = phoenix6.controls.MotionMagicDutyCycle(0.0)
 
     def _apply_pidf_to_config(self, new_p, new_i, new_d, new_v, new_s, 
-                              new_a, new_g, new_Vmax, new_Amax, new_Jerk):
-        wpilib.reportWarning(f"Applying PIDF config to {self.dashboard_name}: kP={new_p}, kI={new_i}, kD={new_d}, kV={new_v}, kS={new_s}, kA={new_a}, kG={new_g}, Vmax={new_Vmax}, Amax={new_Amax}, Jerk={new_Jerk}", printTrace=False)
+                              new_a, new_g, new_vmax, new_amax, new_jerk):
         self._config.slot0.k_p = self.kP = new_p
         self._config.slot0.k_i = self.kI = new_i
         self._config.slot0.k_d = self.kD = new_d
@@ -59,17 +58,18 @@ class SS_Kraken(commands2.Subsystem):
         self._config.slot0.k_s = self.kS = new_s # optional static feedforward for overcoming static friction
         self._config.slot0.k_a = self.kA = new_a # optional acceleration feedforward for compensating inertia
         self._config.slot0.k_g = self.kG = new_g # optional gravity feedforward for compensating gravity effects
-        self.Vmax = new_Vmax
-        self.Amax = new_Amax
-        self.Jerk = new_Jerk
-        if self.Vmax or self.Amax or self.Jerk:
-            self._config.motion_magic.motion_magic_cruise_velocity = self.Vmax
-            self._config.motion_magic.motion_magic_acceleration = self.Amax
-            self._config.motion_magic.motion_magic_jerk = self.Jerk
-        #self._config.feedback.sensor_to_mechanism_ratio = 100.0
+        self.vmax = new_vmax
+        self.amax = new_amax
+        self.jerk = new_jerk
+        if self.vmax or self.amax or self.jerk:
+            self._config.motion_magic.motion_magic_cruise_velocity = self.vmax
+            self._config.motion_magic.motion_magic_acceleration = self.amax
+            self._config.motion_magic.motion_magic_jerk = self.jerk
 
         self.status = self.motor.configurator.apply(self._config)
-        if not self.status.is_ok():
+        if self.status.is_ok():
+            wpilib.reportWarning(f"Applying PIDF config to {self.dashboard_name}: kP={new_p}, kI={new_i}, kD={new_d}, kV={new_v}, kS={new_s}, kA={new_a}, kG={new_g}, vmax={new_vmax}, amax={new_amax}, jerk={new_jerk}", printTrace=False)
+        else:
             wpilib.reportError(f"Kraken PID update failed: {self.status}", False)
         SmartDashboard.putBoolean(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Config Success", self.status.is_ok())
 
@@ -86,9 +86,9 @@ class SS_Kraken(commands2.Subsystem):
         SmartDashboard.putNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} kS", self.kS)
         SmartDashboard.putNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} ka", self.kA)
         SmartDashboard.putNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} kg", self.kG)
-        SmartDashboard.putNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} Vmax", self.Vmax)
-        SmartDashboard.putNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} Amax", self.Amax)
-        SmartDashboard.putNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} Jerk", self.Jerk)
+        SmartDashboard.putNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} vmax", self.vmax)
+        SmartDashboard.putNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} amax", self.amax)
+        SmartDashboard.putNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} jerk", self.jerk)
         nt_pidf = NetworkTableInstance.getDefault().getTable(f"PIDF/{self.dashboard_name}")
         self._nt_kP = nt_pidf.getEntry(f"{self.dashboard_name} kP")
         self._nt_kI = nt_pidf.getEntry(f"{self.dashboard_name} kI")
@@ -97,9 +97,9 @@ class SS_Kraken(commands2.Subsystem):
         self._nt_kS = nt_pidf.getEntry(f"{self.dashboard_name} kS")
         self._nt_kA = nt_pidf.getEntry(f"{self.dashboard_name} kA")
         self._nt_kG = nt_pidf.getEntry(f"{self.dashboard_name} kG")
-        self._nt_Vmax = nt_pidf.getEntry(f"{self.dashboard_name} Vmax")
-        self._nt_Amax = nt_pidf.getEntry(f"{self.dashboard_name} Amax")
-        self._nt_Jerk = nt_pidf.getEntry(f"{self.dashboard_name} Jerk")
+        self._nt_vmax = nt_pidf.getEntry(f"{self.dashboard_name} vmax")
+        self._nt_amax = nt_pidf.getEntry(f"{self.dashboard_name} amax")
+        self._nt_jerk = nt_pidf.getEntry(f"{self.dashboard_name} jerk")
 
     def _register_pathplanner_commands(self):
         # NamedCommands.registerCommand(f"{self.dashboard_name}/{self.dashboard_name} Spin-up to Setpoint", self.spin_up_and_wait_command())
@@ -141,14 +141,14 @@ class SS_Kraken(commands2.Subsystem):
             dashboard_s = self._nt_kS.getDouble(self.kS)
             dashboard_a = self._nt_kA.getDouble(self.kA)
             dashboard_g = self._nt_kG.getDouble(self.kG)
-            dashboard_Vmax = self._nt_Vmax.getDouble(self.Vmax)
-            dashboard_Amax = self._nt_Amax.getDouble(self.Amax)
-            dashboard_Jerk = self._nt_Jerk.getDouble(self.Jerk)
+            dashboard_vmax = self._nt_vmax.getDouble(self.vmax)
+            dashboard_amax = self._nt_amax.getDouble(self.amax)
+            dashboard_jerk = self._nt_jerk.getDouble(self.jerk)
             if (dashboard_p != self.kP or dashboard_i != self.kI or dashboard_d != self.kD or 
                 dashboard_v != self.kV or dashboard_s != self.kS or dashboard_a != self.kA or dashboard_g != self.kG or
-                dashboard_Vmax != self.Vmax or dashboard_Amax != self.Amax or dashboard_Jerk != self.Jerk):
+                dashboard_vmax != self.vmax or dashboard_amax != self.amax or dashboard_jerk != self.jerk):
                 self._apply_pidf_to_config(dashboard_p, dashboard_i, dashboard_d, dashboard_v, dashboard_s, 
-                                        dashboard_a, dashboard_g, dashboard_Vmax, dashboard_Amax, dashboard_Jerk)
+                                        dashboard_a, dashboard_g, dashboard_vmax, dashboard_amax, dashboard_jerk)
             # self._put_telemetry_on_dashboard()
 
     # -------------------------
@@ -184,7 +184,7 @@ class SS_Kraken(commands2.Subsystem):
     # Commands
     # -------------------------
     def spin_up_and_wait_command(self):
-        class SpinUpAndWait_CommDef(commands2.Command):
+        class SpinUpAndWait(commands2.Command):
             def __init__(self, ss_kraken: SS_Kraken):
                 super().__init__()
                 self.ss_kraken = ss_kraken
@@ -209,6 +209,6 @@ class SS_Kraken(commands2.Subsystem):
                 else:
                     wpilib.reportWarning(f"SpinUpAndWait_Command reached target velocity: {self.timer.get():.1f} seconds.", printTrace=False)
                 
-        spin_up_and_wait_command = SpinUpAndWait_CommDef(self)
+        spin_up_and_wait_command = SpinUpAndWait(self)
         return spin_up_and_wait_command
 

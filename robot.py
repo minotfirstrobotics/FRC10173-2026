@@ -77,7 +77,7 @@ class RobotContainer:
             self.extend2d = self.root2d.appendLigament("extend", 2, 90, 3, Color8Bit(255, 255, 255))
         wpilib.SmartDashboard.putData("Mechanism", self.mech2d)
 
-    def getAutonomousCommand(self) -> commands2.Command:
+    def get_autonomous_command(self) -> commands2.Command:
         return self.auto_chooser.getSelected()
 
 
@@ -160,7 +160,7 @@ class MyRobot(commands2.TimedCommandRobot):
         """
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
-        self.autonomousCommand = self.container.getAutonomousCommand()
+        self.autonomousCommand = self.container.get_autonomous_command()
         
         if not self.autonomousCommand:
             print("No autonomous command selected.")
@@ -202,6 +202,7 @@ class MyRobot(commands2.TimedCommandRobot):
         pass
 
     def testExit(self) -> None:
+        """This function is called once when exiting test mode."""
         pass
 
 if __name__ == "__main__":

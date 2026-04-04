@@ -1,4 +1,4 @@
-"""#####################################
+#####################################
 from pathplannerlib.auto import NamedCommands
 
 class RobotContainer:
@@ -13,7 +13,7 @@ class RobotContainer:
 ###################################
 from pathplannerlib.auto import PathPlannerAuto
 
-def getAutonomousCommand(self):
+def get_autonomous_command(self):
     return PathPlannerAuto('Example Auto')
 
 
@@ -21,7 +21,6 @@ def getAutonomousCommand(self):
 from pathplannerlib.path import PathPlannerPath
 from pathplannerlib.auto import AutoBuilder
 
-def getPathCommand(self):
+def get_path_command(self):
     path = PathPlannerPath.fromPathFile('TestPath')
     return AutoBuilder.followPath(path)
-"""
