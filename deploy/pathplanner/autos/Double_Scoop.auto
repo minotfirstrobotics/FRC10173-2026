@@ -7,7 +7,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Deploy_Intake"
+            "name": "Deploy Intake"
           }
         },
         {
@@ -23,7 +23,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Run_Intake"
+                  "name": "Run Intake"
                 }
               }
             ]
@@ -54,7 +54,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Run_Intake"
+                  "name": "Run Intake"
                 }
               }
             ]
@@ -69,7 +69,7 @@
         {
           "type": "named",
           "data": {
-            "name": "SEQ_Shoot"
+            "name": "SEQ Shoot"
           }
         }
       ]
