@@ -42,6 +42,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         self.target_x = 0.0
         self.target_y = 0.0
         self._padlock_active = False
+        self.stop_distance = 1.0 # Default stop distance
         self.field = wpilib.Field2d()
         wpilib.SmartDashboard.putData("Field", self.field)
 
@@ -83,16 +84,20 @@ class SS_SwerveDrive(commands2.Subsystem):
             self.range_to_target = (self.x_vector_to_target**2 + self.y_vector_to_target**2)**0.5
             self.x_direction_to_target = self.x_vector_to_target / self.range_to_target
             self.y_direction_to_target = self.y_vector_to_target / self.range_to_target
-            self.speed_to_target = .8 * (self.range_to_target - 1) # Subtract desired stopping distance from error calculation
+            self.speed_to_target = .8 * (self.range_to_target - self.stop_distance) # Subtract desired stopping distance from error calculation
 
+        dashboard_stop_distance = wpilib.SmartDashboard.getNumber("Swerve/Stop Distance", self.stop_distance)
         dashboard_max_speed = wpilib.SmartDashboard.getNumber("Swerve/Swerve Max Speed Factor", self._max_speed_factor)
         if dashboard_max_speed != self._max_speed_factor:
             self._max_speed_factor = max(min(dashboard_max_speed, 1.0), 0.0) # Clamp between 0 and 1
+        if dashboard_stop_distance != self.stop_distance:
+            self.stop_distance = max(min(dashboard_stop_distance, 7.0), 0.0)
         wpilib.SmartDashboard.putNumber("Swerve/Target X Vector", self.x_vector_to_target)
         wpilib.SmartDashboard.putNumber("Swerve/Target Y Vector", self.y_vector_to_target)
         wpilib.SmartDashboard.putNumber("Swerve/Target X", self.target_x)
         wpilib.SmartDashboard.putNumber("Swerve/Target Y", self.target_y)
         wpilib.SmartDashboard.putNumber("Swerve/Target Range", self.range_to_target)
+        wpilib.SmartDashboard.putNumber("Swerve/Stop Distance", self.stop_distance)
 
         self._max_speed = self._max_speed_factor * TunerConstants.speed_at_12_volts
 
