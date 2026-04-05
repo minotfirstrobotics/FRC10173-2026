@@ -119,12 +119,16 @@ class SS_Kraken(commands2.Subsystem):
         SmartDashboard.putData(f"Commands/{self.dashboard_name}/{self.dashboard_name} Power Percent Reverse", self.run_power_percent_reverse_command)
         
         self.spin_up_and_wait_command = self.spin_up_and_wait()
-        NamedCommands.registerCommand(f"{self.dashboard_name}/{self.dashboard_name} Spin-up to Setpoint", self.spin_up_and_wait_command)
-        SmartDashboard.putData(f"Commands/{self.dashboard_name}/{self.dashboard_name} Spin-up to Setpoint", self.spin_up_and_wait_command)
-        
+        NamedCommands.registerCommand(f"{self.dashboard_name}/{self.dashboard_name} Spin-up to Setpoint and Wait", self.spin_up_and_wait_command)
+        SmartDashboard.putData(f"Commands/{self.dashboard_name}/{self.dashboard_name} Spin-up to Setpoint and Wait", self.spin_up_and_wait_command)
+
         self.rotate_to_position_command = self.rotate_to_position()
         NamedCommands.registerCommand(f"{self.dashboard_name} Rotate to Position", self.rotate_to_position_command)
         SmartDashboard.putData(f"Commands/{self.dashboard_name}/{self.dashboard_name} Rotate to Position", self.rotate_to_position_command)
+
+        self.rotate_to_position_and_wait_command = self.rotate_to_position_and_wait()
+        NamedCommands.registerCommand(f"{self.dashboard_name} Rotate to and Wait", self.rotate_to_position_and_wait_command)
+        SmartDashboard.putData(f"Commands/{self.dashboard_name}/{self.dashboard_name} Rotate to Position and Wait", self.rotate_to_position_and_wait_command)
 
     # -------------------------
     # Periodic tasks - dashboard updates and config changes
@@ -190,7 +194,6 @@ class SS_Kraken(commands2.Subsystem):
         self.motor.set_control(self.position_request_with_trapezoid.with_position(float(target_rotations)))
         self.position_setpoint = target_rotations
 
-
     # -------------------------
     # Commands
     # -------------------------
@@ -223,6 +226,16 @@ class SS_Kraken(commands2.Subsystem):
             lambda: None,
             lambda interrupted: wpilib.reportWarning(f"SpinUpAndWait_Command {'interrupted before reaching target velocity!' if interrupted else 'reached target velocity!'}", printTrace=False),
             lambda: abs(self.velocity_actual - self.velocity_setpoint) < 10,
+            self )
+
+    def rotate_to_position_and_wait(self, target_rotations = None):
+        if target_rotations is None:
+            target_rotations = self.position_setpoint
+        return commands2.FunctionalCommand(
+            lambda: self._rotate_to_position(target_rotations),
+            lambda: None,
+            lambda: wpilib.reportWarning(f"reached target position", printTrace=False),
+            lambda: abs(self.position_actual - target_rotations) < 0.1,
             self )
 
     def spin_up_and_wait_verbose(self):

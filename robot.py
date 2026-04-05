@@ -38,18 +38,10 @@ class RobotContainer:
             self.gamepad.rightBumper().whileTrue(cmd.startEnd(self.ss_shooter.run_at_velocity, self.ss_shooter.stop_motor, self.ss_shooter))
         if self.ss_feeder:
             self.gamepad.leftBumper().whileTrue(cmd.startEnd(self.ss_feeder.run_at_velocity, self.ss_feeder.stop_motor, self.ss_feeder))
-
-            self.gamepad.leftBumper().onTrue(self.ss_feeder.run_at_velocity)
-            self.gamepad.leftBumper().onFalse(self.ss_feeder._stop_motor)
         if self.ss_intake:
             self.gamepad.leftTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(self.ss_intake.run_power_percent_reverse, self.ss_intake.stop_motor, self.ss_intake))
             self.gamepad.rightTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(self.ss_intake.run_power_percent_forward, self.ss_intake.stop_motor, self.ss_intake))
             self.gamepad.y().whileTrue(cmd.startEnd(lambda: self.ss_extend.rotate_to_position(3), self.ss_extend.stop_motor, self.ss_intake))
-
-            self.gamepad.leftTrigger(threshold=.2).onTrue(self.ss_intake.run_power_percent_reverse)
-            self.gamepad.rightTrigger(threshold=.2).onFalse(self.ss_intake._stop_motor)
-            self.gamepad.y().onTrue(lambda: self.ss_extend._rotate_to_position(3))
-            self.gamepad.y().onFalse(self.ss_extend._stop_motor)
         # if self.ss_shooter and self.ss_feeder:
         #     self.gamepad.x().onFalse(SEQ_shoot(self.ss_shooter, self.ss_feeder))
 
@@ -67,16 +59,13 @@ class RobotContainer:
         # self.seq_shoot = SEQ_shoot(self.ss_shooter, self.ss_feeder)
         # NamedCommands.registerCommand("Commands/SEQ Shoot", self.seq_shoot)
 
-        self.run_intake = cmd.startEnd(self.ss_intake.run_power_percent_forward, self.ss_intake._stop_motor, self.ss_intake)
-        NamedCommands.registerCommand("Commands/Run_Intake", self.run_intake)
-
         path_3ft = PathPlannerPath.fromPathFile("3ft fowd")  # name matches the .path file
         follow_command_3ft = AutoBuilder.followPath(path_3ft)
-        SmartDashboard.putData("Commands/Follow 3ft Fwd Path", follow_command_3ft)
+        SmartDashboard.putData("Commands/Swerve/Follow 3ft Fwd Path", follow_command_3ft)
 
         path_Jerk = PathPlannerPath.fromPathFile("3ft fowd")  # name matches the .path file
         follow_command_jerk = AutoBuilder.followPath(path_Jerk)
-        SmartDashboard.putData("Commands/Jerk(F-B)", follow_command_jerk)
+        SmartDashboard.putData("Commands/Swerve/Jerk(F-B)", follow_command_jerk)
         
         self.auto_chooser = AutoBuilder.buildAutoChooser("None") # must be defined after SS's and all registered commands
         SmartDashboard.putData("Auto Chooser", self.auto_chooser)
