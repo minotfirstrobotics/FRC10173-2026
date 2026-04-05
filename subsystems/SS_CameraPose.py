@@ -1,4 +1,5 @@
 import commands2
+import wpilib
 from wpimath.geometry import Pose3d, Pose2d, Transform3d, Translation3d, Rotation3d
 from wpilib import SmartDashboard, Timer
 from photonlibpy import PhotonCamera, PhotonPoseEstimator
