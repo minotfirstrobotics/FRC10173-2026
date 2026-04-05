@@ -59,6 +59,11 @@ class SS_SwerveDrive(commands2.Subsystem):
             swerve.requests.RobotCentricFacingAngle()
                 .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE)
         )
+        self._drive_field_facing = (
+            swerve.requests.FieldCentricFacingAngle()
+                .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE)
+                .with_heading_pid(12, 0.0, 5)
+        )
 
         self._drive_robot_centered = (
             swerve.requests.RobotCentric()
@@ -126,6 +131,14 @@ class SS_SwerveDrive(commands2.Subsystem):
                 .with_target_direction(self._heading_from_right_stick())
                 .with_heading_pid(1, 10, 0.2)
         ))
+    
+    def drive_mode_hybrid(self):
+        return self.drivetrain.apply_request(lambda: (
+            self._drive_field_facing
+                .with_velocity_x(-self._smoothed_axis(self._joystick.getLeftY(), self._left_y_limiter, square_input=True) * self._max_speed)
+                .with_velocity_y(-self._smoothed_axis(self._joystick.getLeftX(), self._left_x_limiter, square_input=True) * self._max_speed)
+                .with_target_direction(self._heading_from_right_stick())
+        ))
 
     def _heading_from_right_stick(self) -> Rotation2d:
         rx = self._joystick.getRightX()
@@ -152,7 +165,7 @@ class SS_SwerveDrive(commands2.Subsystem):
                 .with_velocity_x(-self._smoothed_axis(self._joystick.getLeftY(), self._left_y_limiter, square_input=True)* self._max_speed)
                 .with_velocity_y(-self._smoothed_axis(self._joystick.getLeftX(), self._left_x_limiter, square_input=True)* self._max_speed)
                 .with_target_direction(Rotation2d(self.x_vector_to_target, self.y_vector_to_target))
-                .with_heading_pid(12, 0, 0)
+                .with_heading_pid(12, 0, 5)
         ))
 
     def drive_mode_robot_centered(self) -> None:

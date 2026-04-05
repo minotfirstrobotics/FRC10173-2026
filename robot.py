@@ -30,7 +30,7 @@ class RobotContainer:
 
         self._build_complex_commands_and_autochooser()
         self._setup_simulated_mechanism2d()
-        self.defaultdrivemode = self.ss_swerve_drive.drive_mode_angular()
+        self.defaultdrivemode = self.ss_swerve_drive.drive_mode_hybrid()
 
         if self.gamepad: self.configure_gamepad_bindings()
 
