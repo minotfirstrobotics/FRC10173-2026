@@ -21,10 +21,10 @@ class SS_Kraken(commands2.Subsystem):
         self.velocity_actual = 0.0
         self._setup_hardware_configuration(inverted, brake_mode)
         self._apply_pidf_to_config(kp, ki, kd, kv, ks, ka, kg, vmax, amax, jerk)
-        self.requested_position = 0.0
+        self.position_setpoint = 0.0
         self.position_actual = 0.0
         self._periodic_counter = 0
-        self.motor.set_position(self.requested_position) # pidf reset encoder position to 0 on startup
+        self.motor.set_position(self.position_setpoint) # pidf reset encoder position to 0 on startup
 
         self._put_telemetry_on_dashboard(first_time=True)
         self._register_pathplanner_commands()
@@ -78,7 +78,7 @@ class SS_Kraken(commands2.Subsystem):
         SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Velocity Setpoint", self.velocity_setpoint)
         SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Power Percent Setpoint", self.percent_power_setpoint)
         SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Position Actual", round(self.position_actual, 2))
-        SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Position Setpoint", self.requested_position)
+        SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Position Setpoint", self.position_setpoint)
         SmartDashboard.putNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} kP", self.kP)
         SmartDashboard.putNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} kI", self.kI)
         SmartDashboard.putNumber(f"PIDF/{self.dashboard_name}/{self.dashboard_name} kD", self.kD)
@@ -131,9 +131,9 @@ class SS_Kraken(commands2.Subsystem):
                 self.percent_power_setpoint = max(min(dashboard_power_percent_setpoint, 1.0), -1.0)
                 SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Power Percent Setpoint", self.percent_power_setpoint)
             dashboard_position_setpoint = SmartDashboard.getNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Position Setpoint", self.percent_power_setpoint)
-            if dashboard_position_setpoint != self.requested_position:
-                self.requested_position = max(min(dashboard_position_setpoint, 1.0), -1.0)
-                SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Position Setpoint", self.requested_position)
+            if dashboard_position_setpoint != self.position_setpoint:
+                self.position_setpoint = max(min(dashboard_position_setpoint, 1.0), -1.0)
+                SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Position Setpoint", self.position_setpoint)
             dashboard_p = self._nt_kP.getDouble(self.kP)
             dashboard_i = self._nt_kI.getDouble(self.kI)
             dashboard_d = self._nt_kD.getDouble(self.kD)
@@ -172,9 +172,9 @@ class SS_Kraken(commands2.Subsystem):
 
     def set_position(self, target_rotations = None) -> None:
         if target_rotations is None:
-            target_rotations = self.requested_position
+            target_rotations = self.position_setpoint
         self.motor.set_control(self.position_request_with_trapezoid.with_position(float(target_rotations)))
-        self.requested_position = target_rotations
+        self.position_setpoint = target_rotations
 
     def stop_motor(self):
         self.motor.set(0.0)
@@ -183,6 +183,14 @@ class SS_Kraken(commands2.Subsystem):
     # -------------------------
     # Commands
     # -------------------------
+    def spin_up_and_wait(self):
+        return commands2.FunctionalCommand(
+            onInit=lambda: self.run_velocity_at_setpoint(),
+            isFinished=lambda: abs(self.velocity_actual - self.velocity_setpoint) < 10,
+            requirements=[self] )
+
+
+
     def spin_up_and_wait_command(self):
         class SpinUpAndWait(commands2.Command):
             def __init__(self, ss_kraken: SS_Kraken):
@@ -211,4 +219,5 @@ class SS_Kraken(commands2.Subsystem):
                 
         spin_up_and_wait_command = SpinUpAndWait(self)
         return spin_up_and_wait_command
+
 

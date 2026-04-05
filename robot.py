@@ -59,6 +59,7 @@ class RobotContainer:
         NamedCommands.registerCommand("SEQ Shoot", self.seq_shoot)
         self.deploy_intake = cmd.runOnce(lambda: self.ss_extend.set_position(1.5), self.ss_extend)
         NamedCommands.registerCommand("Deploy_Intake", self.deploy_intake)
+        SmartDashboard.putData("Deploy Intake", self.deploy_intake)
         self.run_intake = cmd.startEnd(self.ss_intake.run_voltage_percent_forward, self.ss_intake.stop_motor, self.ss_intake)
         NamedCommands.registerCommand("Run_Intake", self.run_intake)
         self.auto_chooser = AutoBuilder.buildAutoChooser("None") # must be defined after SS's and all registered commands
