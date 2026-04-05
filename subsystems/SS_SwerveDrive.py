@@ -124,7 +124,7 @@ class SS_SwerveDrive(commands2.Subsystem):
                 .with_velocity_x(-self._smoothed_axis(self._joystick.getLeftY(), self._left_y_limiter, square_input=True)* self._max_speed)
                 .with_velocity_y(-self._smoothed_axis(self._joystick.getLeftX(), self._left_x_limiter, square_input=True)* self._max_speed)
                 .with_target_direction(self._heading_from_right_stick())
-                .with_heading_pid(20, 10, 10)
+                .with_heading_pid(1, 10, 0.2)
         ))
 
     def _heading_from_right_stick(self) -> Rotation2d:
