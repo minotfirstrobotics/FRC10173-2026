@@ -81,7 +81,9 @@ class SS_SwerveDrive(commands2.Subsystem):
             self.x_vector_to_target = self._latest_pose.translation().X() - self.target_x
             self.y_vector_to_target = self._latest_pose.translation().Y() - self.target_y
             self.range_to_target = (self.x_vector_to_target**2 + self.y_vector_to_target**2)**0.5
-
+            self.directionx = self.x_vector_to_target / self.range_to_target
+            self.directiony = self.y_vector_to_target / self.range_to_target
+            self.direction_speed = .8 * (self.range_to_target - 1) # Subtract desired stopping distance from error calculation
 
         dashboard_max_speed = wpilib.SmartDashboard.getNumber("Swerve/Swerve Max Speed Factor", self._max_speed_factor)
         if dashboard_max_speed != self._max_speed_factor:
@@ -141,6 +143,33 @@ class SS_SwerveDrive(commands2.Subsystem):
                 .with_velocity_y(-self._smoothed_axis(self._joystick.getLeftX(), self._left_x_limiter, square_input=True) * self._max_speed)
                 .with_target_direction(self._heading_from_right_stick())
         ))
+    
+    def drive_to_target(self):
+        return self.drivetrain.apply_request(lambda: (
+            self._drive_field_facing
+                .with_velocity_x(self.direction_speed * self.directionx)
+                .with_velocity_y(self.direction_speed * self.directiony)
+                .with_target_direction(self._heading_from_right_stick())
+        ))
+
+
+    
+    def drive_mode_padlocked(self) -> None:
+        return self.drivetrain.apply_request(lambda: (
+            self._drive_facing_direction
+                .with_velocity_x(-self._smoothed_axis(self._joystick.getLeftY(), self._left_y_limiter, square_input=True)* self._max_speed)
+                .with_velocity_y(-self._smoothed_axis(self._joystick.getLeftX(), self._left_x_limiter, square_input=True)* self._max_speed)
+                .with_target_direction(Rotation2d(self.x_vector_to_target, self.y_vector_to_target))
+                .with_heading_pid(12, 0, 5)
+        ))
+
+    def drive_mode_robot_centered(self) -> None:
+
+            return self.drivetrain.apply_request(lambda: (
+                self._drive_robot_centered
+                    .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
+                    .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
+                    .with_rotational_rate(-self._joystick.getRightX() * abs(self._joystick.getRightX()) * self._max_angular_rate)) )
 
     def _heading_from_right_stick(self) -> Rotation2d:
         if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
@@ -165,22 +194,6 @@ class SS_SwerveDrive(commands2.Subsystem):
             axis = axis * abs(axis)
         return limiter.calculate(axis)
 
-    def drive_mode_padlocked(self) -> None:
-        return self.drivetrain.apply_request(lambda: (
-            self._drive_facing_direction
-                .with_velocity_x(-self._smoothed_axis(self._joystick.getLeftY(), self._left_y_limiter, square_input=True)* self._max_speed)
-                .with_velocity_y(-self._smoothed_axis(self._joystick.getLeftX(), self._left_x_limiter, square_input=True)* self._max_speed)
-                .with_target_direction(Rotation2d(self.x_vector_to_target, self.y_vector_to_target))
-                .with_heading_pid(12, 0, 5)
-        ))
-
-    def drive_mode_robot_centered(self) -> None:
-
-            return self.drivetrain.apply_request(lambda: (
-                self._drive_robot_centered
-                    .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
-                    .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
-                    .with_rotational_rate(-self._joystick.getRightX() * abs(self._joystick.getRightX()) * self._max_angular_rate)) )
 
     # -------------------------
     # Drive requests for automated movement

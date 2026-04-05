@@ -54,9 +54,8 @@ class RobotContainer:
             self.gamepad.a().onTrue(self.ss_swerve_drive.drive_mode_padlocked())
             self.gamepad.a().onFalse(self.defaultdrivemode)
 
-
-            # B button hold → padlock to target
-            #self.gamepad.b().whileTrue(self.ss_swerve_drive.hold_padlock_goal_command())
+            self.gamepad.b().onTrue(self.ss_swerve_drive.drive_to_target())
+            self.gamepad.b().onFalse(self.defaultdrivemode)
 
             # Brake
             self.gamepad.back().and_(self.gamepad.b()).whileTrue(
