@@ -50,7 +50,7 @@ class RobotContainer:
 
         if self.ss_swerve_drive:
 
-            # A button toggles padlock mode
+            # A button hold padlock mode
             self.gamepad.a().onTrue(self.ss_swerve_drive.drive_mode_padlocked())
             self.gamepad.a().onFalse(self.defaultdrivemode)
 
