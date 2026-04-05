@@ -143,8 +143,12 @@ class SS_SwerveDrive(commands2.Subsystem):
         ))
 
     def _heading_from_right_stick(self) -> Rotation2d:
-        rx = self._joystick.getRightX()
-        ry = self._joystick.getRightY()
+        if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
+            ry = -self._joystick.getRightX()
+            rx= -self._joystick.getRightY()
+        else:
+            ry = self._joystick.getRightX()
+            rx = self._joystick.getRightY()
 
         mag = (rx * rx + ry * ry) ** 0.5
 
