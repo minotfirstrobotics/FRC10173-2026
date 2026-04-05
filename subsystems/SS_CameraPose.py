@@ -67,7 +67,6 @@ class SS_CameraPose(commands2.Subsystem):
 
         # Dashboard
         pose = est.estimatedPose
-        SmartDashboard.putNumber("Vision/X", pose.X())
-        SmartDashboard.putNumber("Vision/Y", pose.Y())
-        SmartDashboard.putNumber("Vision/Heading",
-                                 pose.rotation().toRotation2d().degrees())
+        SmartDashboard.putNumber("Vision/X", round(pose.X(), 2))
+        SmartDashboard.putNumber("Vision/Y", round(pose.Y(), 2))
+        SmartDashboard.putNumber("Vision/Heading", round(pose.rotation().toRotation2d().degrees(),1))

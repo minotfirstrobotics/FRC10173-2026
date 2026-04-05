@@ -16,13 +16,12 @@ from commands.complex_and_sequences import CMD_ComboShoot, SEQ_shoot, SEQ_extend
 class RobotContainer:
     def __init__(self) -> None:
         self.gamepad = None or CommandXboxController(0)
-        self.operator = None or CommandXboxController(1)
         DriverStation.silenceJoystickConnectionWarning(True)
         self.canbus = TunerConstants.canbus
         self.ss_shooter = None or SS_Kraken(3, self.canbus, "Shooter", inverted=True, max_rps=100, velocity_setpoint=40, kp=0.08, ki=0.0, kd=0.0, kv=0.012, ks=0.0)
         self.ss_feeder = None or SS_Kraken(1, self.canbus, "Feeder", kp=1.0, velocity_setpoint=40, percent_power_setpoint=0.5)
         self.ss_intake = None or SS_Kraken(4, self.canbus, "Intake", max_rps=120, percent_power_setpoint=0.5)
-        self.ss_extend = None or SS_Kraken(6, self.canbus, "Extension", inverted=True, brake_mode=True, kp=5, ki=0.5, Vmax=.5, Amax=.5, Jerk=2.5)
+        self.ss_extend = None or SS_Kraken(6, self.canbus, "Extension", inverted=True, brake_mode=True, kp=5, ki=0.5, vmax=.5, amax=.5, jerk=2.5)
         self.ss_candle_light_left = None or SS_CANdleLight(2, self.canbus, "Left")
         self.ss_candle_light_right = None or SS_CANdleLight(5, self.canbus, "Right")
         self.ss_swerve_drive = None or SS_SwerveDrive(self.gamepad)
@@ -94,7 +93,7 @@ class RobotContainer:
             self.extend2d = self.root2d.appendLigament("extend", 2, 90, 3, Color8Bit(255, 255, 255))
         wpilib.SmartDashboard.putData("Mechanism", self.mech2d)
 
-    def getAutonomousCommand(self) -> commands2.Command:
+    def get_autonomous_command(self) -> commands2.Command:
         return self.auto_chooser.getSelected()
 
 
@@ -177,7 +176,7 @@ class MyRobot(commands2.TimedCommandRobot):
         """
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
-        self.autonomousCommand = self.container.getAutonomousCommand()
+        self.autonomousCommand = self.container.get_autonomous_command()
         
         if not self.autonomousCommand:
             print("No autonomous command selected.")
@@ -219,6 +218,7 @@ class MyRobot(commands2.TimedCommandRobot):
         pass
 
     def testExit(self) -> None:
+        """This function is called once when exiting test mode."""
         pass
 
 if __name__ == "__main__":

@@ -20,6 +20,7 @@ from wpilib import DriverStation
 
 class SS_SwerveDrive(commands2.Subsystem):
     def __init__(self, joystick) -> None:
+        self.alliance = DriverStation.getAlliance()
         self._joystick = joystick
         self._max_angular_rate = rotationsToRadians(0.75)
         self._max_speed_factor = 0.2
@@ -81,6 +82,7 @@ class SS_SwerveDrive(commands2.Subsystem):
             self.y_vector_to_target = self._latest_pose.translation().Y() - self.target_y
             self.range_to_target = (self.x_vector_to_target**2 + self.y_vector_to_target**2)**0.5
 
+
         dashboard_max_speed = wpilib.SmartDashboard.getNumber("Swerve/Swerve Max Speed Factor", self._max_speed_factor)
         if dashboard_max_speed != self._max_speed_factor:
             self._max_speed_factor = max(min(dashboard_max_speed, 1.0), 0.0) # Clamp between 0 and 1
@@ -95,9 +97,9 @@ class SS_SwerveDrive(commands2.Subsystem):
         # Dashboard pose output
         pose_translation = self._latest_pose.translation()
         pose_rotation = self._latest_pose.rotation()
-        SmartDashboard.putNumber("Swerve/Swerve Pose X (meters)", pose_translation.X())
-        SmartDashboard.putNumber("Swerve/Swerve Pose Y (meters)", pose_translation.Y())
-        SmartDashboard.putNumber("Swerve/Swerve Rotation (deg)", pose_rotation.degrees())
+        SmartDashboard.putNumber("Swerve/Swerve Pose X (meters)", round(pose_translation.X(), 2))
+        SmartDashboard.putNumber("Swerve/Swerve Pose Y (meters)", round(pose_translation.Y(), 2))
+        SmartDashboard.putNumber("Swerve/Swerve Rotation (deg)", round(pose_rotation.degrees(), 1))
         self.field.setRobotPose(self._latest_pose)
 
     def _determine_padlock_target(self, pose: Pose2d) -> tuple:
