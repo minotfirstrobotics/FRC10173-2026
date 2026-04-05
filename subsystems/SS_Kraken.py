@@ -26,8 +26,8 @@ class SS_Kraken(commands2.Subsystem):
         self._periodic_counter = 0
         self.motor.set_position(self.position_setpoint) # pidf reset encoder position to 0 on startup
 
-        self._put_telemetry_on_dashboard(first_time=True)
-        self._register_pathplanner_commands()
+        self._put_telemetry_on_dashboard()
+        self._construct_register_and_dashboard_commands()
 
     def _setup_hardware_configuration(self, inverted: bool=False, brake_mode: bool=False):
         self._config = phoenix6.configs.TalonFXConfiguration()
@@ -73,7 +73,7 @@ class SS_Kraken(commands2.Subsystem):
             wpilib.reportError(f"Kraken PID update failed: {self.status}", False)
         SmartDashboard.putBoolean(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Config Success", self.status.is_ok())
 
-    def _put_telemetry_on_dashboard(self, first_time: bool=False):
+    def _put_telemetry_on_dashboard(self):
         SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Velocity Actual", round(self.velocity_actual, 1))
         SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Velocity Setpoint", self.velocity_setpoint)
         SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Power Percent Setpoint", self.percent_power_setpoint)
@@ -101,15 +101,30 @@ class SS_Kraken(commands2.Subsystem):
         self._nt_amax = nt_pidf.getEntry(f"{self.dashboard_name} amax")
         self._nt_jerk = nt_pidf.getEntry(f"{self.dashboard_name} jerk")
 
-    def _register_pathplanner_commands(self):
-        # NamedCommands.registerCommand(f"{self.dashboard_name}/{self.dashboard_name} Spin-up to Setpoint", self.spin_up_and_wait_command())
-        NamedCommands.registerCommand(f"{self.dashboard_name}/{self.dashboard_name} Power Percent Forward", commands2.cmd.runOnce(self.run_voltage_percent_forward))
-        NamedCommands.registerCommand(f"{self.dashboard_name}/{self.dashboard_name} Power Percent Reverse", commands2.cmd.runOnce(self.run_voltage_percent_reverse))
-        NamedCommands.registerCommand(f"{self.dashboard_name}/{self.dashboard_name} Run at Velocity", commands2.cmd.runOnce(self.run_velocity_at_setpoint))
-        NamedCommands.registerCommand(f"{self.dashboard_name}/{self.dashboard_name} Stop", commands2.cmd.runOnce(self.stop_motor))
-        NamedCommands.registerCommand(f"{self.dashboard_name}/{self.dashboard_name} Set Position", commands2.cmd.runOnce(self.set_position))
-        NamedCommands.registerCommand(f"{self.dashboard_name}/{self.dashboard_name} Point Ahead", commands2.cmd.runOnce(lambda: self.set_position(0)))
-        NamedCommands.registerCommand(f"{self.dashboard_name}/{self.dashboard_name} Point Right", commands2.cmd.runOnce(lambda: self.set_position(-2.56)))
+    def _construct_register_and_dashboard_commands(self):
+        self.stop_motor_command = self.stop_motor()
+        NamedCommands.registerCommand(f"{self.dashboard_name} Stop Motor", self.stop_motor_command)
+        SmartDashboard.putData(f"Commands/{self.dashboard_name}/{self.dashboard_name} Stop Motor", self.stop_motor_command)
+
+        self.run_at_velocity_command = self.run_at_velocity()
+        NamedCommands.registerCommand(f"{self.dashboard_name} Run at Setpoint Velocity", self.run_at_velocity_command)
+        SmartDashboard.putData(f"Commands/{self.dashboard_name}/{self.dashboard_name} Run at Velocity", self.run_at_velocity_command)
+
+        self.run_power_percent_forward_command = self.run_power_percent_forward()
+        NamedCommands.registerCommand(f"{self.dashboard_name} Power Percent Forward", self.run_power_percent_forward_command)
+        SmartDashboard.putData(f"Commands/{self.dashboard_name}/{self.dashboard_name} Power Percent Forward", self.run_power_percent_forward_command)
+
+        self.run_power_percent_reverse_command = self.run_power_percent_reverse()
+        NamedCommands.registerCommand(f"{self.dashboard_name} Power Percent Reverse", self.run_power_percent_reverse_command)
+        SmartDashboard.putData(f"Commands/{self.dashboard_name}/{self.dashboard_name} Power Percent Reverse", self.run_power_percent_reverse_command)
+        
+        self.spin_up_and_wait_command = self.spin_up_and_wait()
+        NamedCommands.registerCommand(f"{self.dashboard_name}/{self.dashboard_name} Spin-up to Setpoint", self.spin_up_and_wait_command)
+        SmartDashboard.putData(f"Commands/{self.dashboard_name}/{self.dashboard_name} Spin-up to Setpoint", self.spin_up_and_wait_command)
+        
+        self.rotate_to_position_command = self.rotate_to_position()
+        NamedCommands.registerCommand(f"{self.dashboard_name} Rotate to Position", self.rotate_to_position_command)
+        SmartDashboard.putData(f"Commands/{self.dashboard_name}/{self.dashboard_name} Rotate to Position", self.rotate_to_position_command)
 
     # -------------------------
     # Periodic tasks - dashboard updates and config changes
@@ -154,44 +169,63 @@ class SS_Kraken(commands2.Subsystem):
     # -------------------------
     # Motor movement functions
     # -------------------------
-    def run_velocity_at_setpoint(self, setpoint = None) -> None:
+    def _stop_motor(self):
+        self.motor.set(0.0)
+        # self.motor.stopMotor()
+
+    def _run_at_velocity(self, setpoint = None) -> None:
         if setpoint is None:
             setpoint = self.velocity_setpoint
         """Needs PIDF settings and max_rps to be configured appropriately for good performance."""
         self.motor.set_control(self.velocity_request.with_velocity(setpoint))
 
-    def run_voltage_percent_forward(self, setpoint = None) -> None:
+    def _run_power_percent(self, setpoint = None) -> None:
         if setpoint is None:
             setpoint = self.velocity_setpoint
         self.motor.set(setpoint)
 
-    def run_voltage_percent_reverse(self, setpoint = None) -> None:
-        if setpoint is None:
-            setpoint = self.velocity_setpoint
-        self.motor.set(-setpoint)
-
-    def set_position(self, target_rotations = None) -> None:
+    def _rotate_to_position(self, target_rotations = None) -> None:
         if target_rotations is None:
             target_rotations = self.position_setpoint
         self.motor.set_control(self.position_request_with_trapezoid.with_position(float(target_rotations)))
         self.position_setpoint = target_rotations
 
-    def stop_motor(self):
-        self.motor.set(0.0)
-        # self.motor.stopMotor()
 
     # -------------------------
     # Commands
     # -------------------------
+    def stop_motor(self):
+        return commands2.cmd.runOnce(lambda: self._stop_motor(), self)
+
+    def run_at_velocity(self, setpoint = None):
+        if setpoint is None:
+            setpoint = self.velocity_setpoint
+        return commands2.cmd.runOnce(lambda: self._run_at_velocity(setpoint), self)
+    
+    def run_power_percent_forward(self, setpoint = None):
+        if setpoint is None:
+            setpoint = self.percent_power_setpoint
+        return commands2.cmd.runOnce(lambda: self._run_power_percent(setpoint), self)
+    
+    def run_power_percent_reverse(self, setpoint = None):
+        if setpoint is None:
+            setpoint = self.percent_power_setpoint
+        return commands2.cmd.runOnce(lambda: self._run_power_percent(-setpoint), self)
+
+    def rotate_to_position(self, target_rotations = None):
+        if target_rotations is None:
+            target_rotations = self.position_setpoint
+        return commands2.cmd.runOnce(lambda: self._rotate_to_position(), self)
+
     def spin_up_and_wait(self):
         return commands2.FunctionalCommand(
-            onInit=lambda: self.run_velocity_at_setpoint(),
-            isFinished=lambda: abs(self.velocity_actual - self.velocity_setpoint) < 10,
-            requirements=[self] )
+            lambda: self._run_at_velocity(),
+            lambda: None,
+            lambda interrupted: wpilib.reportWarning(f"SpinUpAndWait_Command {'interrupted before reaching target velocity!' if interrupted else 'reached target velocity!'}", printTrace=False),
+            lambda: abs(self.velocity_actual - self.velocity_setpoint) < 10,
+            self )
 
-
-
-    def spin_up_and_wait_command(self):
+    def spin_up_and_wait_verbose(self):
         class SpinUpAndWait(commands2.Command):
             def __init__(self, ss_kraken: SS_Kraken):
                 super().__init__()
@@ -202,7 +236,7 @@ class SS_Kraken(commands2.Subsystem):
 
             def initialize(self):
                 self.timer.restart()
-                self.ss_kraken.run_velocity_at_setpoint() # Spin up
+                self.ss_kraken._run_at_velocity() # Spin up
 
             def execute(self):
                 pass # Command is running

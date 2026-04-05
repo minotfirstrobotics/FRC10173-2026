@@ -5,6 +5,7 @@ from wpilib import Color8Bit, SmartDashboard, Timer, DriverStation
 from wpimath.geometry import Pose2d, Rotation2d
 from phoenix6 import HootAutoReplay
 from pathplannerlib.auto import AutoBuilder, NamedCommands, PathConstraints
+from pathplannerlib.path import PathPlannerPath
 from commands2.button import CommandXboxController
 from generated.tuner_constants_2026_GF import TunerConstants
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
@@ -34,34 +35,49 @@ class RobotContainer:
 
     def configure_gamepad_bindings(self):
         if self.ss_shooter:
-            self.gamepad.rightBumper().whileTrue(cmd.startEnd(self.ss_shooter.run_velocity_at_setpoint, self.ss_shooter.stop_motor, self.ss_shooter))
+            self.gamepad.rightBumper().whileTrue(cmd.startEnd(self.ss_shooter.run_at_velocity, self.ss_shooter.stop_motor, self.ss_shooter))
         if self.ss_feeder:
-            self.gamepad.leftBumper().whileTrue(cmd.startEnd(self.ss_feeder.run_velocity_at_setpoint, self.ss_feeder.stop_motor, self.ss_feeder))
+            self.gamepad.leftBumper().whileTrue(cmd.startEnd(self.ss_feeder.run_at_velocity, self.ss_feeder.stop_motor, self.ss_feeder))
+
+            self.gamepad.leftBumper().onTrue(self.ss_feeder.run_at_velocity)
+            self.gamepad.leftBumper().onFalse(self.ss_feeder._stop_motor)
         if self.ss_intake:
-            self.gamepad.leftTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(self.ss_intake.run_voltage_percent_reverse, self.ss_intake.stop_motor, self.ss_intake))
-            self.gamepad.rightTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(self.ss_intake.run_voltage_percent_forward, self.ss_intake.stop_motor, self.ss_intake))
-            self.gamepad.y().whileTrue(cmd.startEnd(lambda: self.ss_extend.set_position(3), self.ss_extend.stop_motor, self.ss_intake))
-        if self.ss_shooter and self.ss_feeder:
-            self.gamepad.x().onFalse(SEQ_shoot(self.ss_shooter, self.ss_feeder))
+            self.gamepad.leftTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(self.ss_intake.run_power_percent_reverse, self.ss_intake.stop_motor, self.ss_intake))
+            self.gamepad.rightTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(self.ss_intake.run_power_percent_forward, self.ss_intake.stop_motor, self.ss_intake))
+            self.gamepad.y().whileTrue(cmd.startEnd(lambda: self.ss_extend.rotate_to_position(3), self.ss_extend.stop_motor, self.ss_intake))
+
+            self.gamepad.leftTrigger(threshold=.2).onTrue(self.ss_intake.run_power_percent_reverse)
+            self.gamepad.rightTrigger(threshold=.2).onFalse(self.ss_intake._stop_motor)
+            self.gamepad.y().onTrue(lambda: self.ss_extend._rotate_to_position(3))
+            self.gamepad.y().onFalse(self.ss_extend._stop_motor)
+        # if self.ss_shooter and self.ss_feeder:
+        #     self.gamepad.x().onFalse(SEQ_shoot(self.ss_shooter, self.ss_feeder))
 
         if self.ss_swerve_drive:
             ## Set starting drive mode to field-centered, and allow toggling to padlocked with the A button
             self.ss_swerve_drive.drive_mode_field_centered()
             self.gamepad.a().onTrue(cmd.runOnce(self.ss_swerve_drive.drive_mode_padlocked))
             self.gamepad.a().onFalse(cmd.runOnce(self.ss_swerve_drive.drive_mode_field_centered))
-            self.gamepad.back().and_(self.gamepad.b()).whileTrue(cmd.runOnce(self.ss_swerve_drive.brake))
             self.gamepad.back().and_(self.gamepad.start()).onTrue(cmd.runOnce(self.ss_swerve_drive.reset_field_oriented_perspective))
 
     def _build_complex_commands_and_autochooser(self):
-        self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.gamepad)
-        NamedCommands.registerCommand("Combo Shoot", self.cmd_combo_shoot)
-        self.seq_shoot = SEQ_shoot(self.ss_shooter, self.ss_feeder)
-        NamedCommands.registerCommand("SEQ Shoot", self.seq_shoot)
-        self.deploy_intake = cmd.runOnce(lambda: self.ss_extend.set_position(1.5), self.ss_extend)
-        NamedCommands.registerCommand("Deploy_Intake", self.deploy_intake)
-        SmartDashboard.putData("Deploy Intake", self.deploy_intake)
-        self.run_intake = cmd.startEnd(self.ss_intake.run_voltage_percent_forward, self.ss_intake.stop_motor, self.ss_intake)
-        NamedCommands.registerCommand("Run_Intake", self.run_intake)
+        # self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.gamepad)
+        # NamedCommands.registerCommand("Commands/Combo Shoot", self.cmd_combo_shoot)
+
+        # self.seq_shoot = SEQ_shoot(self.ss_shooter, self.ss_feeder)
+        # NamedCommands.registerCommand("Commands/SEQ Shoot", self.seq_shoot)
+
+        self.run_intake = cmd.startEnd(self.ss_intake.run_power_percent_forward, self.ss_intake._stop_motor, self.ss_intake)
+        NamedCommands.registerCommand("Commands/Run_Intake", self.run_intake)
+
+        path_3ft = PathPlannerPath.fromPathFile("3ft fowd")  # name matches the .path file
+        follow_command_3ft = AutoBuilder.followPath(path_3ft)
+        SmartDashboard.putData("Commands/Follow 3ft Fwd Path", follow_command_3ft)
+
+        path_Jerk = PathPlannerPath.fromPathFile("3ft fowd")  # name matches the .path file
+        follow_command_jerk = AutoBuilder.followPath(path_Jerk)
+        SmartDashboard.putData("Commands/Jerk(F-B)", follow_command_jerk)
+        
         self.auto_chooser = AutoBuilder.buildAutoChooser("None") # must be defined after SS's and all registered commands
         SmartDashboard.putData("Auto Chooser", self.auto_chooser)
 
@@ -190,7 +206,7 @@ class MyRobot(commands2.TimedCommandRobot):
         ''' # Example test code for manually testing subsystems during test mode, using the mechanism2d for visualization. Uncomment and modify as needed for testing.
         if self.container.ss_shooter:
             self.container.ss_shooter.velocity_setpoint = 50
-            self.container.ss_shooter.run_velocity_at_setpoint()
+            self.container.ss_shooter._run_at_velocity()
         if self.container.ss_feeder:
             self.container.ss_feeder.percent_power_setpoint = .5
             self.container.ss_feeder.run_voltage_percent_forward()
