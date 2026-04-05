@@ -81,9 +81,9 @@ class SS_SwerveDrive(commands2.Subsystem):
             self.x_vector_to_target = self._latest_pose.translation().X() - self.target_x
             self.y_vector_to_target = self._latest_pose.translation().Y() - self.target_y
             self.range_to_target = (self.x_vector_to_target**2 + self.y_vector_to_target**2)**0.5
-            self.directionx = self.x_vector_to_target / self.range_to_target
-            self.directiony = self.y_vector_to_target / self.range_to_target
-            self.direction_speed = .8 * (self.range_to_target - 1) # Subtract desired stopping distance from error calculation
+            self.x_direction_to_target = self.x_vector_to_target / self.range_to_target
+            self.y_direction_to_target = self.y_vector_to_target / self.range_to_target
+            self.speed_to_target = .8 * (self.range_to_target - 1) # Subtract desired stopping distance from error calculation
 
         dashboard_max_speed = wpilib.SmartDashboard.getNumber("Swerve/Swerve Max Speed Factor", self._max_speed_factor)
         if dashboard_max_speed != self._max_speed_factor:
@@ -147,8 +147,8 @@ class SS_SwerveDrive(commands2.Subsystem):
     def drive_to_target(self):
         return self.drivetrain.apply_request(lambda: (
             self._drive_field_facing
-                .with_velocity_x(self.direction_speed * self.directionx)
-                .with_velocity_y(self.direction_speed * self.directiony)
+                .with_velocity_x(self.speed_to_target * self.x_direction_to_target)
+                .with_velocity_y(self.speed_to_target * self.y_direction_to_target)
                 .with_target_direction(self._heading_from_right_stick())
         ))
 
