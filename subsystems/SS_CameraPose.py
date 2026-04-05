@@ -22,52 +22,62 @@ class SS_CameraPose(commands2.Subsystem):
 
         # set camera
         self.rightcam = PhotonCamera("RightCamera")
-        #self.leftcam = PhotonCamera("LeftCamera") # unused for now, but we can add it later if we want
+        self.leftcam = PhotonCamera("LeftCamera") 
 
         # we need to measure this 
-        #self.robot_to_leftcam = Transform3d(
-       #     Translation3d(0.3048, -0.3302, 0.4826), # meters forward, right, up from robot center
-      #      Rotation3d(0.0, 0.0, 0.0) # radians roll, pitch, yaw from robot forward
-      #  )
+        self.robot_to_leftcam = Transform3d(
+            Translation3d(0.3048, -0.3302, 0.4826), # meters forward, right, up from robot center
+            Rotation3d(0.0, 0.0, 0.0) # radians roll, pitch, yaw from robot forward
+        )
         self.robot_to_rightcam = Transform3d(
             Translation3d(0.3048, 0.3302, 0.4826), # meters forward, left, up from robot center
             Rotation3d(0.0, 0.0, 0.0) # radians roll, pitch, yaw from robot forward
         )
 
         # pos estimation
-        self.estimator = PhotonPoseEstimator(
+        self.right_estimator = PhotonPoseEstimator(
             self.field_layout,
             self.robot_to_rightcam,
-           # self.robot_to_leftcam
+        )
+        self.left_estimator = PhotonPoseEstimator(
+            self.field_layout,
+            self.robot_to_leftcam,
         )
 
-    def periodic(self):
-        # grab cams 
-        results = self.rightcam.getAllUnreadResults()
+    def _process_camera(self, cam, estimator):
+        results = cam.getAllUnreadResults()
         if not results:
             return
 
         result = results[-1]
         if not result.hasTargets():
             return
-
+        
         # calculate pos based on cams (use one of these)
         #est = self.estimator.estimatePnpDistanceTrigSolvePose(result)
         #est = self.estimator.estimateCoprocMultiTagPose(result)
-        est = self.estimator.estimateLowestAmbiguityPose(result)
-
+        est = estimator.estimateLowestAmbiguityPose(result)
         if est is None:
             return
 
-        # send to swerve
         self.swerve_drive.drivetrain.add_vision_measurement(
             est.estimatedPose.toPose2d(),
             est.timestampSeconds,
-            vision_measurement_std_devs = [.3, .3, 5.0] # distrust of x, y in meters, heading in degrees
+            vision_measurement_std_devs=[.3, .3, 5.0]
         )
+        return est.estimatedPose
+    def periodic(self):
+        right_pose = self._process_camera(self.rightcam, self.right_estimator)
+        left_pose = self._process_camera(self.leftcam, self.left_estimator)
 
-        # Dashboard
-        pose = est.estimatedPose
-        SmartDashboard.putNumber("Vision/X", round(pose.X(), 2))
-        SmartDashboard.putNumber("Vision/Y", round(pose.Y(), 2))
-        SmartDashboard.putNumber("Vision/Heading", round(pose.rotation().toRotation2d().degrees(),1))
+        if right_pose:
+            SmartDashboard.putNumber("Vision/RightX", round(right_pose.X(), 2))
+            SmartDashboard.putNumber("Vision/RightY", round(right_pose.Y(), 2))
+            SmartDashboard.putNumber("Vision/RightHeading", round(right_pose.rotation().toRotation2d().degrees(), 1)
+            )
+
+        if left_pose:
+            SmartDashboard.putNumber("Vision/LeftX", round(left_pose.X(), 2))
+            SmartDashboard.putNumber("Vision/LeftY", round(left_pose.Y(), 2))
+            SmartDashboard.putNumber("Vision/LeftHeading", round(left_pose.rotation().toRotation2d().degrees(), 1)
+            )
