@@ -72,8 +72,8 @@ class SS_SwerveDrive(commands2.Subsystem):
         if pose is not None:
             self._latest_pose = pose
             self.target_x, self.target_y = self._determine_padlock_target(pose)
-            self.x_vector_to_target = self.target_x - self._latest_pose.translation().X()
-            self.y_vector_to_target = self.target_y - self._latest_pose.translation().Y()
+            self.x_vector_to_target = self._latest_pose.translation().X() - self.target_x
+            self.y_vector_to_target = self._latest_pose.translation().Y() - self.target_y
             self.range_to_target = (self.x_vector_to_target**2 + self.y_vector_to_target**2)**0.5
 
         dashboard_max_speed = wpilib.SmartDashboard.getNumber("Swerve/Swerve Max Speed Factor", self._max_speed_factor)
@@ -100,19 +100,11 @@ class SS_SwerveDrive(commands2.Subsystem):
         if selected_target == (-1.0, -1.0) or selected_target is None: 
             # If "Auto Targetting" is selected, choose target based on alliance and position
             if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
-                if pose.translation().X() < 4.6:
                     selected_target = (4.6, 4.0)
-                elif pose.translation().Y() > 4.0:
-                    selected_target = (4.0, 6.0)
-                else:
-                    selected_target = (4.0, 2.0)
+
             elif DriverStation.getAlliance() == DriverStation.Alliance.kRed:
-                if pose.translation().X() < 11.94:
                     selected_target = (11.94, 4.0)
-                elif pose.translation().Y() > 4.0:
-                    selected_target = (11.94, 6.0)
-                else:
-                    selected_target = (11.94, 2.0)
+
 
         return selected_target
 
@@ -159,8 +151,7 @@ class SS_SwerveDrive(commands2.Subsystem):
             self._drive_facing_direction
                 .with_velocity_x(-self._smoothed_axis(self._joystick.getLeftY(), self._left_y_limiter, square_input=True)* self._max_speed)
                 .with_velocity_y(-self._smoothed_axis(self._joystick.getLeftX(), self._left_x_limiter, square_input=True)* self._max_speed)
-                .with_target_direction(Rotation2d(
-                    (self._latest_pose.translation().X()-11.94), self._latest_pose.translation().Y()-4))
+                .with_target_direction(Rotation2d(self.x_vector_to_target, self.y_vector_to_target))
                 .with_heading_pid(12, 0, 0)
         ))
 
