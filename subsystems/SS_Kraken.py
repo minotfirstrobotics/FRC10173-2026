@@ -144,15 +144,12 @@ class SS_Kraken(commands2.Subsystem):
             dashboard_velocity_setpoint = SmartDashboard.getNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Velocity Setpoint", self.velocity_setpoint)
             if dashboard_velocity_setpoint != self.velocity_setpoint:
                 self.velocity_setpoint = max(min(dashboard_velocity_setpoint, self.max_rps), -self.max_rps)
-                SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Velocity Setpoint", self.velocity_setpoint)
             dashboard_power_percent_setpoint = SmartDashboard.getNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Power Percent Setpoint", self.percent_power_setpoint)
             if dashboard_power_percent_setpoint != self.percent_power_setpoint:
                 self.percent_power_setpoint = max(min(dashboard_power_percent_setpoint, 1.0), -1.0)
-                SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Power Percent Setpoint", self.percent_power_setpoint)
             dashboard_position_setpoint = SmartDashboard.getNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Position Setpoint", self.percent_power_setpoint)
             if dashboard_position_setpoint != self.position_setpoint:
                 self.position_setpoint = max(min(dashboard_position_setpoint, 1.0), -1.0)
-                SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Position Setpoint", self.position_setpoint)
             dashboard_p = self._nt_kP.getDouble(self.kP)
             dashboard_i = self._nt_kI.getDouble(self.kI)
             dashboard_d = self._nt_kD.getDouble(self.kD)
