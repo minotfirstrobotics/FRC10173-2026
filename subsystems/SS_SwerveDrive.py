@@ -13,6 +13,7 @@ from commands2.sysid import SysIdRoutine
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.config import RobotConfig, PIDConstants
 from pathplannerlib.controller import PPHolonomicDriveController
+from pathplannerlib.path import PathPlannerPath
 from wpilib import DriverStation
 
 class SS_SwerveDrive(commands2.Subsystem):
@@ -209,6 +210,15 @@ class SS_SwerveDrive(commands2.Subsystem):
             should_flip_path=lambda: DriverStation.getAlliance() == DriverStation.Alliance.kRed,
             drive_subsystem=self
         )
+
+        # path_1m = PathPlannerPath.fromPathFile("1m fowd")  # name matches the .path file
+        # follow_command_1m = AutoBuilder.followPath(path_1m)
+        # SmartDashboard.putData("Commands/Swerve/Follow 1m Fwd Path", follow_command_1m)
+
+        # path_jerk = PathPlannerPath.fromPathFile("Jerk(F-B)")  # name matches the .path file
+        # follow_command_jerk = AutoBuilder.followPath(path_jerk)
+        # SmartDashboard.putData("Commands/Swerve/Jerk(F-B)", follow_command_jerk)
+
 
 
     def get_pose(self) -> Pose2d:
