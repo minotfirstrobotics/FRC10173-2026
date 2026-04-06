@@ -4,70 +4,72 @@ from commands2 import cmd
 from wpilib import Color8Bit, SmartDashboard, Timer, DriverStation
 from wpimath.geometry import Pose2d, Rotation2d
 from phoenix6 import HootAutoReplay
-from pathplannerlib.auto import AutoBuilder, NamedCommands
+from pathplannerlib.auto import AutoBuilder, NamedCommands, PathConstraints
+from pathplannerlib.path import PathPlannerPath
 from commands2.button import CommandXboxController
 from generated.tuner_constants_2026_GF import TunerConstants
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
 from subsystems.SS_Kraken import SS_Kraken
 from subsystems.SS_CANdleLight import SS_CANdleLight
 from subsystems.SS_CameraPose import SS_CameraPose
-from commands.complex_and_sequences import CMD_ComboShoot, SEQ_shoot, SEQ_extend_intake
+from commands.complex_and_sequences import CMD_ComboShoot, SEQ_shoot, SEQ_extend_intake, CMD_deploy_intake
 
 class RobotContainer:
     def __init__(self) -> None:
         self.gamepad = None or CommandXboxController(0)
         DriverStation.silenceJoystickConnectionWarning(True)
         self.canbus = TunerConstants.canbus
-        self.ss_shooter = None or SS_Kraken(3, self.canbus, "Shooter", inverted=True, max_rps=100, velocity_setpoint=40, kp=0.01, ki=0.0, kd=0.0, kv=0.01, ks=0.0)
-        self.ss_feeder = None or SS_Kraken(1, self.canbus, "Feeder", kp=1.0, velocity_setpoint=40, percent_power_setpoint=0.62)
-        self.ss_intake = None or SS_Kraken(4, self.canbus, "Intake", max_rps=120, percent_power_setpoint=0.62)
-        self.ss_extend = None or SS_Kraken(6, self.canbus, "Extension", inverted=True, brake_mode=True, kp=3, ki=0.5, Vmax=2, Amax=2, Jerk=10)
-        self.ss_candle_light_left = None or SS_CANdleLight(2, self.canbus, "Left CANdle")
-        self.ss_candle_light_right = None or SS_CANdleLight(5, self.canbus, "Right CANdle")
+        self.ss_shooter = None or SS_Kraken(3, self.canbus, "Shooter", inverted=True, max_rps=100, velocity_setpoint=40, kp=0.08, ki=0.0, kd=0.0, kv=0.012, ks=0.0)
+        self.ss_feeder = None or SS_Kraken(1, self.canbus, "Feeder", kp=1.0, velocity_setpoint=40, percent_power_setpoint=0.5)
+        self.ss_intake = None or SS_Kraken(4, self.canbus, "Intake", max_rps=120, percent_power_setpoint=0.5)
+        self.ss_extend = None or SS_Kraken(6, self.canbus, "Extension", inverted=True, brake_mode=True, kp=5, ki=0.5, vmax=.5, amax=.5, jerk=2.5)
+        self.ss_candle_light_left = None or SS_CANdleLight(2, self.canbus, "Left")
+        self.ss_candle_light_right = None or SS_CANdleLight(5, self.canbus, "Right")
         self.ss_swerve_drive = None or SS_SwerveDrive(self.gamepad)
-        self.ss_camera_pose = None# or SS_CameraPose(self.ss_swerve_drive)
+        self.ss_camera_pose = None or SS_CameraPose(self.ss_swerve_drive)
 
         self._build_complex_commands_and_autochooser()
         self._setup_simulated_mechanism2d()
+        self.defaultdrivemode = self.ss_swerve_drive.drive_mode_field_centered()
 
-        if self.gamepad:
-             self.configure_gamepad_bindings()
+        if self.gamepad: self.configure_gamepad_bindings()
 
     def configure_gamepad_bindings(self):
+        self.ss_swerve_drive.drivetrain.setDefaultCommand(self.defaultdrivemode)
         if self.ss_shooter:
-            self.gamepad.rightBumper().whileTrue(cmd.startEnd(
-                self.ss_shooter.run_velocity_at_setpoint, self.ss_shooter.stop_motor, self.ss_shooter))
+            self.gamepad.rightBumper().onTrue(self.ss_shooter.run_at_velocity())
+            self.gamepad.rightBumper().onFalse(self.ss_shooter.stop_motor())
         if self.ss_feeder:
-            self.gamepad.leftBumper().whileTrue(cmd.startEnd(
-                self.ss_feeder.run_velocity_at_setpoint, self.ss_feeder.stop_motor, self.ss_feeder))
+            self.gamepad.leftBumper().onTrue(self.ss_feeder.run_at_velocity())
+            self.gamepad.leftBumper().onFalse(self.ss_feeder.stop_motor())
         if self.ss_intake:
-            self.gamepad.leftTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(
-                self.ss_intake.run_voltage_percent_forward, self.ss_intake.stop_motor, self.ss_intake))
-            self.gamepad.rightTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(
-                self.ss_intake.run_voltage_percent_reverse, self.ss_intake.stop_motor, self.ss_intake))
-            self.gamepad.y().whileTrue(cmd.startEnd(
-                lambda: self.ss_extend.set_position(1.5), self.ss_extend.stop_motor, self.ss_intake))
-        if self.ss_shooter and self.ss_feeder:
-            self.gamepad.x().onFalse(SEQ_shoot(self.ss_shooter, self.ss_feeder))
+            self.gamepad.leftTrigger(threshold=.2).onTrue(self.ss_intake.run_power_percent_reverse())
+            self.gamepad.leftTrigger(threshold=.2).onFalse(self.ss_intake.stop_motor())
+            self.gamepad.rightTrigger(threshold=.2).onTrue(self.ss_intake.run_power_percent_forward())
+            self.gamepad.rightTrigger(threshold=.2).onFalse(self.ss_intake.stop_motor())
+            self.gamepad.y().onTrue(self.ss_extend.rotate_to_position(3))
+            self.gamepad.y().onFalse(self.ss_extend.stop_motor())
+        # elif self.ss_shooter and self.ss_feeder:
+        #     self.gamepad.rightBumper().whileTrue(CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.gamepad))
+        # elif self.ss_shooter and self.ss_feeder:
+        #     self.gamepad.x().onFalse(SEQ_shoot(self.ss_shooter, self.ss_feeder))
 
         if self.ss_swerve_drive:
-            ## Set starting drive mode to field-centered, and allow toggling to padlocked with the A button
-            self.ss_swerve_drive.drive_mode_field_centered()
-            self.gamepad.a().onTrue(cmd.runOnce(self.ss_swerve_drive.drive_mode_padlocked))
-            self.gamepad.a().onFalse(cmd.runOnce(self.ss_swerve_drive.drive_mode_field_centered))
-            # self.gamepad.a().and_(self.gamepad.back()).onFalse(cmd.runOnce(self.ss_swerve_drive.change_target))
-            # self.gamepad.pov(0).whileTrue(self.ss_swerve_drive.robot_pov_drive_request_command(1, 0))
-            # self.gamepad.pov(180).whileTrue(cmd.startEnd(lambda: self.ss_swerve_drive.robot_pov_drive_request_command(-1, 0), lambda: self.ss_swerve_drive.robot_pov_drive_request_command(0, 0)) )
-            # self.gamepad.pov(90).whileTrue(cmd.startEnd(lambda: self.ss_swerve_drive.robot_pov_drive_request_command(0, 1), lambda: self.ss_swerve_drive.robot_pov_drive_request_command(0, 0)) )
-            # self.gamepad.pov(270).whileTrue(cmd.startEnd(lambda: self.ss_swerve_drive.robot_pov_drive_request_command(0, -1), lambda: self.ss_swerve_drive.robot_pov_drive_request_command(0, 0)) )
-            self.gamepad.back().and_(self.gamepad.b()).whileTrue(cmd.runOnce(self.ss_swerve_drive.brake))
-            self.gamepad.back().and_(self.gamepad.start()).onTrue(cmd.runOnce(self.ss_swerve_drive.reset_field_oriented_perspective))
+            self.gamepad.a().onTrue(self.ss_swerve_drive.drive_mode_padlocked())
+            self.gamepad.a().onFalse(self.defaultdrivemode)
+            self.gamepad.b().onTrue(self.ss_swerve_drive.drive_to_target())
+            self.gamepad.b().onFalse(self.defaultdrivemode)
+
+            self.gamepad.back().and_(self.gamepad.start()).onTrue(
+                cmd.runOnce(self.ss_swerve_drive.reset_field_oriented_perspective) )
 
     def _build_complex_commands_and_autochooser(self):
-        self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.gamepad)
-        NamedCommands.registerCommand("Combo Shoot", self.cmd_combo_shoot)
-        self.seq_shoot = SEQ_shoot(self.ss_shooter, self.ss_feeder)
-        NamedCommands.registerCommand("SEQ Shoot", self.seq_shoot)
+        # self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.gamepad)
+        # NamedCommands.registerCommand("Commands/Combo Shoot", self.cmd_combo_shoot)
+
+        # self.seq_shoot = SEQ_shoot(self.ss_shooter, self.ss_feeder)
+        # NamedCommands.registerCommand("Commands/SEQ Shoot", self.seq_shoot)
+        
         self.auto_chooser = AutoBuilder.buildAutoChooser("None") # must be defined after SS's and all registered commands
         SmartDashboard.putData("Auto Chooser", self.auto_chooser)
 
@@ -84,7 +86,7 @@ class RobotContainer:
             self.extend2d = self.root2d.appendLigament("extend", 2, 90, 3, Color8Bit(255, 255, 255))
         wpilib.SmartDashboard.putData("Mechanism", self.mech2d)
 
-    def getAutonomousCommand(self) -> commands2.Command:
+    def get_autonomous_command(self) -> commands2.Command:
         return self.auto_chooser.getSelected()
 
 
@@ -126,6 +128,8 @@ class MyRobot(commands2.TimedCommandRobot):
         # self._time_and_driver_replay.update() # using HootAutoReplay to log and replay timestamp and driver data
         match_time_from_driver_station = Timer.getMatchTime()
         SmartDashboard.putNumber("Match Time", self.localMatchTimer.get() if match_time_from_driver_station < 0 else match_time_from_driver_station)
+        voltage = wpilib.RobotController.getBatteryVoltage()
+        SmartDashboard.putNumber("Battery Voltage", voltage)
         if self.container.ss_intake:
             self.container.intake2d.setLength(self.container.ss_intake.velocity_actual/10)
         if self.container.ss_feeder:
@@ -167,10 +171,13 @@ class MyRobot(commands2.TimedCommandRobot):
         """
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
-        self.autonomousCommand = self.container.getAutonomousCommand()
-        # self.autonomousCommand = SEQ_extend_intake(self.container.ss_swerve_drive)
-        if self.autonomousCommand:
-            self.autonomousCommand.schedule()
+        self.autonomousCommand = self.container.get_autonomous_command()
+        
+        if not self.autonomousCommand:
+            print("No autonomous command selected.")
+            return
+
+        self.autonomousCommand.schedule()
 
     def autonomousPeriodic(self) -> None:
         """This function is called periodically during autonomous"""
@@ -193,7 +200,7 @@ class MyRobot(commands2.TimedCommandRobot):
         ''' # Example test code for manually testing subsystems during test mode, using the mechanism2d for visualization. Uncomment and modify as needed for testing.
         if self.container.ss_shooter:
             self.container.ss_shooter.velocity_setpoint = 50
-            self.container.ss_shooter.run_velocity_at_setpoint()
+            self.container.ss_shooter._run_at_velocity()
         if self.container.ss_feeder:
             self.container.ss_feeder.percent_power_setpoint = .5
             self.container.ss_feeder.run_voltage_percent_forward()
@@ -206,6 +213,7 @@ class MyRobot(commands2.TimedCommandRobot):
         pass
 
     def testExit(self) -> None:
+        """This function is called once when exiting test mode."""
         pass
 
 if __name__ == "__main__":

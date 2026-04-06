@@ -1,6 +1,6 @@
 {
-  "robotWidth": 0.6731,
-  "robotLength": 0.6731,
+  "robotWidth": 0.6858,
+  "robotLength": 0.6858,
   "holonomicMode": true,
   "pathFolders": [],
   "autoFolders": [],
@@ -19,7 +19,7 @@
   "driveCurrentLimit": 120.0,
   "wheelCOF": 1.7,
   "flModuleX": 0.267,
-  "flModuleY": 0.2667,
+  "flModuleY": 0.267,
   "frModuleX": 0.267,
   "frModuleY": -0.267,
   "blModuleX": -0.267,

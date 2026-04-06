@@ -1,6 +1,6 @@
 import wpilib
 import commands2
-from commands2 import SequentialCommandGroup, WaitCommand, cmd
+from commands2 import WaitCommand, cmd
 from commands2.button import CommandXboxController
 from subsystems.SS_Kraken import SS_Kraken
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
@@ -8,26 +8,32 @@ from subsystems.SS_CANdleLight import SS_CANdleLight
 
 
 def SEQ_shoot(shooter: SS_Kraken, feeder: SS_Kraken):
-    return SequentialCommandGroup(
+    return commands2.SequentialCommandGroup(
         cmd.runOnce(shooter.spin_up_and_wait_command),
-        cmd.runOnce(lambda: shooter.run_velocity_at_setpoint), # Ensure shooter is running at setpoint while feeder runs
-        cmd.runOnce(lambda: feeder.run_velocity_at_setpoint).withTimeout(3.0), # Run feeder for 3 seconds after shooter is up to speed
-        cmd.runOnce(feeder.stop_motor).withTimeout(3.0), # Run feeder for 3 seconds after shooter is up to speed
-        cmd.runOnce(shooter.stop_motor).withTimeout(3.0), # Run feeder for 3 seconds after shooter is up to speed
+        cmd.runOnce(lambda: shooter._run_at_velocity), # Ensure shooter is running at setpoint while feeder runs
+        cmd.runOnce(lambda: feeder._run_at_velocity).withTimeout(3.0), # Run feeder for 3 seconds after shooter is up to speed
+        cmd.runOnce(feeder._stop_motor).withTimeout(3.0), # Run feeder for 3 seconds after shooter is up to speed
+        cmd.runOnce(shooter._stop_motor).withTimeout(3.0), # Run feeder for 3 seconds after shooter is up to speed
     )
 
 def SEQ_extend_intake(extender: SS_Kraken):
-    return SequentialCommandGroup(
-        cmd.runOnce(lambda: extender.set_position(1.5)).withTimeout(2.0),
-        cmd.runOnce(extender.stop_motor)
+    return commands2.SequentialCommandGroup(
+        cmd.runOnce(lambda: extender._rotate_to_position(1.5)).withTimeout(2.0),
+        cmd.runOnce(extender._stop_motor)
     )
 
 def SEQ_auto_shake_intake(swerve: SS_SwerveDrive):
-    return SequentialCommandGroup(
+    return commands2.SequentialCommandGroup(
         swerve.padlocked_drive_request_command(vx_requested=0.5, vy_requested=0.0, x_vector=1.0, y_vector=0.0).withTimeout(2.0),
         swerve.padlocked_drive_request_command(vx_requested=-1.5, vy_requested=0.0, x_vector=1.0, y_vector=0.0).withTimeout(1.0),
         swerve.padlocked_drive_request_command(vx_requested=2.0, vy_requested=0.0, x_vector=1.0, y_vector=0.0).withTimeout(0.2),
         swerve.padlocked_drive_request_command(vx_requested=-0.0, vy_requested=0.0, x_vector=1.0, y_vector=0.0).withTimeout(0.5),
+    )
+
+def CMD_deploy_intake(extender: SS_Kraken, shooter: SS_Kraken):
+    return commands2.ParallelCommandGroup(
+        cmd.runOnce(lambda: extender._rotate_to_position(3)).withTimeout(2.0),
+        cmd.runOnce(shooter.run_voltage_percent_reverse).withTimeout(2.0)
     )
 
 class CMD_ComboShoot(commands2.Command):
@@ -42,17 +48,17 @@ class CMD_ComboShoot(commands2.Command):
 
     def initialize(self):
         self.timer.restart()
-        self.ss_shooter.run_velocity_at_setpoint() # Spin up shooter
+        self.ss_shooter._run_at_velocity() # Spin up shooter
 
     def execute(self):
             if abs(self.ss_shooter.velocity_actual - self.ss_shooter.velocity_setpoint) < self.velocity_tolerance:
-                self.ss_feeder.run_velocity_at_setpoint() # Spin feeder
+                self.ss_feeder._run_at_velocity() # Spin feeder
             else:
-                self.ss_feeder.stop_motor() # Stop feeder if shooter is no longer at speed
+                self.ss_feeder._stop_motor() # Stop feeder if shooter is no longer at speed
 
     def isFinished(self):
         return not self._joystick.rightBumper().getAsBoolean() # Run until the right bumper is released
 
     def end(self, interrupted):
-        self.ss_shooter.stop_motor()
-        self.ss_feeder.stop_motor()
+        self.ss_shooter._stop_motor()
+        self.ss_feeder._stop_motor()
