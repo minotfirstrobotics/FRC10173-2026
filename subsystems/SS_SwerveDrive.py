@@ -318,8 +318,6 @@ class SS_SwerveDrive(commands2.Subsystem):
         # follow_command_jerk = AutoBuilder.followPath(path_jerk)
         # SmartDashboard.putData("Commands/Swerve/Jerk(F-B)", follow_command_jerk)
 
-
-
     def get_pose(self) -> Pose2d:
         return self._latest_pose
 

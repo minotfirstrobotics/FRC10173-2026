@@ -64,8 +64,9 @@ class RobotContainer:
                 cmd.runOnce(self.ss_swerve_drive.reset_field_oriented_perspective) )
 
     def _build_complex_commands_and_autochooser(self):
-        # self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.gamepad)
-        # NamedCommands.registerCommand("Commands/Combo Shoot", self.cmd_combo_shoot)
+        self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.ss_swerve_drive, self.gamepad)
+        SmartDashboard.putData("Commands/Combo Shoot", self.cmd_combo_shoot)
+        NamedCommands.registerCommand("Commands/Combo Shoot", self.cmd_combo_shoot)
 
         # self.seq_shoot = SEQ_shoot(self.ss_shooter, self.ss_feeder)
         # NamedCommands.registerCommand("Commands/SEQ Shoot", self.seq_shoot)
@@ -81,7 +82,7 @@ class RobotContainer:
         if self.ss_feeder:
             self.feeder2d = self.root2d.appendLigament("feeder", 4, 90, 6, Color8Bit(0, 255, 0))
         if self.ss_shooter:
-            self.shooter2d = self.root2d.appendLigament("shooter", 4, -135, 6, Color8Bit(255, 0, 0))
+            self.shooter2d = self.root2d.appendLigament("shooter", 4, 135, 6, Color8Bit(255, 0, 0))
         if self.ss_extend:
             self.extend2d = self.root2d.appendLigament("extend", 2, 90, 3, Color8Bit(255, 255, 255))
         wpilib.SmartDashboard.putData("Mechanism", self.mech2d)

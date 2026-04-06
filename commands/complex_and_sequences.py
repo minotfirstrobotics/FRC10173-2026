@@ -2,6 +2,7 @@ import wpilib
 import commands2
 from commands2 import WaitCommand, cmd
 from commands2.button import CommandXboxController
+from wpilib import SmartDashboard
 from subsystems.SS_Kraken import SS_Kraken
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
 from subsystems.SS_CANdleLight import SS_CANdleLight
@@ -37,17 +38,19 @@ def CMD_deploy_intake(extender: SS_Kraken, shooter: SS_Kraken):
     )
 
 class CMD_ComboShoot(commands2.Command):
-    def __init__(self, ss_shooter: SS_Kraken, ss_feeder: SS_Kraken, joystick: CommandXboxController):
+    def __init__(self, ss_shooter: SS_Kraken, ss_feeder: SS_Kraken, ss_swerve: SS_SwerveDrive, joystick: CommandXboxController):
         super().__init__()
         self.ss_shooter = ss_shooter
         self.ss_feeder = ss_feeder
-        self.addRequirements(self.ss_shooter, self.ss_feeder) # Ensure no other command these subsystems while this command is running
-        self.timer = wpilib.Timer()
-        self.velocity_tolerance = 500 # RPM tolerance for considering the shooter "up to speed"
+        self.ss_swerve = ss_swerve
+        self.addRequirements(self.ss_shooter, self.ss_feeder, self.ss_swerve) # Ensure no other command these subsystems while this command is running
+        self.velocity_tolerance = 1 # RPM tolerance for considering the shooter "up to speed"
         self._joystick = joystick
 
     def initialize(self):
-        self.timer.restart()
+        range_in_inches = self.ss_swerve.range_to_target
+        self.ss_shooter.velocity_setpoint = 0.131 * range_in_inches + 24.9
+        SmartDashboard.putNumber("Shooter Setpoint", self.ss_shooter.velocity_setpoint)
         self.ss_shooter._run_at_velocity() # Spin up shooter
 
     def execute(self):
