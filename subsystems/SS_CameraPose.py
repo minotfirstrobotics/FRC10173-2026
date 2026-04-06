@@ -71,13 +71,13 @@ class SS_CameraPose(commands2.Subsystem):
         left_pose = self._process_camera(self.leftcam, self.left_estimator)
 
         if right_pose:
-            SmartDashboard.putNumber("Vision/RightX", round(right_pose.X(), 2))
-            SmartDashboard.putNumber("Vision/RightY", round(right_pose.Y(), 2))
-            SmartDashboard.putNumber("Vision/RightHeading", round(right_pose.rotation().toRotation2d().degrees(), 1)
+            SmartDashboard.putNumber("Vision/Vision RightX", round(right_pose.X(), 2))
+            SmartDashboard.putNumber("Vision/Vision RightY", round(right_pose.Y(), 2))
+            SmartDashboard.putNumber("Vision/Vision RightHeading", round(right_pose.rotation().toRotation2d().degrees(), 1)
             )
 
         if left_pose:
-            SmartDashboard.putNumber("Vision/LeftX", round(left_pose.X(), 2))
-            SmartDashboard.putNumber("Vision/LeftY", round(left_pose.Y(), 2))
-            SmartDashboard.putNumber("Vision/LeftHeading", round(left_pose.rotation().toRotation2d().degrees(), 1)
+            SmartDashboard.putNumber("Vision/Vision LeftX", round(left_pose.X(), 2))
+            SmartDashboard.putNumber("Vision/Vision LeftY", round(left_pose.Y(), 2))
+            SmartDashboard.putNumber("Vision/Vision LeftHeading", round(left_pose.rotation().toRotation2d().degrees(), 1)
             )
