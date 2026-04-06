@@ -23,7 +23,7 @@ class SS_CameraPose(commands2.Subsystem):
         self.field_layout = AprilTagFieldLayout.loadField(AprilTagField.kDefaultField)
 
         # set camera
-        self.rightcam = PhotonCamera("RightCamera")
+        self.rightcam = PhotonCamera("LeftCamera") # Left=rightcam, not time to fix
         #self.leftcam = PhotonCamera("LeftCamera") # unused for now, but we can add it later if we want
 
         # we need to measure this 
@@ -32,8 +32,8 @@ class SS_CameraPose(commands2.Subsystem):
             #Rotation3d(0.0, 0.0, 0.0) # radians roll, pitch, yaw from robot forward
         #)
         self.robot_to_rightcam = Transform3d(
-            Translation3d(0.3048, 0.3302, 0.4826), # meters forward, left, up from robot center
-            Rotation3d(0.0, 0.0, 0.0) # radians roll, pitch, yaw from robot forward
+            Translation3d(-0.3048, 0.3302, 0.4826), # meters forward, left, up from robot center
+            Rotation3d(0.0, 0.0, 3.14) # radians roll, pitch, yaw from robot forward
         )
 
         # pos estimation
