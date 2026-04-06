@@ -218,7 +218,7 @@ class SS_Kraken(commands2.Subsystem):
     def rotate_to_position(self, target_rotations = None):
         if target_rotations is None:
             target_rotations = self.position_setpoint
-        return commands2.cmd.runOnce(lambda: self._rotate_to_position(), self)
+        return commands2.cmd.runOnce(lambda: self._rotate_to_position(target_rotations), self)
 
     def spin_up_and_wait(self):
         return commands2.FunctionalCommand(
