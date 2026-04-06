@@ -5,16 +5,9 @@
     "data": {
       "commands": [
         {
-          "type": "sequential",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "Shooter Stop Motor"
-                }
-              }
-            ]
+            "pathName": "1m fowd"
           }
         }
       ]
