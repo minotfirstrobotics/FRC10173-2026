@@ -37,13 +37,18 @@ class RobotContainer:
     def configure_gamepad_bindings(self):
         self.ss_swerve_drive.drivetrain.setDefaultCommand(self.defaultdrivemode)
         if self.ss_shooter:
-            self.gamepad.rightBumper().whileTrue(cmd.startEnd(self.ss_shooter.run_at_velocity, self.ss_shooter.stop_motor, self.ss_shooter))
-        if self.ss_feeder:
-            self.gamepad.leftBumper().whileTrue(cmd.startEnd(self.ss_feeder.run_at_velocity, self.ss_feeder.stop_motor, self.ss_feeder))
-        if self.ss_intake:
-            self.gamepad.leftTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(self.ss_intake.run_power_percent_reverse, self.ss_intake.stop_motor, self.ss_intake))
-            self.gamepad.rightTrigger(threshold=.2).whileTrue(commands2.cmd.startEnd(self.ss_intake.run_power_percent_forward, self.ss_intake.stop_motor, self.ss_intake))
-            self.gamepad.y().whileTrue(cmd.startEnd(lambda: self.ss_extend.rotate_to_position(3), self.ss_extend.stop_motor, self.ss_intake))
+            self.gamepad.rightBumper().onTrue(self.ss_shooter.run_at_velocity)
+            self.gamepad.rightBumper().onFalse(self.ss_shooter.stop_motor)
+        # if self.ss_feeder:
+        #     self.gamepad.leftBumper().onTrue(self.ss_feeder.run_at_velocity)
+        #     self.gamepad.leftBumper().onFalse(self.ss_feeder.stop_motor)
+        # if self.ss_intake:
+        #     self.gamepad.leftTrigger(threshold=.2).onTrue(self.ss_intake.run_power_percent_reverse)
+        #     self.gamepad.leftTrigger(threshold=.2).onFalse(self.ss_intake.stop_motor)
+        #     self.gamepad.rightTrigger(threshold=.2).onTrue(self.ss_intake.run_power_percent_forward)
+        #     self.gamepad.rightTrigger(threshold=.2).onFalse(self.ss_intake.stop_motor)
+        #     self.gamepad.y().onTrue(lambda: self.ss_extend.rotate_to_position(3))
+        #     self.gamepad.y().onFalse(self.ss_extend.stop_motor)
         # elif self.ss_shooter and self.ss_feeder:
         #     self.gamepad.rightBumper().whileTrue(CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.gamepad))
         # elif self.ss_shooter and self.ss_feeder:
