@@ -139,36 +139,33 @@ class SS_Kraken(commands2.Subsystem):
         self.velocity_actual = self.motor.get_velocity().value
         SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Velocity Actual", round(self.velocity_actual, 1))
 
-        # self._periodic_counter += 1
-        # if self._periodic_counter % 5 == 0:  # Every 100ms instead of every 20ms
-        dashboard_velocity_setpoint = SmartDashboard.getNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Velocity Setpoint", self.velocity_setpoint)
-        if dashboard_velocity_setpoint != self.velocity_setpoint:
-            self.velocity_setpoint = max(min(dashboard_velocity_setpoint, self.max_rps), -self.max_rps)
-            # SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Velocity Setpoint", self.velocity_setpoint)
-        dashboard_power_percent_setpoint = SmartDashboard.getNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Power Percent Setpoint", self.percent_power_setpoint)
-        if dashboard_power_percent_setpoint != self.percent_power_setpoint:
-            self.percent_power_setpoint = max(min(dashboard_power_percent_setpoint, 1.0), -1.0)
-            # SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Power Percent Setpoint", self.percent_power_setpoint)
-        dashboard_position_setpoint = SmartDashboard.getNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Position Setpoint", self.percent_power_setpoint)
-        if dashboard_position_setpoint != self.position_setpoint:
-            self.position_setpoint = max(min(dashboard_position_setpoint, 1.0), -1.0)
-            # SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Position Setpoint", self.position_setpoint)
-        dashboard_p = self._nt_kP.getDouble(self.kP)
-        dashboard_i = self._nt_kI.getDouble(self.kI)
-        dashboard_d = self._nt_kD.getDouble(self.kD)
-        dashboard_v = self._nt_kV.getDouble(self.kV)
-        dashboard_s = self._nt_kS.getDouble(self.kS)
-        dashboard_a = self._nt_kA.getDouble(self.kA)
-        dashboard_g = self._nt_kG.getDouble(self.kG)
-        dashboard_vmax = self._nt_vmax.getDouble(self.vmax)
-        dashboard_amax = self._nt_amax.getDouble(self.amax)
-        dashboard_jerk = self._nt_jerk.getDouble(self.jerk)
-        if (dashboard_p != self.kP or dashboard_i != self.kI or dashboard_d != self.kD or 
-            dashboard_v != self.kV or dashboard_s != self.kS or dashboard_a != self.kA or dashboard_g != self.kG or
-            dashboard_vmax != self.vmax or dashboard_amax != self.amax or dashboard_jerk != self.jerk):
-            self._apply_pidf_to_config(dashboard_p, dashboard_i, dashboard_d, dashboard_v, dashboard_s, 
-                                    dashboard_a, dashboard_g, dashboard_vmax, dashboard_amax, dashboard_jerk)
-        # self._put_telemetry_on_dashboard()
+        self._periodic_counter += 1
+        if self._periodic_counter % 5 == 0:  # Every 100ms instead of every 20ms
+            dashboard_velocity_setpoint = SmartDashboard.getNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Velocity Setpoint", self.velocity_setpoint)
+            if dashboard_velocity_setpoint != self.velocity_setpoint:
+                self.velocity_setpoint = max(min(dashboard_velocity_setpoint, self.max_rps), -self.max_rps)
+            dashboard_power_percent_setpoint = SmartDashboard.getNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Power Percent Setpoint", self.percent_power_setpoint)
+            if dashboard_power_percent_setpoint != self.percent_power_setpoint:
+                self.percent_power_setpoint = max(min(dashboard_power_percent_setpoint, 1.0), -1.0)
+            dashboard_position_setpoint = SmartDashboard.getNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Position Setpoint", self.percent_power_setpoint)
+            if dashboard_position_setpoint != self.position_setpoint:
+                self.position_setpoint = max(min(dashboard_position_setpoint, 1.0), -1.0)
+            dashboard_p = self._nt_kP.getDouble(self.kP)
+            dashboard_i = self._nt_kI.getDouble(self.kI)
+            dashboard_d = self._nt_kD.getDouble(self.kD)
+            dashboard_v = self._nt_kV.getDouble(self.kV)
+            dashboard_s = self._nt_kS.getDouble(self.kS)
+            dashboard_a = self._nt_kA.getDouble(self.kA)
+            dashboard_g = self._nt_kG.getDouble(self.kG)
+            dashboard_vmax = self._nt_vmax.getDouble(self.vmax)
+            dashboard_amax = self._nt_amax.getDouble(self.amax)
+            dashboard_jerk = self._nt_jerk.getDouble(self.jerk)
+            if (dashboard_p != self.kP or dashboard_i != self.kI or dashboard_d != self.kD or 
+                dashboard_v != self.kV or dashboard_s != self.kS or dashboard_a != self.kA or dashboard_g != self.kG or
+                dashboard_vmax != self.vmax or dashboard_amax != self.amax or dashboard_jerk != self.jerk):
+                self._apply_pidf_to_config(dashboard_p, dashboard_i, dashboard_d, dashboard_v, dashboard_s, 
+                                        dashboard_a, dashboard_g, dashboard_vmax, dashboard_amax, dashboard_jerk)
+            # self._put_telemetry_on_dashboard()
 
     # -------------------------
     # Motor movement functions
