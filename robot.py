@@ -49,6 +49,7 @@ class RobotContainer:
             self.gamepad.rightTrigger(threshold=.2).onFalse(self.ss_intake.stop_motor())
             self.gamepad.y().onTrue(self.ss_extend.rotate_to_position(3))
             self.gamepad.y().onFalse(self.ss_extend.stop_motor())
+        self.gamepad.x().onTrue(CMD_deploy_intake(self.ss_extend, self.ss_shooter))
         # elif self.ss_shooter and self.ss_feeder:
         #     self.gamepad.rightBumper().whileTrue(CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.gamepad))
         # elif self.ss_shooter and self.ss_feeder:

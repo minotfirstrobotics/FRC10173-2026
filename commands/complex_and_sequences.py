@@ -60,7 +60,7 @@ class CMD_ComboShoot(commands2.Command):
                 self.ss_feeder._stop_motor() # Stop feeder if shooter is no longer at speed
 
     def isFinished(self):
-        return not self._joystick.rightBumper().getAsBoolean() # Run until the right bumper is released
+        return not self._joystick.x().getAsBoolean()
 
     def end(self, interrupted):
         self.ss_shooter._stop_motor()
