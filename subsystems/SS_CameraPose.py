@@ -1,5 +1,6 @@
 import commands2
 import wpilib
+from subsystems.SS_SwerveDrive import SS_SwerveDrive
 from wpimath.geometry import Pose3d, Pose2d, Transform3d, Translation3d, Rotation3d
 from wpilib import SmartDashboard, Timer
 from subsystems.command_swerve_drivetrain import CommandSwerveDrivetrain
@@ -9,7 +10,7 @@ from robotpy_apriltag import AprilTagField, AprilTagFieldLayout
 class SS_CameraPose(commands2.Subsystem):
 
 
-    def __init__(self, swerve_drive: CommandSwerveDrivetrain):
+    def __init__(self, swerve_drive: SS_SwerveDrive):
         super().__init__()
         self.swerve_drive = swerve_drive
         if not wpilib.RobotBase.isReal():

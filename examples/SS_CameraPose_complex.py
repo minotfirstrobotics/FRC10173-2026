@@ -1,4 +1,5 @@
 import commands2
+from subsystems.SS_SwerveDrive import SS_SwerveDrive
 from wpimath.geometry import Transform3d, Translation3d, Rotation3d, Pose3d
 from wpilib import Timer, SmartDashboard
 from photonlibpy import PhotonCamera, PhotonPoseEstimator, EstimatedRobotPose
@@ -7,7 +8,7 @@ from robotpy_apriltag import AprilTagField, AprilTagFieldLayout
 class SS_CameraPose(commands2.Subsystem):   
     #Subsystem for vision-based pose estimation using PhotonVision
 
-    def __init__(self, swerve_drive):
+    def __init__(self, swerve_drive: SS_SwerveDrive):
         self.swerve_drive = swerve_drive
 
         # Load the field layout

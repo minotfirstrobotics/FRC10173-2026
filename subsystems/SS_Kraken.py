@@ -200,20 +200,14 @@ class SS_Kraken(commands2.Subsystem):
     def stop_motor(self):
         return commands2.cmd.runOnce(lambda: self._stop_motor(), self)
 
-    def run_at_velocity(self, setpoint = None):
-        if setpoint is None:
-            setpoint = self.velocity_setpoint
-        return commands2.cmd.runOnce(lambda: self._run_at_velocity(setpoint), self)
+    def run_at_velocity(self):
+        return commands2.cmd.runOnce(lambda: self._run_at_velocity(self.velocity_setpoint), self)
     
-    def run_power_percent_forward(self, setpoint = None):
-        if setpoint is None:
-            setpoint = self.percent_power_setpoint
-        return commands2.cmd.runOnce(lambda: self._run_power_percent(setpoint), self)
+    def run_power_percent_forward(self):
+        return commands2.cmd.runOnce(lambda: self._run_power_percent(self.percent_power_setpoint), self)
     
-    def run_power_percent_reverse(self, setpoint = None):
-        if setpoint is None:
-            setpoint = self.percent_power_setpoint
-        return commands2.cmd.runOnce(lambda: self._run_power_percent(-setpoint), self)
+    def run_power_percent_reverse(self):
+        return commands2.cmd.runOnce(lambda: self._run_power_percent(-self.percent_power_setpoint), self)
 
     def rotate_to_position(self, target_rotations = None):
         if target_rotations is None:
