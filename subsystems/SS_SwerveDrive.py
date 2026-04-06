@@ -131,7 +131,8 @@ class SS_SwerveDrive(commands2.Subsystem):
                 self._drive_field_centered
                     .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
                     .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
-                    .with_rotational_rate(-self._joystick.getRightX() * abs(self._joystick.getRightX()) * self._max_angular_rate)) )
+                    .with_rotational_rate(-self._joystick.getRightX() * abs(self._joystick.getRightX()) * self._max_angular_rate)
+        ))
 
     def drive_mode_angular(self):
         return self.drivetrain.apply_request(lambda: (
@@ -164,7 +165,8 @@ class SS_SwerveDrive(commands2.Subsystem):
                 self._drive_robot_centered
                     .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
                     .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
-                    .with_rotational_rate(-self._joystick.getRightX() * abs(self._joystick.getRightX()) * self._max_angular_rate)) )
+                    .with_rotational_rate(-self._joystick.getRightX() * abs(self._joystick.getRightX()) * self._max_angular_rate)
+        ))
 
     def _smoothed_axis(self, raw_axis: float, limiter: SlewRateLimiter,
                     deadband: float = 0.12, square_input: bool = False) -> float:
@@ -206,7 +208,8 @@ class SS_SwerveDrive(commands2.Subsystem):
             self._drive_field_centered
                 .with_velocity_x(vx_requested * self._max_speed)
                 .with_velocity_y(vy_requested * self._max_speed)
-                .with_rotational_rate(rotational_rate * self._max_angular_rate) ))
+                .with_rotational_rate(rotational_rate * self._max_angular_rate) 
+        ))
 
     def padlocked_drive_request_command(self, vx_requested, vy_requested, x_vector=0.0, y_vector=0.0) -> commands2.Command:
         if x_vector == 0 and y_vector == 0:
@@ -217,7 +220,8 @@ class SS_SwerveDrive(commands2.Subsystem):
                 .with_velocity_x(vx_requested * self._max_speed)
                 .with_velocity_y(vy_requested * self._max_speed)
                 .with_target_direction(Rotation2d(x_vector, y_vector))
-                .with_heading_pid(5, 0, 0) ))
+                .with_heading_pid(5, 0, 0) 
+        ))
 
     def target_goal(self) -> None:
         if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
@@ -256,7 +260,8 @@ class SS_SwerveDrive(commands2.Subsystem):
             self._drive_robot_centered
                 .with_velocity_x(direction_x * self._pov_speed)
                 .with_velocity_y(direction_y * self._pov_speed)
-                .with_rotational_rate(0) ) )
+                .with_rotational_rate(0) 
+        ))
 
     def brake(self) -> None:
         self.drivetrain.apply_request(lambda: swerve.requests.SwerveDriveBrake())
