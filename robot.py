@@ -78,9 +78,9 @@ class RobotContainer:
         self.mech2d = wpilib.Mechanism2d(10, 10)  # Width, Height
         self.root2d = self.mech2d.getRoot("root", 5, 2)
         if self.ss_intake:
-            self.intake2d = self.root2d.appendLigament("intake", 4, 135, 6, Color8Bit(0, 0, 255))
+            self.intake2d = self.root2d.appendLigament("intake", 4, 45, 6, Color8Bit(0, 0, 255))
         if self.ss_feeder:
-            self.feeder2d = self.root2d.appendLigament("feeder", 4, 90, 6, Color8Bit(0, 255, 0))
+            self.feeder2d = self.root2d.appendLigament("feeder", 4, 0, 6, Color8Bit(0, 255, 0))
         if self.ss_shooter:
             self.shooter2d = self.root2d.appendLigament("shooter", 4, 135, 6, Color8Bit(255, 0, 0))
         if self.ss_extend:
@@ -132,7 +132,7 @@ class MyRobot(commands2.TimedCommandRobot):
         voltage = wpilib.RobotController.getBatteryVoltage()
         SmartDashboard.putNumber("Battery Voltage", voltage)
         if self.container.ss_intake:
-            self.container.intake2d.setLength(self.container.ss_intake.velocity_actual/10)
+            self.container.intake2d.setLength(-self.container.ss_intake.velocity_actual/10)
         if self.container.ss_feeder:
             self.container.feeder2d.setLength(self.container.ss_feeder.velocity_actual/10)
         if self.container.ss_shooter:
