@@ -16,6 +16,7 @@ from commands2.sysid import SysIdRoutine
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.config import RobotConfig, PIDConstants
 from pathplannerlib.controller import PPHolonomicDriveController
+from pathplannerlib.path import PathPlannerPath
 from wpilib import DriverStation
 
 class SS_SwerveDrive(commands2.Subsystem):
@@ -56,7 +57,8 @@ class SS_SwerveDrive(commands2.Subsystem):
             swerve.requests.FieldCentric()
             .with_deadband(self._max_speed * 0.1)
             .with_rotational_deadband(self._max_angular_rate * 0.1)
-            .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE) )
+            .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE) 
+        )
         self._drive_facing_direction = (
             swerve.requests.RobotCentricFacingAngle()
                 .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE)
@@ -66,14 +68,14 @@ class SS_SwerveDrive(commands2.Subsystem):
                 .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE)
                 .with_heading_pid(12, 0.0, 5)
         )
-
         self._drive_robot_centered = (
             swerve.requests.RobotCentric()
-            .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE) )
+            .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE) 
+        )
 
         self._setup_padlock_target_chooser()
         self._setup_pathplanner_auto_builder()
-        
+
     def periodic(self) -> None:
         pose = self.drivetrain.sample_pose_at(Timer.getFPGATimestamp())
         if pose is not None:
@@ -119,7 +121,6 @@ class SS_SwerveDrive(commands2.Subsystem):
             elif DriverStation.getAlliance() == DriverStation.Alliance.kRed:
                     selected_target = (11.94, 4.0)
 
-
         return selected_target
 
     # -------------------------
@@ -149,16 +150,6 @@ class SS_SwerveDrive(commands2.Subsystem):
                 .with_target_direction(self._heading_from_right_stick())
         ))
     
-    def drive_to_target(self):
-        return self.drivetrain.apply_request(lambda: (
-            self._drive_field_facing
-                .with_velocity_x(self.speed_to_target * self.x_direction_to_target)
-                .with_velocity_y(self.speed_to_target * self.y_direction_to_target)
-                .with_target_direction(self._heading_from_right_stick())
-        ))
-
-
-    
     def drive_mode_padlocked(self) -> None:
         return self.drivetrain.apply_request(lambda: (
             self._drive_facing_direction
@@ -169,12 +160,30 @@ class SS_SwerveDrive(commands2.Subsystem):
         ))
 
     def drive_mode_robot_centered(self) -> None:
-
             return self.drivetrain.apply_request(lambda: (
                 self._drive_robot_centered
                     .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
                     .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
                     .with_rotational_rate(-self._joystick.getRightX() * abs(self._joystick.getRightX()) * self._max_angular_rate)) )
+
+    def _smoothed_axis(self, raw_axis: float, limiter: SlewRateLimiter,
+                    deadband: float = 0.12, square_input: bool = False) -> float:
+        axis = applyDeadband(raw_axis, deadband)
+        if square_input:
+            axis = axis * abs(axis)
+        return limiter.calculate(axis)
+
+
+    # -------------------------
+    # Drive requests for automated movement
+    # -------------------------
+    def drive_to_target(self):
+        return self.drivetrain.apply_request(lambda: (
+            self._drive_field_facing
+                .with_velocity_x(self.speed_to_target * self.x_direction_to_target)
+                .with_velocity_y(self.speed_to_target * self.y_direction_to_target)
+                .with_target_direction(self._heading_from_right_stick())
+        ))
 
     def _heading_from_right_stick(self) -> Rotation2d:
         if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
@@ -192,17 +201,6 @@ class SS_SwerveDrive(commands2.Subsystem):
 
         return self._last_heading
 
-    def _smoothed_axis(self, raw_axis: float, limiter: SlewRateLimiter,
-                    deadband: float = 0.12, square_input: bool = False) -> float:
-        axis = applyDeadband(raw_axis, deadband)
-        if square_input:
-            axis = axis * abs(axis)
-        return limiter.calculate(axis)
-
-
-    # -------------------------
-    # Drive requests for automated movement
-    # -------------------------
     def free_rotate_drive_request_command(self, vx_requested, vy_requested, rotational_rate) -> commands2.Command:
         return self.drivetrain.apply_request(lambda: (
             self._drive_field_centered
@@ -306,6 +304,14 @@ class SS_SwerveDrive(commands2.Subsystem):
             should_flip_path=lambda: DriverStation.getAlliance() == DriverStation.Alliance.kRed,
             drive_subsystem=self
         )
+
+        path_1m = PathPlannerPath.fromPathFile("1m fowd")  # name matches the .path file
+        follow_command_1m = AutoBuilder.followPath(path_1m)
+        SmartDashboard.putData("Commands/Swerve/Follow 1m Fwd Path", follow_command_1m)
+
+        path_jerk = PathPlannerPath.fromPathFile("Jerk(F-B)")  # name matches the .path file
+        follow_command_jerk = AutoBuilder.followPath(path_jerk)
+        SmartDashboard.putData("Commands/Swerve/Jerk(F-B)", follow_command_jerk)
 
 
     def get_pose(self) -> Pose2d:
