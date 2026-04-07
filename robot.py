@@ -49,6 +49,11 @@ class RobotContainer:
             self.gamepad.rightTrigger(threshold=.2).onFalse(self.ss_intake.stop_motor())
             self.gamepad.y().onTrue(self.ss_extend.rotate_to_position(3))
             self.gamepad.y().onFalse(self.ss_extend.stop_motor())
+        self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.ss_swerve_drive, self.gamepad)
+        self.gamepad.x().onTrue(self.cmd_combo_shoot)
+        self.gamepad.b().onTrue(CMD_deploy_intake(self.ss_extend, self.ss_shooter))
+        self.gamepad.b().onTrue(self.ss_extend.stop_motor())
+
         # elif self.ss_shooter and self.ss_feeder:
         #     self.gamepad.rightBumper().whileTrue(CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.gamepad))
         # elif self.ss_shooter and self.ss_feeder:
@@ -57,15 +62,16 @@ class RobotContainer:
         if self.ss_swerve_drive:
             self.gamepad.a().onTrue(self.ss_swerve_drive.drive_mode_padlocked())
             self.gamepad.a().onFalse(self.defaultdrivemode)
-            self.gamepad.b().onTrue(self.ss_swerve_drive.drive_to_target())
-            self.gamepad.b().onFalse(self.defaultdrivemode)
+            # self.gamepad.b().onTrue(self.ss_swerve_drive.drive_to_target())
+            # self.gamepad.b().onFalse(self.defaultdrivemode)
 
             self.gamepad.back().and_(self.gamepad.start()).onTrue(
                 cmd.runOnce(self.ss_swerve_drive.reset_field_oriented_perspective) )
 
     def _build_complex_commands_and_autochooser(self):
-        # self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.gamepad)
-        # NamedCommands.registerCommand("Commands/Combo Shoot", self.cmd_combo_shoot)
+        self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.ss_swerve_drive, self.gamepad)
+        SmartDashboard.putData("Commands/Combo Shoot", self.cmd_combo_shoot)
+        NamedCommands.registerCommand("Commands/Combo Shoot", self.cmd_combo_shoot)
 
         # self.seq_shoot = SEQ_shoot(self.ss_shooter, self.ss_feeder)
         # NamedCommands.registerCommand("Commands/SEQ Shoot", self.seq_shoot)
@@ -77,11 +83,11 @@ class RobotContainer:
         self.mech2d = wpilib.Mechanism2d(10, 10)  # Width, Height
         self.root2d = self.mech2d.getRoot("root", 5, 2)
         if self.ss_intake:
-            self.intake2d = self.root2d.appendLigament("intake", 4, 135, 6, Color8Bit(0, 0, 255))
+            self.intake2d = self.root2d.appendLigament("intake", 4, 45, 6, Color8Bit(0, 0, 255))
         if self.ss_feeder:
-            self.feeder2d = self.root2d.appendLigament("feeder", 4, 90, 6, Color8Bit(0, 255, 0))
+            self.feeder2d = self.root2d.appendLigament("feeder", 4, 0, 6, Color8Bit(0, 255, 0))
         if self.ss_shooter:
-            self.shooter2d = self.root2d.appendLigament("shooter", 4, -135, 6, Color8Bit(255, 0, 0))
+            self.shooter2d = self.root2d.appendLigament("shooter", 4, 135, 6, Color8Bit(255, 0, 0))
         if self.ss_extend:
             self.extend2d = self.root2d.appendLigament("extend", 2, 90, 3, Color8Bit(255, 255, 255))
         wpilib.SmartDashboard.putData("Mechanism", self.mech2d)
@@ -131,13 +137,16 @@ class MyRobot(commands2.TimedCommandRobot):
         voltage = wpilib.RobotController.getBatteryVoltage()
         SmartDashboard.putNumber("Battery Voltage", voltage)
         if self.container.ss_intake:
-            self.container.intake2d.setLength(self.container.ss_intake.velocity_actual/10)
+            self.container.intake2d.setLength(-self.container.ss_intake.velocity_actual/10)
         if self.container.ss_feeder:
             self.container.feeder2d.setLength(self.container.ss_feeder.velocity_actual/10)
         if self.container.ss_shooter:
             self.container.shooter2d.setLength(self.container.ss_shooter.velocity_actual/10)
         if self.container.ss_extend:
             self.container.extend2d.setAngle(90 - self.container.ss_extend.position_actual*90/2)
+        self.container.ss_shooter.velocity_setpoint = 5.17 * self.container.ss_swerve_drive.range_to_target + 24.9
+        SmartDashboard.putNumber(f"SS_Telemetry/Shooter/Shooter Velocity Setpoint", self.container.ss_shooter.velocity_setpoint)
+
 
     def teleopInit(self) -> None:
         """

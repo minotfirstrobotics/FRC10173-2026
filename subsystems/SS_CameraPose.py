@@ -1,14 +1,16 @@
 import commands2
 import wpilib
+from subsystems.SS_SwerveDrive import SS_SwerveDrive
 from wpimath.geometry import Pose3d, Pose2d, Transform3d, Translation3d, Rotation3d
 from wpilib import SmartDashboard, Timer
+from subsystems.command_swerve_drivetrain import CommandSwerveDrivetrain
 from photonlibpy import PhotonCamera, PhotonPoseEstimator
 from robotpy_apriltag import AprilTagField, AprilTagFieldLayout
 
 class SS_CameraPose(commands2.Subsystem):
 
 
-    def __init__(self, swerve_drive):
+    def __init__(self, swerve_drive: SS_SwerveDrive):
         super().__init__()
         self.swerve_drive = swerve_drive
         if not wpilib.RobotBase.isReal():
@@ -21,7 +23,7 @@ class SS_CameraPose(commands2.Subsystem):
         self.field_layout = AprilTagFieldLayout.loadField(AprilTagField.kDefaultField)
 
         # set camera
-        self.rightcam = PhotonCamera("RightCamera")
+        self.rightcam = PhotonCamera("LeftCamera") # Left=rightcam, not time to fix
         #self.leftcam = PhotonCamera("LeftCamera") # unused for now, but we can add it later if we want
 
         # we need to measure this 
@@ -30,8 +32,8 @@ class SS_CameraPose(commands2.Subsystem):
             #Rotation3d(0.0, 0.0, 0.0) # radians roll, pitch, yaw from robot forward
         #)
         self.robot_to_rightcam = Transform3d(
-            Translation3d(0.3048, 0.3302, 0.4826), # meters forward, left, up from robot center
-            Rotation3d(0.0, 0.0, 0.0) # radians roll, pitch, yaw from robot forward
+            Translation3d(-0.3048, 0.3302, 0.4826), # meters forward, left, up from robot center
+            Rotation3d(0.0, 0.0, 3.14) # radians roll, pitch, yaw from robot forward
         )
 
         # pos estimation

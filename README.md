@@ -9,10 +9,10 @@
 * dropdown selector on dashboard for CANDle animations
 * battery voltage mapped to CANDle brightness
 * move_to_position_and_wait in SS_kraken
-* 
+* 7.44 x - 182 (inverted)
+* 0.131 * inches + 24.9 = rps
 
 # Dependencies:
-
 * pip install robotpy
 * pip install robotpy-commands-v2
 * pip install phoenix6

@@ -141,18 +141,15 @@ class SS_Kraken(commands2.Subsystem):
 
         self._periodic_counter += 1
         if self._periodic_counter % 5 == 0:  # Every 100ms instead of every 20ms
-            dashboard_velocity_setpoint = SmartDashboard.getNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Velocity Setpoint", self.velocity_setpoint)
-            if dashboard_velocity_setpoint != self.velocity_setpoint:
-                self.velocity_setpoint = max(min(dashboard_velocity_setpoint, self.max_rps), -self.max_rps)
-                SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Velocity Setpoint", self.velocity_setpoint)
+            # dashboard_velocity_setpoint = SmartDashboard.getNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Velocity Setpoint", self.velocity_setpoint)
+            # if dashboard_velocity_setpoint != self.velocity_setpoint:
+            #     self.velocity_setpoint = max(min(dashboard_velocity_setpoint, self.max_rps), -self.max_rps)
             dashboard_power_percent_setpoint = SmartDashboard.getNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Power Percent Setpoint", self.percent_power_setpoint)
             if dashboard_power_percent_setpoint != self.percent_power_setpoint:
                 self.percent_power_setpoint = max(min(dashboard_power_percent_setpoint, 1.0), -1.0)
-                SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Power Percent Setpoint", self.percent_power_setpoint)
             dashboard_position_setpoint = SmartDashboard.getNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Position Setpoint", self.percent_power_setpoint)
             if dashboard_position_setpoint != self.position_setpoint:
                 self.position_setpoint = max(min(dashboard_position_setpoint, 1.0), -1.0)
-                SmartDashboard.putNumber(f"SS_Telemetry/{self.dashboard_name}/{self.dashboard_name} Position Setpoint", self.position_setpoint)
             dashboard_p = self._nt_kP.getDouble(self.kP)
             dashboard_i = self._nt_kI.getDouble(self.kI)
             dashboard_d = self._nt_kD.getDouble(self.kD)
@@ -200,20 +197,14 @@ class SS_Kraken(commands2.Subsystem):
     def stop_motor(self):
         return commands2.cmd.runOnce(lambda: self._stop_motor(), self)
 
-    def run_at_velocity(self, setpoint = None):
-        if setpoint is None:
-            setpoint = self.velocity_setpoint
-        return commands2.cmd.runOnce(lambda: self._run_at_velocity(setpoint), self)
+    def run_at_velocity(self):
+        return commands2.cmd.runOnce(lambda: self._run_at_velocity(self.velocity_setpoint), self)
     
-    def run_power_percent_forward(self, setpoint = None):
-        if setpoint is None:
-            setpoint = self.percent_power_setpoint
-        return commands2.cmd.runOnce(lambda: self._run_power_percent(setpoint), self)
+    def run_power_percent_forward(self):
+        return commands2.cmd.runOnce(lambda: self._run_power_percent(self.percent_power_setpoint), self)
     
-    def run_power_percent_reverse(self, setpoint = None):
-        if setpoint is None:
-            setpoint = self.percent_power_setpoint
-        return commands2.cmd.runOnce(lambda: self._run_power_percent(-setpoint), self)
+    def run_power_percent_reverse(self):
+        return commands2.cmd.runOnce(lambda: self._run_power_percent(-self.percent_power_setpoint), self)
 
     def rotate_to_position(self, target_rotations = None):
         if target_rotations is None:

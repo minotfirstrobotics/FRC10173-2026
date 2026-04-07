@@ -83,6 +83,9 @@ class SS_SwerveDrive(commands2.Subsystem):
             self.target_x, self.target_y = self._determine_padlock_target(pose)
             self.x_vector_to_target = self._latest_pose.translation().X() - self.target_x
             self.y_vector_to_target = self._latest_pose.translation().Y() - self.target_y
+            if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
+                self.x_vector_to_target = -self.x_vector_to_target
+                self.y_vector_to_target = -self.y_vector_to_target
             self.range_to_target = (self.x_vector_to_target**2 + self.y_vector_to_target**2)**0.5
             self.x_direction_to_target = self.x_vector_to_target / self.range_to_target
             self.y_direction_to_target = self.y_vector_to_target / self.range_to_target
@@ -157,7 +160,7 @@ class SS_SwerveDrive(commands2.Subsystem):
                 .with_velocity_x(-self._smoothed_axis(self._joystick.getLeftY(), self._left_y_limiter, square_input=True)* self._max_speed)
                 .with_velocity_y(-self._smoothed_axis(self._joystick.getLeftX(), self._left_x_limiter, square_input=True)* self._max_speed)
                 .with_target_direction(Rotation2d(self.x_vector_to_target, self.y_vector_to_target))
-                .with_heading_pid(12, 0, 5)
+                .with_heading_pid(5, 1, 0)
         ))
 
     def drive_mode_robot_centered(self) -> None:
@@ -310,14 +313,17 @@ class SS_SwerveDrive(commands2.Subsystem):
             drive_subsystem=self
         )
 
-        # path_1m = PathPlannerPath.fromPathFile("1m fowd")  # name matches the .path file
-        # follow_command_1m = AutoBuilder.followPath(path_1m)
-        # SmartDashboard.putData("Commands/Swerve/Follow 1m Fwd Path", follow_command_1m)
+        path_1m = PathPlannerPath.fromPathFile("1m fowd")  # name matches the .path file
+        follow_command_1m = AutoBuilder.followPath(path_1m)
+        SmartDashboard.putData("Commands/Swerve/Follow 1m Fwd Path", follow_command_1m)
 
-        # path_jerk = PathPlannerPath.fromPathFile("Jerk(F-B)")  # name matches the .path file
-        # follow_command_jerk = AutoBuilder.followPath(path_jerk)
-        # SmartDashboard.putData("Commands/Swerve/Jerk(F-B)", follow_command_jerk)
+        path_jerk = PathPlannerPath.fromPathFile("Jerk(F-B)")  # name matches the .path file
+        follow_command_jerk = AutoBuilder.followPath(path_jerk)
+        SmartDashboard.putData("Commands/Swerve/Jerk(F-B)", follow_command_jerk)
 
+        path_trench = PathPlannerPath.fromPathFile("Under Trench Test")  # name matches the .path file
+        follow_command_trench = AutoBuilder.followPath(path_trench)
+        SmartDashboard.putData("Commands/Swerve/Trench", follow_command_trench)
 
 
     def get_pose(self) -> Pose2d:
