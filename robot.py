@@ -71,10 +71,9 @@ class RobotContainer:
     def _build_complex_commands_and_autochooser(self):
         self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.ss_swerve_drive, self.gamepad)
         SmartDashboard.putData("Commands/Combo Shoot", self.cmd_combo_shoot)
-        NamedCommands.registerCommand("Commands/Combo Shoot", self.cmd_combo_shoot)
-
-        # self.seq_shoot = SEQ_shoot(self.ss_shooter, self.ss_feeder)
-        # NamedCommands.registerCommand("Commands/SEQ Shoot", self.seq_shoot)
+        NamedCommands.registerCommand("Shoot", self.cmd_combo_shoot)
+        NamedCommands.registerCommand("Deploy Intake", cmd.waitSeconds(2))
+        NamedCommands.registerCommand("Run Intake", cmd.waitSeconds(2))
         
         self.auto_chooser = AutoBuilder.buildAutoChooser("None") # must be defined after SS's and all registered commands
         SmartDashboard.putData("Auto Chooser", self.auto_chooser)
