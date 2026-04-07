@@ -13,19 +13,19 @@ class CMD_AutoDistanceShoot(commands2.Command):
         self.addRequirements(self.shooter, self.swerve)
 
     def initialize(self):
-        # Start shooter spin-up
+        # Start shooter
         self.shooter.spin_up_and_wait().schedule()
 
     def execute(self):
-        # Compute required shooter speed every 20ms
+        # required shooter speed
         distance = self.swerve.range_to_target
         required_speed = (5.17 * distance) + 24.9
 
-        # Apply velocity dynamically
+        # Apply velocity 
         self.shooter._run_at_velocity_injected(required_speed)
 
     def isFinished(self):
-        return False  # runs until interrupted
+        return False  # run until interrupted
 
     def end(self, interrupted: bool):
         self.shooter._stop_motor()
