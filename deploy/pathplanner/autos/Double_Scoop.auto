@@ -36,12 +36,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "Unload"
-          }
-        },
-        {
           "type": "deadline",
           "data": {
             "commands": [
@@ -69,7 +63,7 @@
         {
           "type": "named",
           "data": {
-            "name": "SEQ Shoot"
+            "name": "Shoot"
           }
         }
       ]
