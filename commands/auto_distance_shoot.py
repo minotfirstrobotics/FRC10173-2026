@@ -18,10 +18,11 @@ class CMD_AutoDistanceShoot(commands2.Command):
         self.shooter.spin_up_and_wait().schedule()
 
     def execute(self):
+        # 26.2 + 12.1 ln x
         # required shooter speed
         distance = self.swerve.range_to_target
-        required_speed = 26 + 14.2 * math.log(distance)
-        
+        required_speed = 26.2 + (12.1 * math.log(distance))
+
         # Apply velocity 
         self.shooter._run_at_velocity_injected(required_speed)
 
