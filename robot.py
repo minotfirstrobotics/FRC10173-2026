@@ -159,6 +159,10 @@ class MyRobot(commands2.TimedCommandRobot):
         continue until interrupted by another command, remove
         this line or comment it out. 
         """
+        self.container.ss_swerve_drive.drivetrain.setDefaultCommand(
+            self.container.defaultdrivemode
+        )
+
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
         if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
@@ -182,6 +186,7 @@ class MyRobot(commands2.TimedCommandRobot):
         This function is run once when the robot enters autonomous mode.
         Gets the selected autonomous command from the chooser and schedules it.
         """
+        self.container.ss_swerve_drive.drivetrain.setDefaultCommand(None)
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
         self.autonomousCommand = self.container.get_autonomous_command()
