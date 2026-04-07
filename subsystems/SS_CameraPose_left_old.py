@@ -19,7 +19,8 @@ class SS_CameraPose_Left(commands2.Subsystem):
             self.leftcam = None
             self.estimator = None
             return
-        # load load field 
+        # load load field and dashboard toggle
+        SmartDashboard.putBoolean("Vision/Enable Left Camera", True)
         self.field_layout = AprilTagFieldLayout.loadField(AprilTagField.kDefaultField)
 
         # set camera
@@ -46,6 +47,9 @@ class SS_CameraPose_Left(commands2.Subsystem):
     def periodic(self):
         # grab cams 
         if self.leftcam is None:
+            return
+        # Dashboard toggle
+        if not SmartDashboard.getBoolean("Vision/Enable Left Camera", True):
             return
         results = self.leftcam.getAllUnreadResults()
         if not results:

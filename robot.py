@@ -36,7 +36,6 @@ class RobotContainer:
         self.auto_distance_shoot_command = CMD_AutoDistanceShoot(self.ss_shooter, self.ss_swerve_drive)
         self._setup_simulated_mechanism2d()
         self.defaultdrivemode = self.ss_swerve_drive.drive_mode_field_centered()
-
         if self.gamepad: self.configure_gamepad_bindings()
 
     def configure_gamepad_bindings(self):
