@@ -112,11 +112,22 @@ class SS_CameraPose(commands2.Subsystem):
 
         pose = final_pose.estimatedPose
 
+        num_tags = len(final_pose.targetsUsed)
+
+        ambiguity = final_pose.ambiguity
+
+        if num_tags >= 2 and ambiguity < 0.1:
+            std_devs = [0.1, 0.1, 0.1]   # TRUST ROTATION
+        elif num_tags >= 1:
+            std_devs = [0.15, 0.15, 0.5] # partial trust
+        else:
+            return  # shouldn't happen anyway stops it from crashing
+
         # Inject into drivetrain
         self.swerve_drive.drivetrain.add_vision_measurement(
             pose.toPose2d(),
             final_pose.timestampSeconds,
-            vision_measurement_std_devs=[0.1, 0.1, 1.0]
+            vision_measurement_std_devs=std_devs
         )
 
         # Dashboard
