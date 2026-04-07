@@ -7,7 +7,7 @@ from subsystems.command_swerve_drivetrain import CommandSwerveDrivetrain
 from photonlibpy import PhotonCamera, PhotonPoseEstimator
 from robotpy_apriltag import AprilTagField, AprilTagFieldLayout
 
-class SS_CameraPose(commands2.Subsystem):
+class SS_CameraPose_Right(commands2.Subsystem):
 
 
     def __init__(self, swerve_drive: SS_SwerveDrive):
@@ -72,7 +72,7 @@ class SS_CameraPose(commands2.Subsystem):
 
         # Dashboard
         pose = est.estimatedPose
-        SmartDashboard.putNumber("Vision/Vision X", pose.X())
-        SmartDashboard.putNumber("Vision/Vision Y", pose.Y())
-        SmartDashboard.putNumber("Vision/Vision Heading",
+        SmartDashboard.putNumber("Vision/Vision X right", pose.X())
+        SmartDashboard.putNumber("Vision/Vision Y right", pose.Y())
+        SmartDashboard.putNumber("Vision/Vision Heading right",
                                  pose.rotation().toRotation2d().degrees())

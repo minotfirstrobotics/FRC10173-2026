@@ -19,7 +19,6 @@ class RobotContainer:
     def __init__(self) -> None:
         self.gamepad = None or CommandXboxController(0)
         DriverStation.silenceJoystickConnectionWarning(True)
-        self.velocity_setpoint_test = 40.00
         self.canbus = TunerConstants.canbus
         self.ss_shooter = None or SS_Kraken(3, self.canbus, "Shooter", inverted=True, max_rps=100, velocity_setpoint=40, kp=0.08, ki=0.0, kd=0.0, kv=0.012, ks=0.0)
         self.ss_feeder = None or SS_Kraken(1, self.canbus, "Feeder", kp=1.0, velocity_setpoint=40, percent_power_setpoint=0.5)
@@ -40,9 +39,7 @@ class RobotContainer:
     def configure_gamepad_bindings(self):
         self.ss_swerve_drive.drivetrain.setDefaultCommand(self.defaultdrivemode)
         if self.ss_shooter:
-            self.gamepad.rightBumper().onTrue(
-                cmd.runOnce(lambda: self.ss_shooter._run_at_velocity_injected(self.velocity_setpoint_test))
-            )
+            self.gamepad.rightBumper().onTrue(self.ss_shooter.run_at_velocity())
             self.gamepad.rightBumper().onFalse(self.ss_shooter.stop_motor())
         if self.ss_feeder:
             self.gamepad.leftBumper().onTrue(self.ss_feeder.run_at_velocity())
@@ -149,17 +146,7 @@ class MyRobot(commands2.TimedCommandRobot):
             self.container.shooter2d.setLength(self.container.ss_shooter.velocity_actual/10)
         if self.container.ss_extend:
             self.container.extend2d.setAngle(90 - self.container.ss_extend.position_actual*90/2)
-        #self.container.ss_shooter.velocity_setpoint = 5.17 * self.container.ss_swerve_drive.range_to_target + 24.9
-        dash_velocity_setpoint_test = wpilib.SmartDashboard.getNumber(
-            "SS_Telemetry/Shooter/Shooter Velocity Setpoint Test",
-            self.container.velocity_setpoint_test
-        )
-        self.container.velocity_setpoint_test = dash_velocity_setpoint_test
-        wpilib.SmartDashboard.putNumber(
-            "SS_Telemetry/Shooter/Shooter Velocity Setpoint Test",
-            self.container.velocity_setpoint_test
-        )
-
+        self.container.ss_shooter.velocity_setpoint = 5.17 * self.container.ss_swerve_drive.range_to_target + 24.9
         SmartDashboard.putNumber(f"SS_Telemetry/Shooter/Shooter Velocity Setpoint", self.container.ss_shooter.velocity_setpoint)
 
 
