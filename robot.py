@@ -11,7 +11,7 @@ from generated.tuner_constants_2026_GF import TunerConstants
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
 from subsystems.SS_Kraken import SS_Kraken
 from subsystems.SS_CANdleLight import SS_CANdleLight
-from subsystems.SS_CameraPose import SS_CameraPose
+from subsystems.SS_CameraPose_old import SS_CameraPose
 from commands.complex_and_sequences import CMD_ComboShoot, SEQ_shoot, SEQ_extend_intake, CMD_deploy_intake
 from commands.auto_distance_shoot import CMD_AutoDistanceShoot
 
