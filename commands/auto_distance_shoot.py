@@ -1,3 +1,4 @@
+import math
 import wpilib
 import commands2
 from commands2 import cmd
@@ -19,8 +20,8 @@ class CMD_AutoDistanceShoot(commands2.Command):
     def execute(self):
         # required shooter speed
         distance = self.swerve.range_to_target
-        required_speed = (5.17 * distance) + 24.9
-
+        required_speed = 26 + 14.2 * math.log(distance)
+        
         # Apply velocity 
         self.shooter._run_at_velocity_injected(required_speed)
 
