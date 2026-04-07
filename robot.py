@@ -19,7 +19,9 @@ class RobotContainer:
     def __init__(self) -> None:
         self.gamepad = None or CommandXboxController(0)
         DriverStation.silenceJoystickConnectionWarning(True)
-        self.velocity_setpoint_test = 1.00
+        self.velocity_setpoint_test_shooter = 40.00
+        self.velocity_setpoint_test_feeder = 10.00
+        self.velocity_setpoint_test_intake = 11.00
         self.canbus = TunerConstants.canbus
         self.ss_shooter = None or SS_Kraken(3, self.canbus, "Shooter", inverted=True, max_rps=100, velocity_setpoint=40, kp=0.08, ki=0.0, kd=0.0, kv=0.012, ks=0.0)
         self.ss_feeder = None or SS_Kraken(1, self.canbus, "Feeder", kp=1.0, velocity_setpoint=40, percent_power_setpoint=0.5)
@@ -41,16 +43,22 @@ class RobotContainer:
         self.ss_swerve_drive.drivetrain.setDefaultCommand(self.defaultdrivemode)
         if self.ss_shooter:
             self.gamepad.rightBumper().onTrue(
-                cmd.runOnce(lambda: self.ss_shooter._run_at_velocity_injected(self.velocity_setpoint_test))
+                cmd.runOnce(lambda: self.ss_shooter._run_at_velocity_injected(self.velocity_setpoint_test_shooter))
             )
             self.gamepad.rightBumper().onFalse(self.ss_shooter.stop_motor())
         if self.ss_feeder:
-            self.gamepad.leftBumper().onTrue(self.ss_feeder.run_at_velocity())
+            self.gamepad.leftBumper().onTrue(
+                cmd.runOnce(lambda: self.ss_feeder._run_at_velocity_injected(self.velocity_setpoint_test_feeder))
+            )
             self.gamepad.leftBumper().onFalse(self.ss_feeder.stop_motor())
         if self.ss_intake:
-            self.gamepad.leftTrigger(threshold=.2).onTrue(self.ss_intake.run_power_percent_reverse())
+            self.gamepad.leftTrigger(threshold=.2).onTrue(
+                cmd.runOnce(lambda: self.ss_intake._run_at_velocity_injected(-self.velocity_setpoint_test_intake))
+            )
             self.gamepad.leftTrigger(threshold=.2).onFalse(self.ss_intake.stop_motor())
-            self.gamepad.rightTrigger(threshold=.2).onTrue(self.ss_intake.run_power_percent_forward())
+            self.gamepad.rightTrigger(threshold=.2).onTrue(
+                cmd.runOnce(lambda: self.ss_intake._run_at_velocity_injected(self.velocity_setpoint_test_intake))
+            )
             self.gamepad.rightTrigger(threshold=.2).onFalse(self.ss_intake.stop_motor())
             self.gamepad.y().onTrue(self.ss_extend.rotate_to_position(3))
             self.gamepad.y().onFalse(self.ss_extend.stop_motor())
@@ -150,15 +158,17 @@ class MyRobot(commands2.TimedCommandRobot):
         if self.container.ss_extend:
             self.container.extend2d.setAngle(90 - self.container.ss_extend.position_actual*90/2)
         #self.container.ss_shooter.velocity_setpoint = 5.17 * self.container.ss_swerve_drive.range_to_target + 24.9
-        dash_velocity_setpoint_test = wpilib.SmartDashboard.getNumber(
-            "SS_Telemetry/Shooter/Shooter Velocity Setpoint Test",
-            self.container.velocity_setpoint_test
-        )
-        self.container.velocity_setpoint_test = dash_velocity_setpoint_test
-        wpilib.SmartDashboard.putNumber(
-            "SS_Telemetry/Shooter/Shooter Velocity Setpoint Test",
-            self.container.velocity_setpoint_test
-        )
+        dash_velocity_setpoint_test = wpilib.SmartDashboard.getNumber( "SS_Telemetry/Shooter/Shooter Velocity Setpoint Test",self.container.velocity_setpoint_test_shooter)
+        self.container.velocity_setpoint_test_shooter = dash_velocity_setpoint_test
+        wpilib.SmartDashboard.putNumber("SS_Telemetry/Shooter/Shooter Velocity Setpoint Test",self.container.velocity_setpoint_test_shooter)
+
+        dash_velocity_setpoint_test = wpilib.SmartDashboard.getNumber( "SS_Telemetry/Intake/Intake Velocity Setpoint Test",self.container.velocity_setpoint_test_intake)
+        self.container.velocity_setpoint_test_intake = dash_velocity_setpoint_test
+        wpilib.SmartDashboard.putNumber("SS_Telemetry/Intake/Intake Velocity Setpoint Test",self.container.velocity_setpoint_test_intake)
+
+        dash_velocity_setpoint_test = wpilib.SmartDashboard.getNumber( "SS_Telemetry/Feeder/Feeder Velocity Setpoint Test",self.container.velocity_setpoint_test_feeder)
+        self.container.velocity_setpoint_test_feeder = dash_velocity_setpoint_test
+        wpilib.SmartDashboard.putNumber("SS_Telemetry/Feeder/Feeder Velocity Setpoint Test",self.container.velocity_setpoint_test_feeder)
 
         SmartDashboard.putNumber(f"SS_Telemetry/Shooter/Shooter Velocity Setpoint", self.container.ss_shooter.velocity_setpoint)
 
