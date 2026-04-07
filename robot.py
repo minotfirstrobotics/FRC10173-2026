@@ -49,7 +49,11 @@ class RobotContainer:
             self.gamepad.rightTrigger(threshold=.2).onFalse(self.ss_intake.stop_motor())
             self.gamepad.y().onTrue(self.ss_extend.rotate_to_position(3))
             self.gamepad.y().onFalse(self.ss_extend.stop_motor())
-        self.gamepad.x().onTrue(CMD_deploy_intake(self.ss_extend, self.ss_shooter))
+        self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.ss_swerve_drive, self.gamepad)
+        self.gamepad.x().onTrue(self.cmd_combo_shoot)
+        self.gamepad.b().onTrue(CMD_deploy_intake(self.ss_extend, self.ss_shooter))
+        self.gamepad.b().onTrue(self.ss_extend.stop_motor())
+
         # elif self.ss_shooter and self.ss_feeder:
         #     self.gamepad.rightBumper().whileTrue(CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.gamepad))
         # elif self.ss_shooter and self.ss_feeder:
@@ -58,8 +62,8 @@ class RobotContainer:
         if self.ss_swerve_drive:
             self.gamepad.a().onTrue(self.ss_swerve_drive.drive_mode_padlocked())
             self.gamepad.a().onFalse(self.defaultdrivemode)
-            self.gamepad.b().onTrue(self.ss_swerve_drive.drive_to_target())
-            self.gamepad.b().onFalse(self.defaultdrivemode)
+            # self.gamepad.b().onTrue(self.ss_swerve_drive.drive_to_target())
+            # self.gamepad.b().onFalse(self.defaultdrivemode)
 
             self.gamepad.back().and_(self.gamepad.start()).onTrue(
                 cmd.runOnce(self.ss_swerve_drive.reset_field_oriented_perspective) )
@@ -140,6 +144,9 @@ class MyRobot(commands2.TimedCommandRobot):
             self.container.shooter2d.setLength(self.container.ss_shooter.velocity_actual/10)
         if self.container.ss_extend:
             self.container.extend2d.setAngle(90 - self.container.ss_extend.position_actual*90/2)
+        self.container.ss_shooter.velocity_setpoint = 5.17 * self.container.ss_swerve_drive.range_to_target + 24.9
+        SmartDashboard.putNumber(f"SS_Telemetry/Shooter/Shooter Velocity Setpoint", self.container.ss_shooter.velocity_setpoint)
+
 
     def teleopInit(self) -> None:
         """

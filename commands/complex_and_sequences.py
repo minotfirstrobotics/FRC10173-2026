@@ -10,7 +10,7 @@ from subsystems.SS_CANdleLight import SS_CANdleLight
 
 def SEQ_shoot(shooter: SS_Kraken, feeder: SS_Kraken):
     return commands2.SequentialCommandGroup(
-        cmd.runOnce(shooter.spin_up_and_wait_command),
+        shooter.spin_up_and_wait(),
         cmd.runOnce(lambda: shooter._run_at_velocity), # Ensure shooter is running at setpoint while feeder runs
         cmd.runOnce(lambda: feeder._run_at_velocity).withTimeout(3.0), # Run feeder for 3 seconds after shooter is up to speed
         cmd.runOnce(feeder._stop_motor).withTimeout(3.0), # Run feeder for 3 seconds after shooter is up to speed
@@ -34,7 +34,7 @@ def SEQ_auto_shake_intake(swerve: SS_SwerveDrive):
 def CMD_deploy_intake(extender: SS_Kraken, shooter: SS_Kraken):
     return commands2.ParallelCommandGroup(
         cmd.runOnce(lambda: extender._rotate_to_position(3)).withTimeout(2.0),
-        cmd.runOnce(shooter.run_voltage_percent_reverse).withTimeout(2.0)
+        cmd.runOnce(shooter.run_power_percent_reverse).withTimeout(2.0)
     )
 
 class CMD_ComboShoot(commands2.Command):
@@ -44,17 +44,17 @@ class CMD_ComboShoot(commands2.Command):
         self.ss_feeder = ss_feeder
         self.ss_swerve = ss_swerve
         self.addRequirements(self.ss_shooter, self.ss_feeder, self.ss_swerve) # Ensure no other command these subsystems while this command is running
-        self.velocity_tolerance = 1 # RPM tolerance for considering the shooter "up to speed"
+        self.velocity_tolerance = 10 # RPM tolerance for considering the shooter "up to speed"
         self._joystick = joystick
 
     def initialize(self):
-        range_in_inches = self.ss_swerve.range_to_target
-        self.ss_shooter.velocity_setpoint = 0.131 * range_in_inches + 24.9
+        range_in_meters = self.ss_swerve.range_to_target
+        self.ss_shooter.velocity_setpoint = 5.17 * range_in_meters + 24.9
         SmartDashboard.putNumber("Shooter Setpoint", self.ss_shooter.velocity_setpoint)
         self.ss_shooter._run_at_velocity() # Spin up shooter
 
     def execute(self):
-            if abs(self.ss_shooter.velocity_actual - self.ss_shooter.velocity_setpoint) < self.velocity_tolerance:
+            if abs(self.ss_shooter.motor.get_velocity().value - self.ss_shooter.velocity_setpoint) < self.velocity_tolerance:
                 self.ss_feeder._run_at_velocity() # Spin feeder
             else:
                 self.ss_feeder._stop_motor() # Stop feeder if shooter is no longer at speed
