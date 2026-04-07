@@ -179,6 +179,12 @@ class SS_Kraken(commands2.Subsystem):
             setpoint = self.velocity_setpoint
         """Needs PIDF settings and max_rps to be configured appropriately for good performance."""
         self.motor.set_control(self.velocity_request.with_velocity(setpoint))
+    
+    def _run_at_velocity_injected(self, velocity = None) -> None:
+        if velocity is None:
+            velocity = self.velocity_setpoint
+        """Run the motor at a called velocity every cycle."""
+        self.motor.set_control(self.velocity_request.with_velocity(velocity))
 
     def _run_power_percent(self, setpoint = None) -> None:
         if setpoint is None:

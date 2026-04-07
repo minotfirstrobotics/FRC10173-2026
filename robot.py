@@ -13,6 +13,7 @@ from subsystems.SS_Kraken import SS_Kraken
 from subsystems.SS_CANdleLight import SS_CANdleLight
 from subsystems.SS_CameraPose import SS_CameraPose
 from commands.complex_and_sequences import CMD_ComboShoot, SEQ_shoot, SEQ_extend_intake, CMD_deploy_intake
+from commands.auto_distance_shoot import CMD_AutoDistanceShoot
 
 class RobotContainer:
     def __init__(self) -> None:
@@ -29,6 +30,7 @@ class RobotContainer:
         self.ss_camera_pose = None or SS_CameraPose(self.ss_swerve_drive)
 
         self._build_complex_commands_and_autochooser()
+        self.auto_distance_shoot_command = CMD_AutoDistanceShoot(self.ss_shooter, self.ss_swerve_drive)
         self._setup_simulated_mechanism2d()
         self.defaultdrivemode = self.ss_swerve_drive.drive_mode_field_centered()
 
@@ -50,7 +52,7 @@ class RobotContainer:
             self.gamepad.y().onTrue(self.ss_extend.rotate_to_position(3))
             self.gamepad.y().onFalse(self.ss_extend.stop_motor())
         self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.ss_swerve_drive, self.gamepad)
-        self.gamepad.x().onTrue(self.cmd_combo_shoot)
+        self.gamepad.x().whileTrue(self.auto_distance_shoot_command)
         self.gamepad.b().onTrue(CMD_deploy_intake(self.ss_extend, self.ss_shooter))
         self.gamepad.b().onTrue(self.ss_extend.stop_motor())
 
