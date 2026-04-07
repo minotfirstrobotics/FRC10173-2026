@@ -11,7 +11,7 @@ from generated.tuner_constants_2026_GF import TunerConstants
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
 from subsystems.SS_Kraken import SS_Kraken
 from subsystems.SS_CANdleLight import SS_CANdleLight
-from subsystems.SS_CameraPose_left_old import SS_CameraPose
+from subsystems.SS_CameraPose_left_old import SS_CameraPose_Left
 from subsystems.SS_CameraPose_right_old import SS_CameraPose_Right
 from commands.complex_and_sequences import CMD_ComboShoot, SEQ_shoot, SEQ_extend_intake, CMD_deploy_intake
 from commands.auto_distance_shoot import CMD_AutoDistanceShoot
@@ -28,7 +28,8 @@ class RobotContainer:
         self.ss_candle_light_left = None or SS_CANdleLight(2, self.canbus, "Left")
         self.ss_candle_light_right = None or SS_CANdleLight(5, self.canbus, "Right")
         self.ss_swerve_drive = None or SS_SwerveDrive(self.gamepad)
-        self.ss_camera_pose = None or SS_CameraPose(self.ss_swerve_drive)
+        self.ss_camera_pose_left = None or SS_CameraPose_Left(self.ss_swerve_drive)
+        self.ss_camera_pose_right = None or SS_CameraPose_Right(self.ss_swerve_drive)
 
         self._build_complex_commands_and_autochooser()
         self.auto_distance_shoot_command = CMD_AutoDistanceShoot(self.ss_shooter, self.ss_swerve_drive)

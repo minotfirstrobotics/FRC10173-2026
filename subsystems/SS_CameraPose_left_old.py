@@ -33,7 +33,7 @@ class SS_CameraPose_Left(commands2.Subsystem):
             #Rotation3d(0.0, 0.0, 0.0) # radians roll, pitch, yaw from robot forward
         #)
         self.robot_to_leftcam = Transform3d(
-            Translation3d(0.3048, -0.3302, 0.4826), # meters forward, right, up from robot center
+            Translation3d(-0.2794, -0.2921, 0.4572), # meters forward, right, up from robot center
             Rotation3d(0.0, 0.0, 3.14) # radians roll, pitch, yaw from robot forward
         )
 
