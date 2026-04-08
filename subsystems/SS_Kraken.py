@@ -19,6 +19,9 @@ class SS_Kraken(commands2.Subsystem):
         self.percent_power_setpoint = percent_power_setpoint
         self.velocity_setpoint = velocity_setpoint
         self.velocity_actual = 0.0
+        self.command_mode = "stopped"
+        self.commanded_velocity_setpoint = 0.0
+        self.commanded_power_percent = 0.0
         self._setup_hardware_configuration(inverted, brake_mode)
         self._apply_pidf_to_config(kp, ki, kd, kv, ks, ka, kg, vmax, amax, jerk)
         self.position_setpoint = 0.0
@@ -171,6 +174,9 @@ class SS_Kraken(commands2.Subsystem):
     # Motor movement functions
     # -------------------------
     def _stop_motor(self):
+        self.command_mode = "stopped"
+        self.commanded_velocity_setpoint = 0.0
+        self.commanded_power_percent = 0.0
         self.motor.set(0.0)
         # self.motor.stopMotor()
 
@@ -178,17 +184,26 @@ class SS_Kraken(commands2.Subsystem):
         if setpoint is None:
             setpoint = self.velocity_setpoint
         """Needs PIDF settings and max_rps to be configured appropriately for good performance."""
+        self.command_mode = "velocity"
+        self.commanded_velocity_setpoint = float(setpoint)
+        self.commanded_power_percent = 0.0
         self.motor.set_control(self.velocity_request.with_velocity(setpoint))
     
     def _run_at_velocity_injected(self, velocity = None) -> None:
         if velocity is None:
             velocity = self.velocity_setpoint
         """Run the motor at a called velocity every cycle."""
+        self.command_mode = "velocity"
+        self.commanded_velocity_setpoint = float(velocity)
+        self.commanded_power_percent = 0.0
         self.motor.set_control(self.velocity_request.with_velocity(velocity))
 
     def _run_power_percent(self, setpoint = None) -> None:
         if setpoint is None:
             setpoint = self.percent_power_setpoint
+        self.command_mode = "percent"
+        self.commanded_power_percent = float(setpoint)
+        self.commanded_velocity_setpoint = 0.0
         self.motor.set(setpoint)
 
     def _rotate_to_position(self, target_rotations = None) -> None:
@@ -251,6 +266,17 @@ class SS_Kraken(commands2.Subsystem):
             ),
             self,
         )
+
+    def hold_dashboard_velocity(self):
+        return commands2.cmd.run(
+            lambda: self._run_at_velocity(
+                self.set_velocity_setpoint(
+                    self.get_dashboard_velocity_setpoint(),
+                    publish_dashboard=False,
+                )
+            ),
+            self,
+        ).finallyDo(lambda interrupted: self._stop_motor())
     
     def run_power_percent_forward(self):
         return commands2.cmd.runOnce(lambda: self._run_power_percent(self.percent_power_setpoint), self)
@@ -279,6 +305,18 @@ class SS_Kraken(commands2.Subsystem):
             ),
             self,
         )
+
+    def hold_dashboard_power_percent(self, direction: float = 1.0):
+        return commands2.cmd.run(
+            lambda: self._run_power_percent(
+                direction
+                * self.set_power_percent_setpoint(
+                    self.get_dashboard_power_percent_setpoint(),
+                    publish_dashboard=False,
+                )
+            ),
+            self,
+        ).finallyDo(lambda interrupted: self._stop_motor())
 
     def rotate_to_position(self, target_rotations = None):
         if target_rotations is None:
@@ -316,6 +354,11 @@ class SS_Kraken(commands2.Subsystem):
             ),
             self,
         )
+
+    def is_at_velocity(self, tolerance: float = 10.0) -> bool:
+        return abs(self.velocity_actual - self.velocity_setpoint) < tolerance
+    
+    
 
     def rotate_to_position_and_wait(self, target_rotations = None):
         if target_rotations is None:

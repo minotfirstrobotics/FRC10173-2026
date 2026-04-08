@@ -37,11 +37,11 @@ def SEQ_auto_shake_intake(swerve: SS_SwerveDrive):
 def CMD_deploy_intake(extender: SS_Kraken, shooter: SS_Kraken):
     return commands2.ParallelCommandGroup(
         cmd.runOnce(lambda: extender._rotate_to_position(3)).withTimeout(2.0),
-        cmd.runOnce(shooter.run_power_percent_reverse).withTimeout(2.0)
+        shooter.run_power_percent_reverse().withTimeout(2.0)
     )
 
 class CMD_ComboShoot(commands2.Command):
-    def __init__(self, ss_shooter: SS_Kraken, ss_feeder: SS_Kraken, ss_swerve: SS_SwerveDrive, joystick: CommandXboxController):
+    def __init__(self, ss_shooter: SS_Kraken, ss_feeder: SS_Kraken, ss_swerve: SS_SwerveDrive, joystick: CommandXboxController | None = None,):
         super().__init__()
         self.ss_shooter = ss_shooter
         self.ss_feeder = ss_feeder
@@ -67,6 +67,8 @@ class CMD_ComboShoot(commands2.Command):
                 self.ss_feeder._stop_motor() # Stop feeder if shooter is no longer at speed
 
     def isFinished(self):
+        if self._joystick is None:
+            return False
         return not self._joystick.x().getAsBoolean()
 
     def end(self, interrupted):

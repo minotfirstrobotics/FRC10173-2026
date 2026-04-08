@@ -1,4 +1,3 @@
-# AUTO SHOOTER DISTANCE
 import wpilib
 import commands2
 from commands2 import cmd
@@ -23,8 +22,8 @@ class RobotContainer:
         DriverStation.silenceJoystickConnectionWarning(True)
         self.canbus = TunerConstants.canbus
         self.ss_shooter = None or SS_Kraken(3, self.canbus, "Shooter", inverted=True, max_rps=100, velocity_setpoint=40, kp=0.08, ki=0.0, kd=0.0, kv=0.012, ks=0.0)
-        self.ss_feeder = None or SS_Kraken(1, self.canbus, "Feeder", kp=1.0, velocity_setpoint=40, percent_power_setpoint=0.5)
-        self.ss_intake = None or SS_Kraken(4, self.canbus, "Intake", max_rps=120, percent_power_setpoint=0.5)
+        self.ss_feeder = None or SS_Kraken(1, self.canbus, "Feeder", kp=1.0, velocity_setpoint=10, percent_power_setpoint=0.5)
+        self.ss_intake = None or SS_Kraken(4, self.canbus, "Intake", max_rps=120, percent_power_setpoint=0.09)
         self.ss_extend = None or SS_Kraken(6, self.canbus, "Extension", inverted=True, brake_mode=True, kp=5, ki=0.5, vmax=.5, amax=.5, jerk=2.5)
         self.ss_candle_light_left = None or SS_CANdleLight(2, self.canbus, "Left")
         self.ss_candle_light_right = None or SS_CANdleLight(5, self.canbus, "Right")
@@ -42,20 +41,16 @@ class RobotContainer:
     def configure_gamepad_bindings(self):
         self.ss_swerve_drive.drivetrain.setDefaultCommand(self.defaultdrivemode)
         if self.ss_shooter:
-            self.gamepad.rightBumper().onTrue(self.ss_shooter.run_at_dashboard_velocity())
-            self.gamepad.rightBumper().onFalse(self.ss_shooter.stop_motor())
+            self.gamepad.rightBumper().whileTrue(self.ss_shooter.hold_dashboard_velocity())
         if self.ss_feeder:
-            self.gamepad.leftBumper().onTrue(self.ss_feeder.run_at_dashboard_velocity())
-            self.gamepad.leftBumper().onFalse(self.ss_feeder.stop_motor())
+            self.gamepad.leftBumper().whileTrue(self.ss_feeder.hold_dashboard_velocity())
         if self.ss_intake:
-            self.gamepad.leftTrigger(threshold=.2).onTrue(self.ss_intake.run_power_percent_reverse_dashboard())
-            self.gamepad.leftTrigger(threshold=.2).onFalse(self.ss_intake.stop_motor())
-            self.gamepad.rightTrigger(threshold=.2).onTrue(self.ss_intake.run_power_percent_forward_dashboard())
-            self.gamepad.rightTrigger(threshold=.2).onFalse(self.ss_intake.stop_motor())
+            self.gamepad.leftTrigger(threshold=.2).whileTrue(self.ss_intake.hold_dashboard_power_percent(-1.0))
+            self.gamepad.rightTrigger(threshold=.2).whileTrue(self.ss_intake.hold_dashboard_power_percent(1.0))
             self.gamepad.y().onTrue(self.ss_extend.rotate_to_position(3))
             self.gamepad.y().onFalse(self.ss_extend.stop_motor())
-        self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.ss_swerve_drive, self.gamepad)
-        self.gamepad.x().whileTrue(self.auto_distance_shoot_command)
+        self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.ss_swerve_drive)
+        self.gamepad.x().whileTrue(self.cmd_combo_shoot)
         self.gamepad.b().onTrue(CMD_deploy_intake(self.ss_extend, self.ss_shooter))
         self.gamepad.b().onTrue(self.ss_extend.stop_motor())
 
@@ -74,7 +69,7 @@ class RobotContainer:
                 cmd.runOnce(self.ss_swerve_drive.reset_field_oriented_perspective) )
 
     def _build_complex_commands_and_autochooser(self):
-        self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.ss_swerve_drive, self.gamepad)
+        self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.ss_swerve_drive)
         SmartDashboard.putData("Commands/Combo Shoot", self.cmd_combo_shoot)
         NamedCommands.registerCommand("Commands/Combo Shoot", self.cmd_combo_shoot)
 
