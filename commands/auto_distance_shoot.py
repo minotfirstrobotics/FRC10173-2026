@@ -2,6 +2,7 @@ import math
 import wpilib
 import commands2
 from commands2 import cmd
+from wpilib import SmartDashboard
 from subsystems.SS_Kraken import SS_Kraken
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
 
@@ -18,14 +19,19 @@ class CMD_AutoDistanceShoot(commands2.Command):
         # 26.2 + 12.1 ln x
         return 26.2 + (12.1 * math.log(distance))
 
-    def initialize(self):
+    def update_and_get_required_shooter_speed(self) -> float:
         required_speed = self.get_required_shooter_speed()
-        self.shooter.set_velocity_setpoint(required_speed)
+        SmartDashboard.putNumber("SS_Telemetry/Shooter/Shooter Auto Distance Speed", required_speed)
+        return required_speed
+
+    def initialize(self):
+        required_speed = self.update_and_get_required_shooter_speed()
+        self.shooter.set_velocity_setpoint(required_speed, publish_dashboard=False)
         self.shooter._run_at_velocity(required_speed)
 
     def execute(self):
-        required_speed = self.get_required_shooter_speed()
-        self.shooter.set_velocity_setpoint(required_speed)
+        required_speed = self.update_and_get_required_shooter_speed()
+        self.shooter.set_velocity_setpoint(required_speed, publish_dashboard=False)
         self.shooter._run_at_velocity(required_speed)
 
     def isFinished(self):

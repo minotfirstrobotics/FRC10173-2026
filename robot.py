@@ -42,15 +42,15 @@ class RobotContainer:
     def configure_gamepad_bindings(self):
         self.ss_swerve_drive.drivetrain.setDefaultCommand(self.defaultdrivemode)
         if self.ss_shooter:
-            self.gamepad.rightBumper().onTrue(self.ss_shooter.run_at_velocity())
+            self.gamepad.rightBumper().onTrue(self.ss_shooter.run_at_dashboard_velocity())
             self.gamepad.rightBumper().onFalse(self.ss_shooter.stop_motor())
         if self.ss_feeder:
-            self.gamepad.leftBumper().onTrue(self.ss_feeder.run_at_velocity())
+            self.gamepad.leftBumper().onTrue(self.ss_feeder.run_at_dashboard_velocity())
             self.gamepad.leftBumper().onFalse(self.ss_feeder.stop_motor())
         if self.ss_intake:
-            self.gamepad.leftTrigger(threshold=.2).onTrue(self.ss_intake.run_power_percent_reverse())
+            self.gamepad.leftTrigger(threshold=.2).onTrue(self.ss_intake.run_power_percent_reverse_dashboard())
             self.gamepad.leftTrigger(threshold=.2).onFalse(self.ss_intake.stop_motor())
-            self.gamepad.rightTrigger(threshold=.2).onTrue(self.ss_intake.run_power_percent_forward())
+            self.gamepad.rightTrigger(threshold=.2).onTrue(self.ss_intake.run_power_percent_forward_dashboard())
             self.gamepad.rightTrigger(threshold=.2).onFalse(self.ss_intake.stop_motor())
             self.gamepad.y().onTrue(self.ss_extend.rotate_to_position(3))
             self.gamepad.y().onFalse(self.ss_extend.stop_motor())
@@ -149,8 +149,8 @@ class MyRobot(commands2.TimedCommandRobot):
             self.container.shooter2d.setLength(self.container.ss_shooter.velocity_actual/10)
         if self.container.ss_extend:
             self.container.extend2d.setAngle(90 - self.container.ss_extend.position_actual*90/2)
-        self.container.ss_shooter.velocity_setpoint = 5.17 * self.container.ss_swerve_drive.range_to_target + 24.9
-        SmartDashboard.putNumber(f"SS_Telemetry/Shooter/Shooter Velocity Setpoint", self.container.ss_shooter.velocity_setpoint)
+        calculated_shooter_speed = self.container.auto_distance_shoot_command.get_required_shooter_speed()
+        SmartDashboard.putNumber("SS_Telemetry/Shooter/Shooter Auto Distance Speed", calculated_shooter_speed)
 
 
     def teleopInit(self) -> None:
