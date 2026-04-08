@@ -22,7 +22,8 @@ def SEQ_shoot(shooter: SS_Kraken, feeder: SS_Kraken):
 
 def SEQ_extend_intake(extender: SS_Kraken):
     return commands2.SequentialCommandGroup(
-        cmd.runOnce(lambda: extender._rotate_to_position(1.5)).withTimeout(2.0),
+        cmd.runOnce(lambda: extender._rotate_to_position(1.5), extender),
+        WaitCommand(2.0),
         cmd.runOnce(extender._stop_motor)
     )
 
@@ -35,9 +36,17 @@ def SEQ_auto_shake_intake(swerve: SS_SwerveDrive):
     )
 
 def CMD_deploy_intake(extender: SS_Kraken, shooter: SS_Kraken):
-    return commands2.ParallelCommandGroup(
-        cmd.runOnce(lambda: extender._rotate_to_position(3)).withTimeout(2.0),
-        shooter.run_power_percent_reverse().withTimeout(2.0)
+    return commands2.SequentialCommandGroup(
+        commands2.ParallelDeadlineGroup(
+            WaitCommand(2.0),
+            cmd.run(lambda: extender._rotate_to_position(3), extender),
+            cmd.run(
+                lambda: shooter._run_power_percent(-abs(shooter.percent_power_setpoint)),
+                shooter,
+            ),
+        ),
+        cmd.runOnce(extender._stop_motor, extender),
+        cmd.runOnce(shooter._stop_motor, shooter),
     )
 
 class CMD_ComboShoot(commands2.Command):
@@ -46,7 +55,7 @@ class CMD_ComboShoot(commands2.Command):
         self.ss_shooter = ss_shooter
         self.ss_feeder = ss_feeder
         self.ss_swerve = ss_swerve
-        self.addRequirements(self.ss_shooter, self.ss_feeder, self.ss_swerve) # Ensure no other command these subsystems while this command is running
+        self.addRequirements(self.ss_shooter, self.ss_feeder) # Allow auto path following to keep control of swerve while shooting
         self._joystick = joystick
 
     def initialize(self):

@@ -47,12 +47,12 @@ class RobotContainer:
         if self.ss_intake:
             self.gamepad.leftTrigger(threshold=.2).whileTrue(self.ss_intake.hold_dashboard_power_percent(-1.0))
             self.gamepad.rightTrigger(threshold=.2).whileTrue(self.ss_intake.hold_dashboard_power_percent(1.0))
+        if self.ss_extend:
             self.gamepad.y().onTrue(self.ss_extend.rotate_to_position(3))
             self.gamepad.y().onFalse(self.ss_extend.stop_motor())
         self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.ss_swerve_drive)
         self.gamepad.x().whileTrue(self.cmd_combo_shoot)
         self.gamepad.b().onTrue(CMD_deploy_intake(self.ss_extend, self.ss_shooter))
-        self.gamepad.b().onTrue(self.ss_extend.stop_motor())
 
         # elif self.ss_shooter and self.ss_feeder:
         #     self.gamepad.rightBumper().whileTrue(CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.gamepad))
@@ -73,8 +73,24 @@ class RobotContainer:
         SmartDashboard.putData("Commands/Combo Shoot", self.cmd_combo_shoot)
         NamedCommands.registerCommand("Combo Shoot", self.cmd_combo_shoot)
 
-        # self.seq_shoot = SEQ_shoot(self.ss_shooter, self.ss_feeder)
-        # NamedCommands.registerCommand("Commands/SEQ Shoot", self.seq_shoot)
+        self.seq_shoot = SEQ_shoot(self.ss_shooter, self.ss_feeder)
+        SmartDashboard.putData("Commands/SEQ Shoot", self.seq_shoot)
+        NamedCommands.registerCommand("SEQ Shoot", self.seq_shoot)
+
+        self.deploy_intake = CMD_deploy_intake(self.ss_extend, self.ss_shooter)
+        SmartDashboard.putData("Commands/Deploy Intake", self.deploy_intake)
+        NamedCommands.registerCommand("Deploy Intake", self.deploy_intake)
+
+        self.run_intake = self.ss_intake.run_power_percent_forward_dashboard()
+        SmartDashboard.putData("Commands/Run Intake", self.run_intake)
+        NamedCommands.registerCommand("Run Intake", self.run_intake)
+
+        self.unload = cmd.sequence(
+            self.ss_feeder.hold_velocity(self.ss_feeder.get_dashboard_velocity_setpoint).withTimeout(1.0),
+            self.ss_feeder.stop_motor(),
+        )
+        SmartDashboard.putData("Commands/Unload", self.unload)
+        NamedCommands.registerCommand("Unload", self.unload)
         
         self.auto_chooser = AutoBuilder.buildAutoChooser("None") # must be defined after SS's and all registered commands
         SmartDashboard.putData("Auto Chooser", self.auto_chooser)
