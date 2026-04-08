@@ -20,7 +20,7 @@ class SS_CameraPose_Right(commands2.Subsystem):
             self.estimator = None
             return
         # load load field and dashboard toggle
-        SmartDashboard.putBoolean("Vision/Enable Right Camera", True)
+        SmartDashboard.putBoolean("Vision/Enable Right Camera", False)
         self.field_layout = AprilTagFieldLayout.loadField(AprilTagField.kDefaultField)
 
         # set camera
@@ -33,7 +33,7 @@ class SS_CameraPose_Right(commands2.Subsystem):
             #Rotation3d(0.0, 0.0, 0.0) # radians roll, pitch, yaw from robot forward
         #)
         self.robot_to_rightcam = Transform3d(
-            Translation3d(-0.3048, 0.3048, 0.4064), # meters forward, right, up from robot center
+            Translation3d(-0.3048, -0.3048, 0.4064), # meters forward, right, up from robot center
             Rotation3d(0.0, 0.0, 3.14) # radians roll, pitch, yaw from robot forward
         )
 
