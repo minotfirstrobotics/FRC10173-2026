@@ -21,6 +21,7 @@ from wpilib import DriverStation
 
 class SS_SwerveDrive(commands2.Subsystem):
     def __init__(self, joystick) -> None:
+        super().__init__()
         self.alliance = DriverStation.getAlliance()
         self._joystick = joystick
         self._max_angular_rate = rotationsToRadians(0.75)
@@ -29,8 +30,13 @@ class SS_SwerveDrive(commands2.Subsystem):
         wpilib.SmartDashboard.putNumber("Swerve/Swerve Max Speed Factor", self._max_speed)
         self._pov_speed = 0.2
         self._latest_pose = Pose2d()
+        self._latest_speeds = ChassisSpeeds(0.0, 0.0, 0.0)
         self._last_heading = Rotation2d()
         self.drivetrain = TunerConstants.create_drivetrain() # does this need to after swerve configs?
+        self._auto_translation_kp = 2.0
+        self._auto_rotation_kp = 2.5
+        wpilib.SmartDashboard.putNumber("Swerve/Auto Translation kP", self._auto_translation_kp)
+        wpilib.SmartDashboard.putNumber("Swerve/Auto Rotation kP", self._auto_rotation_kp)
         # self._logger = Telemetry(self._max_speed)
         # self.drivetrain.register_telemetry( lambda state: self._logger.telemeterize(state) )
         self._left_x_limiter = SlewRateLimiter(2.0)
@@ -77,9 +83,16 @@ class SS_SwerveDrive(commands2.Subsystem):
         self._setup_pathplanner_auto_builder()
 
     def periodic(self) -> None:
-        pose = self.drivetrain.sample_pose_at(Timer.getFPGATimestamp())
+        state = None
+        try:
+            state = self.drivetrain.get_state()
+        except Exception:
+            state = None
+
+        pose = getattr(state, "pose", None)
         if pose is not None:
             self._latest_pose = pose
+            self._latest_speeds = getattr(state, "speeds", self._latest_speeds)
             self.target_x, self.target_y = self._determine_padlock_target(pose)
             self.x_vector_to_target = self._latest_pose.translation().X() - self.target_x
             self.y_vector_to_target = self._latest_pose.translation().Y() - self.target_y
@@ -305,8 +318,8 @@ class SS_SwerveDrive(commands2.Subsystem):
             robot_relative_speeds_supplier=self.get_robot_relative_speeds,
             output=self.drive_robot_relative,
             controller=PPHolonomicDriveController(
-                PIDConstants(2.0, 0.0, 0.0),  # Translation PID (tune these values)
-                PIDConstants(2.0, 0.0, 0.0),  # Rotation PID (tune these values)
+                PIDConstants(self._auto_translation_kp, 0.0, 0.0),  # Translation PID (tune these values)
+                PIDConstants(self._auto_rotation_kp, 0.0, 0.0),  # Rotation PID (tune these values)
             ),
             robot_config=RobotConfig.fromGUISettings(),
             should_flip_path=lambda: DriverStation.getAlliance() == DriverStation.Alliance.kRed,
@@ -327,6 +340,14 @@ class SS_SwerveDrive(commands2.Subsystem):
 
 
     def get_pose(self) -> Pose2d:
+        state = None
+        try:
+            state = self.drivetrain.get_state()
+        except Exception:
+            state = None
+        pose = getattr(state, "pose", None)
+        if state is not None:
+            self._latest_pose = pose
         return self._latest_pose
 
     def reset_pose(self, pose: Pose2d) -> None:
@@ -351,12 +372,22 @@ class SS_SwerveDrive(commands2.Subsystem):
 
         # Some drivetrain implementations may not include 'speeds' attribute
         # (unlikely), so be defensive.
+        self._latest_speeds = getattr(state, "speeds", ChassisSpeeds(0.0, 0.0, 0.0))
         return getattr(state, "speeds", ChassisSpeeds(0.0, 0.0, 0.0))
 
     def drive_robot_relative(self, robot_relative_speeds: ChassisSpeeds, drive_feedforwards=None) -> None:
-        self.drivetrain.set_control(
-            swerve.requests.ApplyRobotSpeeds().with_speeds(robot_relative_speeds)
+        request = (
+            swerve.requests.ApplyRobotSpeeds()
+            .with_speeds(robot_relative_speeds)
+            .with_desaturate_wheel_speeds(True)
         )
+        if drive_feedforwards is not None:
+            request = (
+                request
+                .with_wheel_force_feedforwards_x(drive_feedforwards.robotRelativeForcesXNewtons)
+                .with_wheel_force_feedforwards_y(drive_feedforwards.robotRelativeForcesYNewtons)
+            )
+        self.drivetrain.set_control(request)
 
     def _setup_padlock_target_chooser(self):
         # This is an example of how you might set up a dashboard chooser to select between different padlock targets (e.g., different scoring locations)
