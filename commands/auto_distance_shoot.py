@@ -13,22 +13,23 @@ class CMD_AutoDistanceShoot(commands2.Command):
 
         self.addRequirements(self.shooter, self.swerve)
 
+    def get_required_shooter_speed(self) -> float:
+        distance = max(self.swerve.range_to_target, 0.1)
+        # 26.2 + 12.1 ln x
+        return 26.2 + (12.1 * math.log(distance))
+
     def initialize(self):
-        # Start shooter
-        self.shooter.spin_up_and_wait().schedule()
+        required_speed = self.get_required_shooter_speed()
+        self.shooter.set_velocity_setpoint(required_speed)
+        self.shooter._run_at_velocity(required_speed)
 
     def execute(self):
-        # 26.2 + 12.1 ln x
-        # required shooter speed
-        distance = self.swerve.range_to_target
-        required_speed = 26.2 + (12.1 * math.log(distance))
-
-        # Apply velocity 
-        self.shooter._run_at_velocity_injected(required_speed)
+        required_speed = self.get_required_shooter_speed()
+        self.shooter.set_velocity_setpoint(required_speed)
+        self.shooter._run_at_velocity(required_speed)
 
     def isFinished(self):
         return False  # run until interrupted
 
     def end(self, interrupted: bool):
         self.shooter._stop_motor()
-
