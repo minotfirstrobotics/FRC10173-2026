@@ -184,7 +184,7 @@ class SS_SwerveDrive(commands2.Subsystem):
     
     def drive_mode_padlocked(self) -> None:
         return self._request_command(lambda: (
-            self._drive_facing_direction
+            self._drive_field_facing
                 .with_velocity_x(-self._smoothed_axis(self._joystick.getLeftY(), self._left_y_limiter, square_input=True)* self._max_speed)
                 .with_velocity_y(-self._smoothed_axis(self._joystick.getLeftX(), self._left_x_limiter, square_input=True)* self._max_speed)
                 .with_target_direction(Rotation2d(self.x_vector_to_target, self.y_vector_to_target))
