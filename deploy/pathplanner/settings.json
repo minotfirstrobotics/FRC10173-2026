@@ -1,6 +1,6 @@
 {
-  "robotWidth": 0.6858,
-  "robotLength": 0.6858,
+  "robotWidth": 0.838,
+  "robotLength": 0.838,
   "holonomicMode": true,
   "pathFolders": [],
   "autoFolders": [],
@@ -29,6 +29,7 @@
   "bumperOffsetX": 0.0,
   "bumperOffsetY": 0.0,
   "robotFeatures": [
-    "{\"name\":\"Rectangle\",\"type\":\"rounded_rect\",\"data\":{\"center\":{\"x\":0.475,\"y\":0.0},\"size\":{\"width\":0.6731,\"length\":0.2921},\"borderRadius\":0.015,\"strokeWidth\":0.02,\"filled\":false}}"
+    "{\"name\":\"Robot Frame\",\"type\":\"rounded_rect\",\"data\":{\"center\":{\"x\":0.0,\"y\":0.0},\"size\":{\"width\":0.686,\"length\":0.6858},\"borderRadius\":0.015,\"strokeWidth\":0.02,\"filled\":false}}",
+    "{\"name\":\"Rectangle\",\"type\":\"rounded_rect\",\"data\":{\"center\":{\"x\":0.535,\"y\":0.0},\"size\":{\"width\":0.686,\"length\":0.2286},\"borderRadius\":0.02,\"strokeWidth\":0.02,\"filled\":false}}"
   ]
 }
