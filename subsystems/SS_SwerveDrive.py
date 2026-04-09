@@ -243,20 +243,20 @@ class SS_SwerveDrive(commands2.Subsystem):
     def _get_pov_pathfind_pose(self, pov_angle: int) -> Pose2d | None:
         zone_positions = {
             PathfindPOVTarget.TOP_RIGHT: (
-                wpilib.SmartDashboard.getNumber("Swerve/Pathfind Opponent X", 12.6),
-                wpilib.SmartDashboard.getNumber("Swerve/Pathfind Right Lane Y", 2.0),
+                wpilib.SmartDashboard.getNumber("Swerve/Pathfind Opponent X", 12.0),
+                wpilib.SmartDashboard.getNumber("Swerve/Pathfind Right Lane Y", 0.5),
             ),
             PathfindPOVTarget.BOTTOM_RIGHT: (
                 wpilib.SmartDashboard.getNumber("Swerve/Pathfind Alliance X", 4.0),
-                wpilib.SmartDashboard.getNumber("Swerve/Pathfind Right Lane Y", 2.0),
+                wpilib.SmartDashboard.getNumber("Swerve/Pathfind Right Lane Y", 0.5),
             ),
             PathfindPOVTarget.BOTTOM_LEFT: (
                 wpilib.SmartDashboard.getNumber("Swerve/Pathfind Alliance X", 4.0),
-                wpilib.SmartDashboard.getNumber("Swerve/Pathfind Left Lane Y", 6.0),
+                wpilib.SmartDashboard.getNumber("Swerve/Pathfind Left Lane Y", 7.5),
             ),
             PathfindPOVTarget.TOP_LEFT: (
-                wpilib.SmartDashboard.getNumber("Swerve/Pathfind Opponent X", 12.6),
-                wpilib.SmartDashboard.getNumber("Swerve/Pathfind Left Lane Y", 6.0),
+                wpilib.SmartDashboard.getNumber("Swerve/Pathfind Opponent X", 12.0),
+                wpilib.SmartDashboard.getNumber("Swerve/Pathfind Left Lane Y", 7.5),
             ),
         }
 
@@ -484,10 +484,10 @@ class SS_SwerveDrive(commands2.Subsystem):
 
     def _setup_pathfind_targets(self):
         # These are blue-alliance-origin coordinates. PathPlanner flips them for red at runtime.
-        wpilib.SmartDashboard.putNumber("Swerve/Pathfind Opponent X", 12.6)
-        wpilib.SmartDashboard.putNumber("Swerve/Pathfind Alliance X", 4.0)
-        wpilib.SmartDashboard.putNumber("Swerve/Pathfind Left Lane Y", 6.0)
-        wpilib.SmartDashboard.putNumber("Swerve/Pathfind Right Lane Y", 2.0)
+        wpilib.SmartDashboard.putNumber("Swerve/Pathfind Opponent X", 12.0)
+        wpilib.SmartDashboard.putNumber("Swerve/Pathfind Alliance X", 4.0) 
+        wpilib.SmartDashboard.putNumber("Swerve/Pathfind Left Lane Y", 7.5)
+        wpilib.SmartDashboard.putNumber("Swerve/Pathfind Right Lane Y", 0.5)
         wpilib.SmartDashboard.putNumber("Swerve/Pathfind Max Velocity", 2.5)
         wpilib.SmartDashboard.putNumber("Swerve/Pathfind Max Acceleration", 2.0)
         wpilib.SmartDashboard.putNumber("Swerve/Pathfind Max Angular Velocity (rot/s)", 0.75)
