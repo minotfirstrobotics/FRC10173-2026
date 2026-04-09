@@ -61,6 +61,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         self.stop_distance = 1.0 # Default stop distance
         self.field = wpilib.Field2d()
         wpilib.SmartDashboard.putData("Field", self.field)
+        self._pathfind_cancel_deadband = 0.20
 
         self.PIDF_sysID_tuning_bindings()
         idle = swerve.requests.Idle() # Determine behavior when no other commands are running. 
@@ -235,7 +236,9 @@ class SS_SwerveDrive(commands2.Subsystem):
             rotationsToRadians(wpilib.SmartDashboard.getNumber("Swerve/Pathfind Max Angular Acceleration (rot/s^2)", 1.5)),
         )
 
-        return AutoBuilder.pathfindToPoseFlipped(target_pose, constraints, 0.0)
+        return AutoBuilder.pathfindToPoseFlipped(target_pose, constraints, 0.0).until(
+            self._driver_override_active
+        )
 
     def _get_pov_pathfind_pose(self, pov_angle: int) -> Pose2d | None:
         zone_positions = {
@@ -279,6 +282,23 @@ class SS_SwerveDrive(commands2.Subsystem):
             self._last_heading = Rotation2d(rx, ry)
 
         return self._last_heading
+
+    def _driver_override_active(self) -> bool:
+        cancel_deadband = wpilib.SmartDashboard.getNumber(
+            "Swerve/Pathfind Cancel Deadband",
+            self._pathfind_cancel_deadband,
+        )
+        self._pathfind_cancel_deadband = max(min(cancel_deadband, 1.0), 0.0)
+
+        left_x = self._joystick.getLeftX()
+        left_y = self._joystick.getLeftY()
+        right_x = self._joystick.getRightX()
+        right_y = self._joystick.getRightY()
+
+        return any(
+            abs(axis) > self._pathfind_cancel_deadband
+            for axis in (left_x, left_y, right_x, right_y)
+        )
 
     def free_rotate_drive_request_command(self, vx_requested, vy_requested, rotational_rate) -> commands2.Command:
         return self._request_command(lambda: (
@@ -472,3 +492,4 @@ class SS_SwerveDrive(commands2.Subsystem):
         wpilib.SmartDashboard.putNumber("Swerve/Pathfind Max Acceleration", 2.0)
         wpilib.SmartDashboard.putNumber("Swerve/Pathfind Max Angular Velocity (rot/s)", 0.75)
         wpilib.SmartDashboard.putNumber("Swerve/Pathfind Max Angular Acceleration (rot/s^2)", 1.5)
+        wpilib.SmartDashboard.putNumber("Swerve/Pathfind Cancel Deadband", self._pathfind_cancel_deadband)
