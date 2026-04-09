@@ -82,6 +82,10 @@ class SS_SwerveDrive(commands2.Subsystem):
         self._setup_padlock_target_chooser()
         self._setup_pathplanner_auto_builder()
 
+    def _request_command(self, request_supplier):
+        """Create a drive command that requires this subsystem, not just the CTRE drivetrain."""
+        return self.run(lambda: self.drivetrain.set_control(request_supplier()))
+
     def periodic(self) -> None:
         state = None
         try:
@@ -143,7 +147,7 @@ class SS_SwerveDrive(commands2.Subsystem):
     # Drive mode switching for joystick/gamepad control
     # -------------------------
     def drive_mode_field_centered(self) -> None:
-            return self.drivetrain.apply_request(lambda: (
+            return self._request_command(lambda: (
                 self._drive_field_centered
                     .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
                     .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
@@ -151,7 +155,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         ))
 
     def drive_mode_angular(self):
-        return self.drivetrain.apply_request(lambda: (
+        return self._request_command(lambda: (
             self._drive_facing_direction
                 .with_velocity_x(-self._smoothed_axis(self._joystick.getLeftY(), self._left_y_limiter, square_input=True)* self._max_speed)
                 .with_velocity_y(-self._smoothed_axis(self._joystick.getLeftX(), self._left_x_limiter, square_input=True)* self._max_speed)
@@ -160,7 +164,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         ))
     
     def drive_mode_hybrid(self):
-        return self.drivetrain.apply_request(lambda: (
+        return self._request_command(lambda: (
             self._drive_field_facing
                 .with_velocity_x(-self._smoothed_axis(self._joystick.getLeftY(), self._left_y_limiter, square_input=True) * self._max_speed)
                 .with_velocity_y(-self._smoothed_axis(self._joystick.getLeftX(), self._left_x_limiter, square_input=True) * self._max_speed)
@@ -168,7 +172,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         ))
     
     def drive_mode_padlocked(self) -> None:
-        return self.drivetrain.apply_request(lambda: (
+        return self._request_command(lambda: (
             self._drive_facing_direction
                 .with_velocity_x(-self._smoothed_axis(self._joystick.getLeftY(), self._left_y_limiter, square_input=True)* self._max_speed)
                 .with_velocity_y(-self._smoothed_axis(self._joystick.getLeftX(), self._left_x_limiter, square_input=True)* self._max_speed)
@@ -177,7 +181,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         ))
 
     def drive_mode_robot_centered(self) -> None:
-            return self.drivetrain.apply_request(lambda: (
+            return self._request_command(lambda: (
                 self._drive_robot_centered
                     .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
                     .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
@@ -196,7 +200,7 @@ class SS_SwerveDrive(commands2.Subsystem):
     # Drive requests for automated movement
     # -------------------------
     def drive_to_target(self):
-        return self.drivetrain.apply_request(lambda: (
+        return self._request_command(lambda: (
             self._drive_field_facing
                 .with_velocity_x(self.speed_to_target * self.x_direction_to_target)
                 .with_velocity_y(self.speed_to_target * self.y_direction_to_target)
@@ -220,7 +224,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         return self._last_heading
 
     def free_rotate_drive_request_command(self, vx_requested, vy_requested, rotational_rate) -> commands2.Command:
-        return self.drivetrain.apply_request(lambda: (
+        return self._request_command(lambda: (
             self._drive_field_centered
                 .with_velocity_x(vx_requested * self._max_speed)
                 .with_velocity_y(vy_requested * self._max_speed)
@@ -231,7 +235,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         if x_vector == 0 and y_vector == 0:
             x_vector = self.x_vector_to_target
             y_vector = self.y_vector_to_target
-        return self.drivetrain.apply_request(lambda: (
+        return self._request_command(lambda: (
             self._drive_facing_direction
                 .with_velocity_x(vx_requested * self._max_speed)
                 .with_velocity_y(vy_requested * self._max_speed)
@@ -272,7 +276,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         )
 
     def robot_pov_drive_request_command(self, direction_x, direction_y) -> commands2.Command:
-        return self.drivetrain.apply_request(lambda: (
+        return self._request_command(lambda: (
             self._drive_robot_centered
                 .with_velocity_x(direction_x * self._pov_speed)
                 .with_velocity_y(direction_y * self._pov_speed)

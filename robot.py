@@ -39,7 +39,7 @@ class RobotContainer:
         if self.gamepad: self.configure_gamepad_bindings()
 
     def configure_gamepad_bindings(self):
-        self.ss_swerve_drive.drivetrain.setDefaultCommand(self.defaultdrivemode)
+        self.ss_swerve_drive.setDefaultCommand(self.defaultdrivemode)
         if self.ss_shooter:
             self.gamepad.rightBumper().whileTrue(self.ss_shooter.hold_dashboard_velocity())
         if self.ss_feeder:
@@ -171,7 +171,7 @@ class MyRobot(commands2.TimedCommandRobot):
         continue until interrupted by another command, remove
         this line or comment it out. 
         """
-        self.container.ss_swerve_drive.drivetrain.setDefaultCommand(
+        self.container.ss_swerve_drive.setDefaultCommand(
             self.container.defaultdrivemode
         )
 
@@ -198,9 +198,10 @@ class MyRobot(commands2.TimedCommandRobot):
         This function is run once when the robot enters autonomous mode.
         Gets the selected autonomous command from the chooser and schedules it.
         """
-        self.container.ss_swerve_drive.drivetrain.setDefaultCommand(None)
+        self.container.ss_swerve_drive.removeDefaultCommand()
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
+        self.container.ss_swerve_drive.reset_field_oriented_perspective()
         self.autonomousCommand = self.container.get_autonomous_command()
         
         if not self.autonomousCommand:
