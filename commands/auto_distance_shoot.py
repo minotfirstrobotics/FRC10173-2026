@@ -22,7 +22,7 @@ class CMD_AutoDistanceShoot(commands2.Command):
     def update_and_get_required_shooter_speed(self) -> float:
         required_speed = self.get_required_shooter_speed()
         SmartDashboard.putNumber("SS_Telemetry/Shooter/Shooter Auto Distance Speed", required_speed)
-        return required_speed
+        return min(required_speed, self.shooter.max_rps)
 
     def initialize(self):
         required_speed = self.update_and_get_required_shooter_speed()
