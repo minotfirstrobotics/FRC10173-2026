@@ -1,6 +1,7 @@
 import commands2
 import wpilib
 import math
+from enum import IntEnum
 from wpimath import applyDeadband
 from wpimath.filter import SlewRateLimiter
 from wpimath.units import rotationsToRadians
@@ -16,8 +17,16 @@ from commands2.sysid import SysIdRoutine
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.config import RobotConfig, PIDConstants
 from pathplannerlib.controller import PPHolonomicDriveController
-from pathplannerlib.path import PathPlannerPath
+from pathplannerlib.path import PathPlannerPath, PathConstraints
 from wpilib import DriverStation
+
+
+class PathfindPOVTarget(IntEnum):
+    TOP_RIGHT = 45
+    BOTTOM_RIGHT = 135
+    BOTTOM_LEFT = 225
+    TOP_LEFT = 315
+
 
 class SS_SwerveDrive(commands2.Subsystem):
     def __init__(self, joystick) -> None:
@@ -80,6 +89,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         )
 
         self._setup_padlock_target_chooser()
+        self._setup_pathfind_targets()
         self._setup_pathplanner_auto_builder()
 
     def _request_command(self, request_supplier):
@@ -206,6 +216,53 @@ class SS_SwerveDrive(commands2.Subsystem):
                 .with_velocity_y(self.speed_to_target * self.y_direction_to_target)
                 .with_target_direction(self._heading_from_right_stick())
         ))
+
+    def pathfind_to_pov_zone(self, pov_angle: int) -> commands2.Command:
+        return commands2.DeferredCommand(
+            lambda: self._build_pathfind_to_pov_zone_command(pov_angle),
+            self,
+        )
+
+    def _build_pathfind_to_pov_zone_command(self, pov_angle: int) -> commands2.Command:
+        target_pose = self._get_pov_pathfind_pose(pov_angle)
+        if target_pose is None:
+            return commands2.cmd.none()
+
+        constraints = PathConstraints(
+            wpilib.SmartDashboard.getNumber("Swerve/Pathfind Max Velocity", 2.5),
+            wpilib.SmartDashboard.getNumber("Swerve/Pathfind Max Acceleration", 2.0),
+            rotationsToRadians(wpilib.SmartDashboard.getNumber("Swerve/Pathfind Max Angular Velocity (rot/s)", 0.75)),
+            rotationsToRadians(wpilib.SmartDashboard.getNumber("Swerve/Pathfind Max Angular Acceleration (rot/s^2)", 1.5)),
+        )
+
+        return AutoBuilder.pathfindToPoseFlipped(target_pose, constraints, 0.0)
+
+    def _get_pov_pathfind_pose(self, pov_angle: int) -> Pose2d | None:
+        zone_positions = {
+            PathfindPOVTarget.TOP_RIGHT: (
+                wpilib.SmartDashboard.getNumber("Swerve/Pathfind Opponent X", 12.6),
+                wpilib.SmartDashboard.getNumber("Swerve/Pathfind Right Lane Y", 2.0),
+            ),
+            PathfindPOVTarget.BOTTOM_RIGHT: (
+                wpilib.SmartDashboard.getNumber("Swerve/Pathfind Alliance X", 4.0),
+                wpilib.SmartDashboard.getNumber("Swerve/Pathfind Right Lane Y", 2.0),
+            ),
+            PathfindPOVTarget.BOTTOM_LEFT: (
+                wpilib.SmartDashboard.getNumber("Swerve/Pathfind Alliance X", 4.0),
+                wpilib.SmartDashboard.getNumber("Swerve/Pathfind Left Lane Y", 6.0),
+            ),
+            PathfindPOVTarget.TOP_LEFT: (
+                wpilib.SmartDashboard.getNumber("Swerve/Pathfind Opponent X", 12.6),
+                wpilib.SmartDashboard.getNumber("Swerve/Pathfind Left Lane Y", 6.0),
+            ),
+        }
+
+        target_xy = zone_positions.get(PathfindPOVTarget(pov_angle)) if pov_angle in PathfindPOVTarget._value2member_map_ else None
+        if target_xy is None:
+            return None
+
+        current_rotation = self.get_pose().rotation()
+        return Pose2d(target_xy[0], target_xy[1], current_rotation)
 
     def _heading_from_right_stick(self) -> Rotation2d:
         if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
@@ -404,3 +461,14 @@ class SS_SwerveDrive(commands2.Subsystem):
         self._padlock_target_chooser.addOption("Red Top Zone", (12.6, 6.0)) # Red alliance target
         self._padlock_target_chooser.addOption("Red Bottom Zone", (12.6, 2.0)) # Red alliance target
         wpilib.SmartDashboard.putData("Swerve/Padlock Target Chooser", self._padlock_target_chooser)
+
+    def _setup_pathfind_targets(self):
+        # These are blue-alliance-origin coordinates. PathPlanner flips them for red at runtime.
+        wpilib.SmartDashboard.putNumber("Swerve/Pathfind Opponent X", 12.6)
+        wpilib.SmartDashboard.putNumber("Swerve/Pathfind Alliance X", 4.0)
+        wpilib.SmartDashboard.putNumber("Swerve/Pathfind Left Lane Y", 6.0)
+        wpilib.SmartDashboard.putNumber("Swerve/Pathfind Right Lane Y", 2.0)
+        wpilib.SmartDashboard.putNumber("Swerve/Pathfind Max Velocity", 2.5)
+        wpilib.SmartDashboard.putNumber("Swerve/Pathfind Max Acceleration", 2.0)
+        wpilib.SmartDashboard.putNumber("Swerve/Pathfind Max Angular Velocity (rot/s)", 0.75)
+        wpilib.SmartDashboard.putNumber("Swerve/Pathfind Max Angular Acceleration (rot/s^2)", 1.5)

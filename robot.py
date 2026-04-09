@@ -1,14 +1,13 @@
 import wpilib
 import commands2
 from commands2 import cmd
+from commands2.button import Trigger
 from wpilib import Color8Bit, SmartDashboard, Timer, DriverStation
-from wpimath.geometry import Pose2d, Rotation2d
 from phoenix6 import HootAutoReplay
-from pathplannerlib.auto import AutoBuilder, NamedCommands, PathConstraints
-from pathplannerlib.path import PathPlannerPath
+from pathplannerlib.auto import AutoBuilder, NamedCommands
 from commands2.button import CommandXboxController
 from generated.tuner_constants_2026_GF import TunerConstants
-from subsystems.SS_SwerveDrive import SS_SwerveDrive
+from subsystems.SS_SwerveDrive import SS_SwerveDrive, PathfindPOVTarget
 from subsystems.SS_Kraken import SS_Kraken
 from subsystems.SS_CANdleLight import SS_CANdleLight
 from subsystems.SS_CameraPose_left_old import SS_CameraPose_Left
@@ -64,6 +63,19 @@ class RobotContainer:
             self.gamepad.a().onFalse(self.defaultdrivemode)
             # self.gamepad.b().onTrue(self.ss_swerve_drive.drive_to_target())
             # self.gamepad.b().onFalse(self.defaultdrivemode)
+
+            Trigger(lambda: self.gamepad.getHID().getPOV() == PathfindPOVTarget.TOP_RIGHT).onTrue(
+                self.ss_swerve_drive.pathfind_to_pov_zone(PathfindPOVTarget.TOP_RIGHT)
+            )
+            Trigger(lambda: self.gamepad.getHID().getPOV() == PathfindPOVTarget.BOTTOM_RIGHT).onTrue(
+                self.ss_swerve_drive.pathfind_to_pov_zone(PathfindPOVTarget.BOTTOM_RIGHT)
+            )
+            Trigger(lambda: self.gamepad.getHID().getPOV() == PathfindPOVTarget.BOTTOM_LEFT).onTrue(
+                self.ss_swerve_drive.pathfind_to_pov_zone(PathfindPOVTarget.BOTTOM_LEFT)
+            )
+            Trigger(lambda: self.gamepad.getHID().getPOV() == PathfindPOVTarget.TOP_LEFT).onTrue(
+                self.ss_swerve_drive.pathfind_to_pov_zone(PathfindPOVTarget.TOP_LEFT)
+            )
 
             self.gamepad.back().and_(self.gamepad.start()).onTrue(
                 cmd.runOnce(self.ss_swerve_drive.reset_field_oriented_perspective) )
