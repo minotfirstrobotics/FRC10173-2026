@@ -38,7 +38,7 @@ def SEQ_auto_shake_intake(swerve: SS_SwerveDrive):
 def CMD_deploy_intake(extender: SS_Kraken, shooter: SS_Kraken):
     return commands2.SequentialCommandGroup(
         commands2.ParallelDeadlineGroup(
-            WaitCommand(2.0),
+            WaitCommand(7.0),
             cmd.run(lambda: extender._rotate_to_position(3), extender),
             cmd.run(
                 lambda: shooter._run_power_percent(-abs(shooter.percent_power_setpoint)),
