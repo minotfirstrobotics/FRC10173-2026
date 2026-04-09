@@ -157,13 +157,13 @@ class SS_SwerveDrive(commands2.Subsystem):
     # -------------------------
     # Drive mode switching for joystick/gamepad control
     # -------------------------
-    def drive_mode_field_centered(self) -> None:
-            return self._request_command(lambda: (
-                self._drive_field_centered
-                    .with_velocity_x(-self._joystick.getLeftY() * abs(self._joystick.getLeftY()) * self._max_speed)
-                    .with_velocity_y(-self._joystick.getLeftX() * abs(self._joystick.getLeftX()) * self._max_speed)
-                    .with_rotational_rate(-self._joystick.getRightX() * abs(self._joystick.getRightX()) * self._max_angular_rate)
-        ))
+def drive_mode_field_centered(self) -> None:
+    return self._request_command(lambda: (
+        self._drive_field_centered
+            .with_velocity_x(-(self._joystick.getLeftY() * abs(self._joystick.getLeftY())) * self._max_speed)
+            .with_velocity_y(-(self._joystick.getLeftX() * abs(self._joystick.getLeftX())) * self._max_speed)
+            .with_rotational_rate(-(self._joystick.getRightX() * abs(self._joystick.getRightX())) * self._max_angular_rate)
+    ))
 
     def drive_mode_angular(self):
         return self._request_command(lambda: (
