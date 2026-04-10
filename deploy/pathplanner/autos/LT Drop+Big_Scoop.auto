@@ -23,7 +23,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Deploy Intake"
+                  "name": "Run Intake"
                 }
               }
             ]
