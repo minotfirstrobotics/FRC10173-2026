@@ -350,7 +350,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
             tx, ty = (4.6, 4.0)
         else:
-            tx, ty = (12.0, 4.0)
+            tx, ty = (11.94, 4.0)
 
         self._forced_padlock_target = (tx, ty)
         self.target_x = tx
@@ -503,7 +503,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         self._padlock_target_chooser.addOption("Blue Target", (4.6, 4.0)) # Blue alliance target
         self._padlock_target_chooser.addOption("Blue Top Zone", (4.0, 6.0)) # Red alliance target
         self._padlock_target_chooser.addOption("Blue Bottom Zone", (4.0, 2.0)) # Red alliance target
-        self._padlock_target_chooser.addOption("Red Target", (12.0, 4.0)) # Red alliance target
+        self._padlock_target_chooser.addOption("Red Target", (11.94, 4.0)) # Red alliance target
         self._padlock_target_chooser.addOption("Red Top Zone", (12.6, 6.0)) # Red alliance target
         self._padlock_target_chooser.addOption("Red Bottom Zone", (12.6, 2.0)) # Red alliance target
         wpilib.SmartDashboard.putData("Swerve/Padlock Target Chooser", self._padlock_target_chooser)
