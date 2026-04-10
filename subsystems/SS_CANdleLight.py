@@ -64,10 +64,12 @@ class SS_CANdleLight(commands2.Subsystem):
                 self.rgb_white = rgb_white
                 if self.selected_animation is not self.set_animation_fire:
                     self.selected_animation(red=rgb_red, green=rgb_green, blue=rgb_blue, white=rgb_white)
-            present_voltage = round(self.candle.get_supply_voltage().value, 0)
+            present_voltage = round(self.candle.get_supply_voltage().value * 2) / 2 # Round to nearest 0.5V for stability in LED count changes 
             if present_voltage != self.supply_battery_voltage:
                 self.supply_battery_voltage = present_voltage
-                self.number_of_leds_to_light = int((present_voltage - 8) * 2)
+                self.number_of_leds_to_light = int((present_voltage - 8.5) * 2)
+                self.set_all_leds_RGBW(red=0, green=0, blue=0, white=0)  # Clear LEDs before applying new animation settings
+                if self.number_of_leds_to_light > 0: self.selected_animation()  # Update the animation to reflect the new number of LEDs to light
 
     # --------------------------
     # LED control functions - Red, Green, Blue, Alpha (transparency, usually 0 for full color)
