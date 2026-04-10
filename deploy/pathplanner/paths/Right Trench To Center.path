@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.5862054208273886,
+        "y": 0.5739087018544944
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.529568913618882,
+        "y": 0.5373028521478725
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.855962910128387,
+        "y": 0.7809272467902997
+      },
+      "prevControl": {
+        "x": 6.934370779970554,
+        "y": 0.7447798397079938
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "End of Right Trench to Center"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 95.35582504285519
+  },
+  "reversed": false,
+  "folder": "Nickos Autos",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "useDefaultConstraints": true
+}
