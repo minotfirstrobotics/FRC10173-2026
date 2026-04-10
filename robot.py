@@ -171,16 +171,10 @@ class MyRobot(commands2.TimedCommandRobot):
 
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
-        if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
-            if self.container.ss_candle_light_right:
-                self.container.ss_candle_light_right.set_all_leds_RGBW(255, 0, 0)
-            if self.container.ss_candle_light_left:
-                self.container.ss_candle_light_left.set_all_leds_RGBW(255, 0, 0)
-        elif DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
-            if self.container.ss_candle_light_right:
-                self.container.ss_candle_light_right.set_all_leds_RGBW(0, 0, 255)
-            if self.container.ss_candle_light_left:
-                self.container.ss_candle_light_left.set_all_leds_RGBW(0, 0, 255)
+        if self.container.ss_candle_light_right:
+            self.container.ss_candle_light_right.set_all_leds_RGBW()
+        if self.container.ss_candle_light_left:
+            self.container.ss_candle_light_left.set_all_leds_RGBW()
 
     def teleopPeriodic(self) -> None:
         """This function is called periodically during operator control"""
