@@ -30,8 +30,9 @@ class RobotContainer:
         self.ss_camera_pose_left = None or SS_CameraPose_Left(self.ss_swerve_drive)
         self.ss_camera_pose_right = None or SS_CameraPose_Right(self.ss_swerve_drive)
 
-        self._build_complex_commands_and_autochooser()
         self.auto_distance_shoot_command = CMD_AutoDistanceShoot(self.ss_shooter, self.ss_swerve_drive)
+        self.right_bumper_auto_distance_shoot_command = CMD_AutoDistanceShoot(self.ss_shooter, self.ss_swerve_drive)
+        self._build_complex_commands_and_autochooser()
         self._setup_simulated_mechanism2d()
         self.defaultdrivemode = self.ss_swerve_drive.drive_mode_field_centered()
 
@@ -40,7 +41,7 @@ class RobotContainer:
     def configure_gamepad_bindings(self):
         self.ss_swerve_drive.setDefaultCommand(self.defaultdrivemode)
         if self.ss_shooter:
-            self.gamepad.rightBumper().whileTrue(self.ss_shooter.hold_dashboard_velocity())
+            self.gamepad.rightBumper().whileTrue(self.right_bumper_auto_distance_shoot_command)
         if self.ss_feeder:
             self.gamepad.leftBumper().whileTrue(self.ss_feeder.hold_dashboard_velocity())
         if self.ss_intake:
@@ -49,7 +50,7 @@ class RobotContainer:
         #if self.ss_extend:
         #    self.gamepad.y().onTrue(self.ss_extend.rotate_to_position(3))
         #    self.gamepad.y().onFalse(self.ss_extend.stop_motor())
-        self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.ss_swerve_drive)
+        self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.ss_swerve_drive, self.gamepad)
         self.gamepad.x().whileTrue(self.cmd_combo_shoot)
         #self.gamepad.b().onTrue(CMD_deploy_intake(self.ss_extend, self.ss_shooter))
 
@@ -84,6 +85,9 @@ class RobotContainer:
         self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.ss_swerve_drive)
         SmartDashboard.putData("Commands/Combo Shoot", self.cmd_combo_shoot)
         NamedCommands.registerCommand("Combo Shoot", self.cmd_combo_shoot)
+
+        SmartDashboard.putData("Commands/Auto Distance Shoot", self.auto_distance_shoot_command)
+        NamedCommands.registerCommand("Auto Distance Shoot", self.auto_distance_shoot_command)
 
         self.seq_shoot = SEQ_shoot(self.ss_shooter, self.ss_feeder)
         SmartDashboard.putData("Commands/SEQ Shoot", self.seq_shoot)

@@ -355,10 +355,8 @@ class SS_Kraken(commands2.Subsystem):
             self,
         )
 
-    def is_at_velocity(self, tolerance: float = 10.0) -> bool:
+    def is_at_velocity(self, tolerance: float = 5.0) -> bool:
         return abs(self.velocity_actual - self.velocity_setpoint) < tolerance
-    
-    
 
     def rotate_to_position_and_wait(self, target_rotations = None):
         if target_rotations is None:

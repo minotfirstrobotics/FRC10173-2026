@@ -6,6 +6,7 @@ from wpilib import SmartDashboard
 from subsystems.SS_Kraken import SS_Kraken
 from subsystems.SS_SwerveDrive import SS_SwerveDrive
 from subsystems.SS_CANdleLight import SS_CANdleLight
+from commands.auto_distance_shoot import CMD_AutoDistanceShoot
 
 
 def SEQ_shoot(shooter: SS_Kraken, feeder: SS_Kraken):
@@ -55,25 +56,35 @@ class CMD_ComboShoot(commands2.Command):
         self.ss_shooter = ss_shooter
         self.ss_feeder = ss_feeder
         self.ss_swerve = ss_swerve
-        self.addRequirements(self.ss_shooter, self.ss_feeder) # Allow auto path following to keep control of swerve while shooting
+        self.addRequirements(self.ss_shooter, self.ss_feeder, self.ss_swerve)
         self._joystick = joystick
+        self._auto_distance_shoot = CMD_AutoDistanceShoot(self.ss_shooter, self.ss_swerve)
 
     def initialize(self):
-        range_in_meters = self.ss_swerve.range_to_target
-        shooter_setpoint = 5.17 * range_in_meters + 24.9
-        self.ss_shooter.set_velocity_setpoint(shooter_setpoint)
+        shooter_setpoint = self._auto_distance_shoot.apply_required_shooter_speed()
         SmartDashboard.putNumber("Shooter Setpoint", shooter_setpoint)
-        self.ss_shooter._run_at_velocity(shooter_setpoint) # Spin up shooter
 
     def execute(self):
-            if self.ss_shooter.is_at_velocity():
-                feeder_setpoint = self.ss_feeder.set_velocity_setpoint(
-                    self.ss_feeder.get_dashboard_velocity_setpoint(),
-                    publish_dashboard=False,
-                )
-                self.ss_feeder._run_at_velocity(feeder_setpoint) # Spin feeder using dashboard velocity directly
-            else:
-                self.ss_feeder._stop_motor() # Stop feeder if shooter is no longer at speed
+        shooter_setpoint = self._auto_distance_shoot.apply_required_shooter_speed()
+        SmartDashboard.putNumber("Shooter Setpoint", shooter_setpoint)
+        velocity_x = 0.0
+        velocity_y = 0.0
+        if self._joystick is not None:
+            velocity_x = self.ss_swerve.get_padlock_driver_velocity_x()
+            velocity_y = self.ss_swerve.get_padlock_driver_velocity_y()
+        self.ss_swerve.apply_padlock_drive(
+            velocity_x,
+            velocity_y,
+        )
+
+        if self.ss_shooter.is_at_velocity():
+            feeder_setpoint = self.ss_feeder.set_velocity_setpoint(
+                self.ss_feeder.get_dashboard_velocity_setpoint(),
+                publish_dashboard=False,
+            )
+            self.ss_feeder._run_at_velocity(feeder_setpoint)
+        else:
+            self.ss_feeder._stop_motor()
 
     def isFinished(self):
         if self._joystick is None:
