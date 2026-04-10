@@ -39,48 +39,18 @@
         "x": 2.75,
         "y": 7.5
       },
-      "nextControl": {
-        "x": 2.25,
-        "y": 7.5
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 3.625,
-        "y": 7.5
-      },
-      "prevControl": {
-        "x": 3.375,
-        "y": 7.5
-      },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "LT Deployed"
     }
   ],
   "rotationTargets": [],
-  "constraintZones": [
-    {
-      "name": "Slow",
-      "minWaypointRelativePos": 2.0,
-      "maxWaypointRelativePos": 2.5,
-      "constraints": {
-        "maxVelocity": 1.0,
-        "maxAcceleration": 1.0,
-        "maxAngularVelocity": 540.0,
-        "maxAngularAcceleration": 720.0,
-        "nominalVoltage": 12.0,
-        "unlimited": false
-      }
-    }
-  ],
+  "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
-    "maxAcceleration": 5.0,
+    "maxAcceleration": 4.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,

@@ -433,17 +433,17 @@ class SS_SwerveDrive(commands2.Subsystem):
             drive_subsystem=self
         )
 
-        path_1m = PathPlannerPath.fromPathFile("1m fowd")  # name matches the .path file
-        follow_command_1m = AutoBuilder.followPath(path_1m)
-        SmartDashboard.putData("Commands/Swerve/Follow 1m Fwd Path", follow_command_1m)
+        # path_1m = PathPlannerPath.fromPathFile("1m fowd")  # name matches the .path file
+        # follow_command_1m = AutoBuilder.followPath(path_1m)
+        # SmartDashboard.putData("Commands/Swerve/Follow 1m Fwd Path", follow_command_1m)
 
-        path_jerk = PathPlannerPath.fromPathFile("Jerk(F-B)")  # name matches the .path file
-        follow_command_jerk = AutoBuilder.followPath(path_jerk)
-        SmartDashboard.putData("Commands/Swerve/Jerk(F-B)", follow_command_jerk)
+        # path_jerk = PathPlannerPath.fromPathFile("Jerk(F-B)")  # name matches the .path file
+        # follow_command_jerk = AutoBuilder.followPath(path_jerk)
+        # SmartDashboard.putData("Commands/Swerve/Jerk(F-B)", follow_command_jerk)
 
-        path_trench = PathPlannerPath.fromPathFile("Under Trench Test")  # name matches the .path file
-        follow_command_trench = AutoBuilder.followPath(path_trench)
-        SmartDashboard.putData("Commands/Swerve/Trench", follow_command_trench)
+        # path_trench = PathPlannerPath.fromPathFile("Under Trench Test")  # name matches the .path file
+        # follow_command_trench = AutoBuilder.followPath(path_trench)
+        # SmartDashboard.putData("Commands/Swerve/Trench", follow_command_trench)
 
 
     def get_pose(self) -> Pose2d:
