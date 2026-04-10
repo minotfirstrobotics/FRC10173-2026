@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.90771754636234,
-        "y": 7.4572753209700435
+        "x": 7.5971897289586305,
+        "y": 7.043238231098431
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.963195435092723,
-        "y": 6.745649072753209
+        "x": 6.652667617689014,
+        "y": 6.331611982881596
       },
       "isLocked": false,
       "linkedName": "End of Left trench to center"
@@ -48,7 +48,7 @@
   "folder": "Nickos Autos",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -98.61564818416434
+    "rotation": -100.0
   },
   "useDefaultConstraints": true
 }
