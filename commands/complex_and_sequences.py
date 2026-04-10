@@ -11,15 +11,19 @@ from subsystems.SS_CANdleLight import SS_CANdleLight
 def SEQ_shoot(shooter: SS_Kraken, feeder: SS_Kraken):
     return commands2.SequentialCommandGroup(
         shooter.spin_up_and_wait(),
-        cmd.runOnce(lambda: shooter._run_at_velocity), # Ensure shooter is running at setpoint while feeder runs
-        cmd.runOnce(lambda: feeder._run_at_velocity).withTimeout(3.0), # Run feeder for 3 seconds after shooter is up to speed
-        cmd.runOnce(feeder._stop_motor).withTimeout(3.0), # Run feeder for 3 seconds after shooter is up to speed
-        cmd.runOnce(shooter._stop_motor).withTimeout(3.0), # Run feeder for 3 seconds after shooter is up to speed
+        commands2.ParallelDeadlineGroup(
+            WaitCommand(3.0),
+            shooter.hold_velocity(shooter.get_velocity_setpoint),
+            feeder.hold_velocity(feeder.get_dashboard_velocity_setpoint),
+        ),
+        cmd.runOnce(feeder._stop_motor),
+        cmd.runOnce(shooter._stop_motor),
     )
 
 def SEQ_extend_intake(extender: SS_Kraken):
     return commands2.SequentialCommandGroup(
-        cmd.runOnce(lambda: extender._rotate_to_position(1.5)).withTimeout(2.0),
+        cmd.runOnce(lambda: extender._rotate_to_position(1.5), extender),
+        WaitCommand(2.0),
         cmd.runOnce(extender._stop_motor)
     )
 
@@ -32,34 +36,48 @@ def SEQ_auto_shake_intake(swerve: SS_SwerveDrive):
     )
 
 def CMD_deploy_intake(extender: SS_Kraken, shooter: SS_Kraken):
-    return commands2.ParallelCommandGroup(
-        cmd.runOnce(lambda: extender._rotate_to_position(3)).withTimeout(2.0),
-        cmd.runOnce(shooter.run_power_percent_reverse).withTimeout(2.0)
+    return commands2.SequentialCommandGroup(
+        commands2.ParallelDeadlineGroup(
+            WaitCommand(5.0),
+            cmd.run(lambda: extender._rotate_to_position(3), extender),
+            cmd.run(
+                lambda: shooter._run_power_percent(-abs(shooter.percent_power_setpoint)),
+                shooter,
+            ),
+        ),
+        cmd.runOnce(extender._stop_motor, extender),
+        cmd.runOnce(shooter._stop_motor, shooter),
     )
 
 class CMD_ComboShoot(commands2.Command):
-    def __init__(self, ss_shooter: SS_Kraken, ss_feeder: SS_Kraken, ss_swerve: SS_SwerveDrive, joystick: CommandXboxController):
+    def __init__(self, ss_shooter: SS_Kraken, ss_feeder: SS_Kraken, ss_swerve: SS_SwerveDrive, joystick: CommandXboxController | None = None,):
         super().__init__()
         self.ss_shooter = ss_shooter
         self.ss_feeder = ss_feeder
         self.ss_swerve = ss_swerve
-        self.addRequirements(self.ss_shooter, self.ss_feeder, self.ss_swerve) # Ensure no other command these subsystems while this command is running
-        self.velocity_tolerance = 10 # RPM tolerance for considering the shooter "up to speed"
+        self.addRequirements(self.ss_shooter, self.ss_feeder) # Allow auto path following to keep control of swerve while shooting
         self._joystick = joystick
 
     def initialize(self):
         range_in_meters = self.ss_swerve.range_to_target
-        self.ss_shooter.velocity_setpoint = 5.17 * range_in_meters + 24.9
-        SmartDashboard.putNumber("Shooter Setpoint", self.ss_shooter.velocity_setpoint)
-        self.ss_shooter._run_at_velocity() # Spin up shooter
+        shooter_setpoint = 5.17 * range_in_meters + 24.9
+        self.ss_shooter.set_velocity_setpoint(shooter_setpoint)
+        SmartDashboard.putNumber("Shooter Setpoint", shooter_setpoint)
+        self.ss_shooter._run_at_velocity(shooter_setpoint) # Spin up shooter
 
     def execute(self):
-            if abs(self.ss_shooter.motor.get_velocity().value - self.ss_shooter.velocity_setpoint) < self.velocity_tolerance:
-                self.ss_feeder._run_at_velocity() # Spin feeder
+            if self.ss_shooter.is_at_velocity():
+                feeder_setpoint = self.ss_feeder.set_velocity_setpoint(
+                    self.ss_feeder.get_dashboard_velocity_setpoint(),
+                    publish_dashboard=False,
+                )
+                self.ss_feeder._run_at_velocity(feeder_setpoint) # Spin feeder using dashboard velocity directly
             else:
                 self.ss_feeder._stop_motor() # Stop feeder if shooter is no longer at speed
 
     def isFinished(self):
+        if self._joystick is None:
+            return False
         return not self._joystick.x().getAsBoolean()
 
     def end(self, interrupted):

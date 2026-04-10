@@ -1,18 +1,19 @@
 import wpilib
 import commands2
 from commands2 import cmd
+from commands2.button import Trigger
 from wpilib import Color8Bit, SmartDashboard, Timer, DriverStation
-from wpimath.geometry import Pose2d, Rotation2d
 from phoenix6 import HootAutoReplay
-from pathplannerlib.auto import AutoBuilder, NamedCommands, PathConstraints
-from pathplannerlib.path import PathPlannerPath
+from pathplannerlib.auto import AutoBuilder, NamedCommands
 from commands2.button import CommandXboxController
 from generated.tuner_constants_2026_GF import TunerConstants
-from subsystems.SS_SwerveDrive import SS_SwerveDrive
+from subsystems.SS_SwerveDrive import SS_SwerveDrive, PathfindPOVTarget
 from subsystems.SS_Kraken import SS_Kraken
 from subsystems.SS_CANdleLight import SS_CANdleLight
-from subsystems.SS_CameraPose import SS_CameraPose
-from commands.complex_and_sequences import CMD_ComboShoot, SEQ_shoot, SEQ_extend_intake, CMD_deploy_intake
+from subsystems.SS_CameraPose_left_old import SS_CameraPose_Left
+from subsystems.SS_CameraPose_right_old import SS_CameraPose_Right
+from commands.complex_and_sequences import CMD_ComboShoot, SEQ_shoot, CMD_deploy_intake
+from commands.auto_distance_shoot import CMD_AutoDistanceShoot
 
 class RobotContainer:
     def __init__(self) -> None:
@@ -20,39 +21,37 @@ class RobotContainer:
         DriverStation.silenceJoystickConnectionWarning(True)
         self.canbus = TunerConstants.canbus
         self.ss_shooter = None or SS_Kraken(3, self.canbus, "Shooter", inverted=True, max_rps=100, velocity_setpoint=40, kp=0.08, ki=0.0, kd=0.0, kv=0.012, ks=0.0)
-        self.ss_feeder = None or SS_Kraken(1, self.canbus, "Feeder", kp=1.0, velocity_setpoint=40, percent_power_setpoint=0.5)
-        self.ss_intake = None or SS_Kraken(4, self.canbus, "Intake", max_rps=120, percent_power_setpoint=0.5)
-        self.ss_extend = None or SS_Kraken(6, self.canbus, "Extension", inverted=True, brake_mode=True, kp=5, ki=0.5, vmax=.5, amax=.5, jerk=2.5)
+        self.ss_feeder = None or SS_Kraken(1, self.canbus, "Feeder", kp=1.0, velocity_setpoint=10, percent_power_setpoint=0.5)
+        self.ss_intake = None or SS_Kraken(4, self.canbus, "Intake", max_rps=120, percent_power_setpoint=0.55)
+        #self.ss_extend = None or SS_Kraken(6, self.canbus, "Extension", inverted=True, brake_mode=True, kp=5, ki=0.5, vmax=.5, amax=.5, jerk=2.5)
         self.ss_candle_light_left = None or SS_CANdleLight(2, self.canbus, "Left")
         self.ss_candle_light_right = None or SS_CANdleLight(5, self.canbus, "Right")
         self.ss_swerve_drive = None or SS_SwerveDrive(self.gamepad)
-        self.ss_camera_pose = None or SS_CameraPose(self.ss_swerve_drive)
+        self.ss_camera_pose_left = None or SS_CameraPose_Left(self.ss_swerve_drive)
+        self.ss_camera_pose_right = None or SS_CameraPose_Right(self.ss_swerve_drive)
 
         self._build_complex_commands_and_autochooser()
+        self.auto_distance_shoot_command = CMD_AutoDistanceShoot(self.ss_shooter, self.ss_swerve_drive)
         self._setup_simulated_mechanism2d()
         self.defaultdrivemode = self.ss_swerve_drive.drive_mode_field_centered()
 
         if self.gamepad: self.configure_gamepad_bindings()
 
     def configure_gamepad_bindings(self):
-        self.ss_swerve_drive.drivetrain.setDefaultCommand(self.defaultdrivemode)
+        self.ss_swerve_drive.setDefaultCommand(self.defaultdrivemode)
         if self.ss_shooter:
-            self.gamepad.rightBumper().onTrue(self.ss_shooter.run_at_velocity())
-            self.gamepad.rightBumper().onFalse(self.ss_shooter.stop_motor())
+            self.gamepad.rightBumper().whileTrue(self.ss_shooter.hold_dashboard_velocity())
         if self.ss_feeder:
-            self.gamepad.leftBumper().onTrue(self.ss_feeder.run_at_velocity())
-            self.gamepad.leftBumper().onFalse(self.ss_feeder.stop_motor())
+            self.gamepad.leftBumper().whileTrue(self.ss_feeder.hold_dashboard_velocity())
         if self.ss_intake:
-            self.gamepad.leftTrigger(threshold=.2).onTrue(self.ss_intake.run_power_percent_reverse())
-            self.gamepad.leftTrigger(threshold=.2).onFalse(self.ss_intake.stop_motor())
-            self.gamepad.rightTrigger(threshold=.2).onTrue(self.ss_intake.run_power_percent_forward())
-            self.gamepad.rightTrigger(threshold=.2).onFalse(self.ss_intake.stop_motor())
-            self.gamepad.y().onTrue(self.ss_extend.rotate_to_position(3))
-            self.gamepad.y().onFalse(self.ss_extend.stop_motor())
-        self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.ss_swerve_drive, self.gamepad)
-        self.gamepad.x().onTrue(self.cmd_combo_shoot)
-        self.gamepad.b().onTrue(CMD_deploy_intake(self.ss_extend, self.ss_shooter))
-        self.gamepad.b().onTrue(self.ss_extend.stop_motor())
+            self.gamepad.leftTrigger(threshold=.2).whileTrue(self.ss_intake.hold_dashboard_power_percent(-1.0))
+            self.gamepad.rightTrigger(threshold=.2).whileTrue(self.ss_intake.hold_dashboard_power_percent(1.0))
+        #if self.ss_extend:
+        #    self.gamepad.y().onTrue(self.ss_extend.rotate_to_position(3))
+        #    self.gamepad.y().onFalse(self.ss_extend.stop_motor())
+        self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.ss_swerve_drive)
+        self.gamepad.x().whileTrue(self.cmd_combo_shoot)
+        #self.gamepad.b().onTrue(CMD_deploy_intake(self.ss_extend, self.ss_shooter))
 
         # elif self.ss_shooter and self.ss_feeder:
         #     self.gamepad.rightBumper().whileTrue(CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.gamepad))
@@ -65,15 +64,45 @@ class RobotContainer:
             # self.gamepad.b().onTrue(self.ss_swerve_drive.drive_to_target())
             # self.gamepad.b().onFalse(self.defaultdrivemode)
 
+            Trigger(lambda: self.gamepad.getHID().getPOV() == PathfindPOVTarget.TOP_RIGHT).onTrue(
+                self.ss_swerve_drive.pathfind_to_pov_zone(PathfindPOVTarget.TOP_RIGHT)
+            )
+            Trigger(lambda: self.gamepad.getHID().getPOV() == PathfindPOVTarget.BOTTOM_RIGHT).onTrue(
+                self.ss_swerve_drive.pathfind_to_pov_zone(PathfindPOVTarget.BOTTOM_RIGHT)
+            )
+            Trigger(lambda: self.gamepad.getHID().getPOV() == PathfindPOVTarget.BOTTOM_LEFT).onTrue(
+                self.ss_swerve_drive.pathfind_to_pov_zone(PathfindPOVTarget.BOTTOM_LEFT)
+            )
+            Trigger(lambda: self.gamepad.getHID().getPOV() == PathfindPOVTarget.TOP_LEFT).onTrue(
+                self.ss_swerve_drive.pathfind_to_pov_zone(PathfindPOVTarget.TOP_LEFT)
+            )
+
             self.gamepad.back().and_(self.gamepad.start()).onTrue(
                 cmd.runOnce(self.ss_swerve_drive.reset_field_oriented_perspective) )
 
     def _build_complex_commands_and_autochooser(self):
-        self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.ss_swerve_drive, self.gamepad)
+        self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.ss_swerve_drive)
         SmartDashboard.putData("Commands/Combo Shoot", self.cmd_combo_shoot)
-        NamedCommands.registerCommand("Shoot", self.cmd_combo_shoot)
-        NamedCommands.registerCommand("Deploy Intake", cmd.waitSeconds(2))
-        NamedCommands.registerCommand("Run Intake", cmd.waitSeconds(2))
+        NamedCommands.registerCommand("Combo Shoot", self.cmd_combo_shoot)
+
+        self.seq_shoot = SEQ_shoot(self.ss_shooter, self.ss_feeder)
+        SmartDashboard.putData("Commands/SEQ Shoot", self.seq_shoot)
+        NamedCommands.registerCommand("SEQ Shoot", self.seq_shoot)
+
+        #self.deploy_intake = CMD_deploy_intake(self.ss_extend, self.ss_shooter)
+        #SmartDashboard.putData("Commands/Deploy Intake", self.deploy_intake)
+        #NamedCommands.registerCommand("Deploy Intake", self.deploy_intake)
+
+        self.run_intake = self.ss_intake.run_power_percent_forward_dashboard()
+        SmartDashboard.putData("Commands/Run Intake", self.run_intake)
+        NamedCommands.registerCommand("Run Intake", self.run_intake)
+
+        self.unload = cmd.sequence(
+            self.ss_feeder.hold_velocity(self.ss_feeder.get_dashboard_velocity_setpoint).withTimeout(1.0),
+            self.ss_feeder.stop_motor(),
+        )
+        SmartDashboard.putData("Commands/Unload", self.unload)
+        NamedCommands.registerCommand("Unload", self.unload)
         
         self.auto_chooser = AutoBuilder.buildAutoChooser("None") # must be defined after SS's and all registered commands
         SmartDashboard.putData("Auto Chooser", self.auto_chooser)
@@ -87,8 +116,8 @@ class RobotContainer:
             self.feeder2d = self.root2d.appendLigament("feeder", 4, 0, 6, Color8Bit(0, 255, 0))
         if self.ss_shooter:
             self.shooter2d = self.root2d.appendLigament("shooter", 4, 135, 6, Color8Bit(255, 0, 0))
-        if self.ss_extend:
-            self.extend2d = self.root2d.appendLigament("extend", 2, 90, 3, Color8Bit(255, 255, 255))
+        #if self.ss_extend:
+        #    self.extend2d = self.root2d.appendLigament("extend", 2, 90, 3, Color8Bit(255, 255, 255))
         wpilib.SmartDashboard.putData("Mechanism", self.mech2d)
 
     def get_autonomous_command(self) -> commands2.Command:
@@ -141,10 +170,10 @@ class MyRobot(commands2.TimedCommandRobot):
             self.container.feeder2d.setLength(self.container.ss_feeder.velocity_actual/10)
         if self.container.ss_shooter:
             self.container.shooter2d.setLength(self.container.ss_shooter.velocity_actual/10)
-        if self.container.ss_extend:
-            self.container.extend2d.setAngle(90 - self.container.ss_extend.position_actual*90/2)
-        self.container.ss_shooter.velocity_setpoint = 5.17 * self.container.ss_swerve_drive.range_to_target + 24.9
-        SmartDashboard.putNumber(f"SS_Telemetry/Shooter/Shooter Velocity Setpoint", self.container.ss_shooter.velocity_setpoint)
+        #if self.container.ss_extend:
+        #    self.container.extend2d.setAngle(90 - self.container.ss_extend.position_actual*90/2)
+        calculated_shooter_speed = self.container.auto_distance_shoot_command.get_required_shooter_speed()
+        SmartDashboard.putNumber("SS_Telemetry/Shooter/Shooter Auto Distance Speed", calculated_shooter_speed)
 
 
     def teleopInit(self) -> None:
@@ -154,6 +183,10 @@ class MyRobot(commands2.TimedCommandRobot):
         continue until interrupted by another command, remove
         this line or comment it out. 
         """
+        self.container.ss_swerve_drive.setDefaultCommand(
+            self.container.defaultdrivemode
+        )
+
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
         if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
@@ -177,8 +210,10 @@ class MyRobot(commands2.TimedCommandRobot):
         This function is run once when the robot enters autonomous mode.
         Gets the selected autonomous command from the chooser and schedules it.
         """
+        self.container.ss_swerve_drive.removeDefaultCommand()
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
+        self.container.ss_swerve_drive.reset_field_oriented_perspective()
         self.autonomousCommand = self.container.get_autonomous_command()
         
         if not self.autonomousCommand:

@@ -63,20 +63,34 @@ class _KrakenSim:
         return max_rps
 
     def _get_commanded_fraction(self) -> float:
+        if self._subsystem is not None:
+            try:
+                command_mode = getattr(self._subsystem, "command_mode", "stopped")
+                if command_mode == "percent":
+                    percent = float(getattr(self._subsystem, "commanded_power_percent", 0.0))
+                    return max(min(percent, 1.0), -1.0)
+                if command_mode == "velocity":
+                    max_rps = self._get_max_rps()
+                    velocity = float(getattr(self._subsystem, "commanded_velocity_setpoint", 0.0))
+                    if max_rps > 0:
+                        return max(min(velocity / max_rps, 1.0), -1.0)
+                    return 0.0
+            except Exception:
+                pass
+
         if self._motor is None:
             return 0.0
 
-        # Prefer applied motor voltage because it works across open-loop and closed-loop modes.
-        try:
-            volts = float(self._motor.get_motor_voltage().value)
-            return max(min(volts / 12.0, 1.0), -1.0)
-        except Exception:
-            pass
-
-        # Fallback to duty-cycle output.
+        # Fallback to the motor's reported output if subsystem command state is unavailable.
         try:
             duty = float(self._motor.get())
             return max(min(duty, 1.0), -1.0)
+        except Exception:
+            pass
+
+        try:
+            volts = float(self._motor.get_motor_voltage().value)
+            return max(min(volts / 12.0, 1.0), -1.0)
         except Exception:
             return 0.0
 

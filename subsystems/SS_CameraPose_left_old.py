@@ -7,7 +7,7 @@ from subsystems.command_swerve_drivetrain import CommandSwerveDrivetrain
 from photonlibpy import PhotonCamera, PhotonPoseEstimator
 from robotpy_apriltag import AprilTagField, AprilTagFieldLayout
 
-class SS_CameraPose(commands2.Subsystem):
+class SS_CameraPose_Left(commands2.Subsystem):
 
 
     def __init__(self, swerve_drive: SS_SwerveDrive):
@@ -19,11 +19,12 @@ class SS_CameraPose(commands2.Subsystem):
             self.leftcam = None
             self.estimator = None
             return
-        # load load field 
+        # load load field and dashboard toggle
+        SmartDashboard.putBoolean("Vision/Enable Left Camera", True)
         self.field_layout = AprilTagFieldLayout.loadField(AprilTagField.kDefaultField)
 
         # set camera
-        self.rightcam = PhotonCamera("LeftCamera") # Left=rightcam, not time to fix
+        self.leftcam = PhotonCamera("LeftCamera") # Left=rightcam, not time to fix
         #self.leftcam = PhotonCamera("LeftCamera") # unused for now, but we can add it later if we want
 
         # we need to measure this 
@@ -31,7 +32,7 @@ class SS_CameraPose(commands2.Subsystem):
             #Translation3d(0.3048, -0.3302, 0.4826), # meters forward, right, up from robot center
             #Rotation3d(0.0, 0.0, 0.0) # radians roll, pitch, yaw from robot forward
         #)
-        self.robot_to_rightcam = Transform3d(
+        self.robot_to_leftcam = Transform3d(
             Translation3d(-0.3048, 0.3302, 0.4826), # meters forward, left, up from robot center
             Rotation3d(0.0, 0.0, 3.14) # radians roll, pitch, yaw from robot forward
         )
@@ -39,15 +40,18 @@ class SS_CameraPose(commands2.Subsystem):
         # pos estimation
         self.estimator = PhotonPoseEstimator(
             self.field_layout,
-            self.robot_to_rightcam,
-            #self.robot_to_leftcam
+            #self.robot_to_rightcam,
+            self.robot_to_leftcam
         )
 
     def periodic(self):
         # grab cams 
-        if self.rightcam is None:
+        if self.leftcam is None:
             return
-        results = self.rightcam.getAllUnreadResults()
+        # Dashboard toggle
+        if not SmartDashboard.getBoolean("Vision/Enable Left Camera", True):
+            return
+        results = self.leftcam.getAllUnreadResults()
         if not results:
             return
 
@@ -72,7 +76,7 @@ class SS_CameraPose(commands2.Subsystem):
 
         # Dashboard
         pose = est.estimatedPose
-        SmartDashboard.putNumber("Vision/Vision X", pose.X())
-        SmartDashboard.putNumber("Vision/Vision Y", pose.Y())
-        SmartDashboard.putNumber("Vision/Vision Heading",
+        SmartDashboard.putNumber("Vision/Vision X left", pose.X())
+        SmartDashboard.putNumber("Vision/Vision Y left", pose.Y())
+        SmartDashboard.putNumber("Vision/Vision Heading left",
                                  pose.rotation().toRotation2d().degrees())
