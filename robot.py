@@ -6,13 +6,14 @@ from wpilib import Color8Bit, SmartDashboard, Timer, DriverStation
 from phoenix6 import HootAutoReplay
 from pathplannerlib.auto import AutoBuilder, NamedCommands
 from commands2.button import CommandXboxController
+from subsystems.ShiftTimer import ShiftTimer
 from generated.tuner_constants_2026_GF import TunerConstants
 from subsystems.SS_SwerveDrive import SS_SwerveDrive, PathfindPOVTarget
 from subsystems.SS_Kraken import SS_Kraken
 from subsystems.SS_CANdleLight import SS_CANdleLight
 from subsystems.SS_CameraPose_left_old import SS_CameraPose_Left
 from subsystems.SS_CameraPose_right_old import SS_CameraPose_Right
-from commands.complex_and_sequences import CMD_ComboShoot, SEQ_shoot, CMD_deploy_intake
+from commands.complex_and_sequences import CMD_ComboShoot, SEQ_shoot
 from commands.auto_distance_shoot import CMD_AutoDistanceShoot
 
 class RobotContainer:
@@ -193,6 +194,7 @@ class MyRobot(commands2.TimedCommandRobot):
 
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
+        self.shift_timer = ShiftTimer(self.localMatchTimer)
         if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
             if self.container.ss_candle_light_right:
                 self.container.ss_candle_light_right.set_all_leds_RGBW(255, 0, 0)
@@ -206,7 +208,7 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def teleopPeriodic(self) -> None:
         """This function is called periodically during operator control"""
-        pass
+        self.shift_timer.its_periodic()
 
 
     def autonomousInit(self) -> None:
