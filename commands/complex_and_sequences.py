@@ -20,33 +20,12 @@ def SEQ_shoot(shooter: SS_Kraken, feeder: SS_Kraken):
         cmd.runOnce(shooter._stop_motor),
     )
 
-def SEQ_extend_intake(extender: SS_Kraken):
-    return commands2.SequentialCommandGroup(
-        cmd.runOnce(lambda: extender._rotate_to_position(1.5), extender),
-        WaitCommand(2.0),
-        cmd.runOnce(extender._stop_motor)
-    )
-
 def SEQ_auto_shake_intake(swerve: SS_SwerveDrive):
     return commands2.SequentialCommandGroup(
         swerve.padlocked_drive_request_command(vx_requested=0.5, vy_requested=0.0, x_vector=1.0, y_vector=0.0).withTimeout(2.0),
         swerve.padlocked_drive_request_command(vx_requested=-1.5, vy_requested=0.0, x_vector=1.0, y_vector=0.0).withTimeout(1.0),
         swerve.padlocked_drive_request_command(vx_requested=2.0, vy_requested=0.0, x_vector=1.0, y_vector=0.0).withTimeout(0.2),
         swerve.padlocked_drive_request_command(vx_requested=-0.0, vy_requested=0.0, x_vector=1.0, y_vector=0.0).withTimeout(0.5),
-    )
-
-def CMD_deploy_intake(extender: SS_Kraken, shooter: SS_Kraken):
-    return commands2.SequentialCommandGroup(
-        commands2.ParallelDeadlineGroup(
-            WaitCommand(5.0),
-            cmd.run(lambda: extender._rotate_to_position(3), extender),
-            cmd.run(
-                lambda: shooter._run_power_percent(-abs(shooter.percent_power_setpoint)),
-                shooter,
-            ),
-        ),
-        cmd.runOnce(extender._stop_motor, extender),
-        cmd.runOnce(shooter._stop_motor, shooter),
     )
 
 class CMD_ComboShoot(commands2.Command):
