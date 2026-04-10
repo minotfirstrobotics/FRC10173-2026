@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.793223965763195,
-        "y": 7.4572753209700435
+        "x": 2.9263338088445074,
+        "y": 7.017360912981456
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.150014265335235,
-        "y": 6.823281027104137
+        "x": 1.1284320896849869,
+        "y": 6.284037956185755
       },
       "isLocked": false,
       "linkedName": "Trench - Left"
@@ -20,8 +20,8 @@
         "y": 5.438844507845934
       },
       "prevControl": {
-        "x": 2.111194010944346,
-        "y": 6.046959299465896
+        "x": 2.305663508245898,
+        "y": 6.071994694655641
       },
       "nextControl": null,
       "isLocked": false,
@@ -73,14 +73,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
+    "velocity": 0.0,
     "rotation": 145.0
   },
   "reversed": false,
   "folder": "Nickos Autos",
   "idealStartingState": {
-    "velocity": 0,
-    "rotation": 178.26429541107166
+    "velocity": 0.0,
+    "rotation": 179.22577983507188
   },
   "useDefaultConstraints": true
 }

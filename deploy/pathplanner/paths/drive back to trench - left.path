@@ -8,44 +8,79 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 8.59718972895863,
-        "y": 4.830727532097005
+        "x": 7.69210605729531,
+        "y": 5.429792637434773
       },
       "isLocked": false,
       "linkedName": "Center trench - left"
     },
     {
       "anchor": {
-        "x": 7.493680456490727,
-        "y": 5.568231098430813
+        "x": 7.700699001426534,
+        "y": 6.603323823109844
       },
       "prevControl": {
-        "x": 7.1760892956702955,
-        "y": 4.958121763170508
+        "x": 8.075692748965308,
+        "y": 5.872477437193085
       },
       "nextControl": {
-        "x": 7.985349500713266,
-        "y": 6.512753209700428
+        "x": 7.586571471942287,
+        "y": 6.825753378281414
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.793223965763195,
-        "y": 7.4572753209700435
+        "x": 6.937318116975749,
+        "y": 7.017360912981456
       },
       "prevControl": {
-        "x": 6.80793152639087,
-        "y": 7.483152639087019
+        "x": 7.175898966754964,
+        "y": 6.942667016854477
+      },
+      "nextControl": {
+        "x": 6.698737267196535,
+        "y": 7.092054809108434
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.9263338088445074,
+        "y": 7.017360912981456
+      },
+      "prevControl": {
+        "x": 3.5241347426272887,
+        "y": 6.956729016486418
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": "Trench - Left"
     }
   ],
-  "rotationTargets": [],
-  "constraintZones": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 2,
+      "rotationDegrees": -179.40319054877088
+    }
+  ],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 1.6,
+      "maxWaypointRelativePos": 3.0,
+      "constraints": {
+        "maxVelocity": 3.0,
+        "maxAcceleration": 3.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
@@ -57,13 +92,13 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": 178.26429541107166
+    "velocity": 0.0,
+    "rotation": 179.22577983507188
   },
   "reversed": false,
   "folder": "Nickos Autos",
   "idealStartingState": {
-    "velocity": 0,
+    "velocity": 0.0,
     "rotation": -104.03624346792637
   },
   "useDefaultConstraints": true
