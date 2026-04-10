@@ -5,9 +5,9 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "Deploy Intake"
+            "pathName": "LT Drop Intake"
           }
         },
         {
@@ -17,7 +17,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Big Scoop"
+                  "pathName": "LT Big Scoop"
                 }
               },
               {

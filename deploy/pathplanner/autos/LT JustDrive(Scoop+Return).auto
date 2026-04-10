@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "drive back"
+            "pathName": "LT Big Scoop"
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "SEQ Shoot"
+            "pathName": "LT Return+Target"
           }
         }
       ]

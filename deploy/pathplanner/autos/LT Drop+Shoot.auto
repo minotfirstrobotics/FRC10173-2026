@@ -7,13 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Big Scoop"
+            "pathName": "LT Drop Intake"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Return+Target"
+            "pathName": "LT Back Up+Shoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Combo Shoot"
           }
         }
       ]
