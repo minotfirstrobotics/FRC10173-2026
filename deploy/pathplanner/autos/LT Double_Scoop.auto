@@ -17,7 +17,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Big Scoop"
+                  "pathName": "LT Big Scoop"
                 }
               },
               {
@@ -32,7 +32,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Unload_Tunn"
+            "pathName": "LT Unload_Tunn"
           }
         },
         {
@@ -42,7 +42,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Take_All_Balls"
+                  "pathName": "LT Take_All_Balls "
                 }
               },
               {
@@ -57,7 +57,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Short_Return"
+            "pathName": "LT Short_Return"
           }
         },
         {

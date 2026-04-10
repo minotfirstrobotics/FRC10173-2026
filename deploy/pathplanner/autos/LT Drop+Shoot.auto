@@ -7,13 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "drive back"
+            "pathName": "LT Drop Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LT Back Up+Shoot"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "SEQ Shoot"
+            "name": "Combo Shoot"
           }
         }
       ]
