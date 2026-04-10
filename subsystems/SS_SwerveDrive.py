@@ -72,7 +72,7 @@ class SS_SwerveDrive(commands2.Subsystem):
         self.target_x = 0.0
         self.target_y = 0.0
         self._padlock_active = False
-        self.stop_distance = 1.0 # Default stop distance
+        self.stop_distance = 2.819 # Default stop distance
         self.field = wpilib.Field2d()
         wpilib.SmartDashboard.putData("Field", self.field)
         self._pathfind_cancel_deadband = 0.20
@@ -225,11 +225,9 @@ class SS_SwerveDrive(commands2.Subsystem):
     # Drive requests for automated movement
     # -------------------------
     def drive_to_target(self):
-        return self._request_command(lambda: (
-            self._drive_field_facing
-                .with_velocity_x(self.speed_to_target * self.x_direction_to_target)
-                .with_velocity_y(self.speed_to_target * self.y_direction_to_target)
-                .with_target_direction(self._heading_from_right_stick())
+        return self._request_command(lambda: self._build_padlock_request(
+            -self.speed_to_target * self.x_direction_to_target,
+            -self.speed_to_target * self.y_direction_to_target,
         ))
 
     def pathfind_to_pov_zone(self, pov_angle: int) -> commands2.Command:
