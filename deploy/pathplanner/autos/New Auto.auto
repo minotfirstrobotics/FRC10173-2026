@@ -7,13 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LT Back Up+Shoot"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Combo Shoot"
+            "pathName": "MD Drop Intake+Back Up"
           }
         }
       ]
