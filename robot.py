@@ -28,7 +28,7 @@ class RobotContainer:
         self.ss_candle_light_left = None or SS_CANdleLight(2, self.canbus, "Left")
         self.ss_candle_light_right = None or SS_CANdleLight(5, self.canbus, "Right")
         self.ss_swerve_drive = None or SS_SwerveDrive(self.gamepad)
-        self.ss_camera_pose_left = None or SS_CameraPose_Left(self.ss_swerve_drive)
+        #self.ss_camera_pose_left = None or SS_CameraPose_Left(self.ss_swerve_drive)
         self.ss_camera_pose_right = None or SS_CameraPose_Right(self.ss_swerve_drive)
 
         self.auto_distance_shoot_command = CMD_AutoDistanceShoot(self.ss_shooter, self.ss_swerve_drive)
