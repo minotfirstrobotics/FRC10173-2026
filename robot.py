@@ -65,6 +65,8 @@ class RobotContainer:
             self.gamepad.a().onFalse(self.defaultdrivemode)
             self.gamepad.b().onTrue(self.ss_swerve_drive.drive_to_target())
             self.gamepad.b().onFalse(self.defaultdrivemode)
+            self.gamepad.y().onTrue(self.ss_swerve_drive.drive_mode_non_smoothed())
+            self.gamepad.y().onFalse(self.defaultdrivemode)
 
             Trigger(lambda: self.gamepad.getHID().getPOV() == PathfindPOVTarget.TOP_RIGHT).onTrue(
                 self.ss_swerve_drive.pathfind_to_pov_zone(PathfindPOVTarget.TOP_RIGHT)
