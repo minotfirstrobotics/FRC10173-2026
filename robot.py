@@ -240,17 +240,6 @@ class MyRobot(commands2.TimedCommandRobot):
     def testInit(self) -> None:
         """Cancels all running commands at the start of test mode"""
         commands2.CommandScheduler.getInstance().cancelAll()
-        self.container.ss_swerve_drive.drive_mode_padlocked()
-        ''' # Example test code for manually testing subsystems during test mode, using the mechanism2d for visualization. Uncomment and modify as needed for testing.
-        if self.container.ss_shooter:
-            self.container.ss_shooter.velocity_setpoint = 50
-            self.container.ss_shooter._run_at_velocity()
-        if self.container.ss_feeder:
-            self.container.ss_feeder.percent_power_setpoint = .5
-            self.container.ss_feeder.run_voltage_percent_forward()
-        if self.container.ss_intake:
-            self.container.ss_intake.percent_power_setpoint = .5
-            self.container.ss_intake.run_voltage_percent_forward()'''
 
     def testPeriodic(self) -> None:
         """This function is called periodically during test mode"""
