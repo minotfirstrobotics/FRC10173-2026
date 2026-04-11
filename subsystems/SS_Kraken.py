@@ -9,7 +9,7 @@ from pathplannerlib.auto import NamedCommands
 class SS_Kraken(commands2.Subsystem):
     def __init__(self, device_id: int, canbus: CANBus, dashboard_name: str, 
                  inverted: bool=False, brake_mode: bool=False,
-                 max_rps: int=100, velocity_setpoint: float=0.0, percent_power_setpoint: float=0.0,
+                 max_rps: int=65, velocity_setpoint: float=0.0, percent_power_setpoint: float=0.0,
                  kp: float=0.0, ki: float=0.0, kd: float=0.0, kv: float=0.0, ks: float=0.0,
                  ka: float=0.0, kg: float=0.0, vmax: float=0.0, amax: float=0.0, jerk: float=0.0) -> None:
         self.motor = phoenix6.hardware.TalonFX(device_id, canbus)
