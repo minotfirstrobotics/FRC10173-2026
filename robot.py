@@ -42,7 +42,10 @@ class RobotContainer:
     def configure_gamepad_bindings(self):
         self.ss_swerve_drive.setDefaultCommand(self.defaultdrivemode)
         if self.ss_shooter:
-            self.gamepad.rightBumper().whileTrue(self.right_bumper_auto_distance_shoot_command)
+            self.gamepad.rightBumper().onTrue(
+                cmd.runOnce(lambda: self.ss_shooter._run_at_velocity_injected(self.ss_shooter.velocity_setpoint))
+            )
+            self.gamepad.rightBumper().onFalse(self.ss_shooter.stop_motor())
         if self.ss_feeder:
             self.gamepad.leftBumper().whileTrue(self.ss_feeder.hold_dashboard_velocity())
         if self.ss_intake:

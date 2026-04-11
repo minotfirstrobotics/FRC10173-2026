@@ -20,7 +20,7 @@ class CMD_AutoDistanceShoot(commands2.Command):
         return (2.25 * distance**3) - (19.78 * distance**2) + (57.88 * distance) - 18.38
 
     def get_required_shooter_speed(self) -> float:
-        return max(min(self.get_required_shooter_speed_raw(), self.shooter.max_rps), -self.shooter.max_rps)
+        return max(min(self.get_required_shooter_speed_raw(), 65), -65)
 
     def update_and_get_required_shooter_speed(self) -> float:
         required_speed = self.get_required_shooter_speed()
