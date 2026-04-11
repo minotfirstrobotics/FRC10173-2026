@@ -11,8 +11,7 @@ from generated.tuner_constants_2026_GF import TunerConstants
 from subsystems.SS_SwerveDrive import SS_SwerveDrive, PathfindPOVTarget
 from subsystems.SS_Kraken import SS_Kraken
 from subsystems.SS_CANdleLight import SS_CANdleLight
-from subsystems.SS_CameraPose_left_old import SS_CameraPose_Left
-from subsystems.SS_CameraPose_right_old import SS_CameraPose_Right
+from subsystems.SS_CameraPose import SS_CameraPose
 from commands.complex_and_sequences import CMD_ComboShoot, SEQ_shoot
 from commands.auto_distance_shoot import CMD_AutoDistanceShoot
 
@@ -28,8 +27,10 @@ class RobotContainer:
         self.ss_candle_light_left = None or SS_CANdleLight(2, self.canbus, "Left")
         self.ss_candle_light_right = None or SS_CANdleLight(5, self.canbus, "Right")
         self.ss_swerve_drive = None or SS_SwerveDrive(self.gamepad)
-        #self.ss_camera_pose_left = None or SS_CameraPose_Left(self.ss_swerve_drive)
-        self.ss_camera_pose_right = None or SS_CameraPose_Right(self.ss_swerve_drive)
+        self.ss_camera_pose_left = None or SS_CameraPose(self.ss_swerve_drive, "Left", 
+                                                              cam_location_fwd=-0.3048, cam_location_left=0.3302, cam_location_up=0.4826, cam_rotation_yaw=3.14)
+        self.ss_camera_pose_right = None or SS_CameraPose(self.ss_swerve_drive, "Right",
+                                                                cam_location_fwd=-0.3048, cam_location_left=-0.3048, cam_location_up=0.4064, cam_rotation_yaw=3.14)
 
         self.auto_distance_shoot_command = CMD_AutoDistanceShoot(self.ss_shooter, self.ss_swerve_drive)
         self.right_bumper_auto_distance_shoot_command = CMD_AutoDistanceShoot(self.ss_shooter, self.ss_swerve_drive)
@@ -56,12 +57,7 @@ class RobotContainer:
         #    self.gamepad.y().onFalse(self.ss_extend.stop_motor())
         self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.ss_swerve_drive, self.gamepad)
         self.gamepad.x().whileTrue(self.cmd_combo_shoot)
-        #self.gamepad.b().onTrue(CMD_deploy_intake(self.ss_extend, self.ss_shooter))
 
-        # elif self.ss_shooter and self.ss_feeder:
-        #     self.gamepad.rightBumper().whileTrue(CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.gamepad))
-        # elif self.ss_shooter and self.ss_feeder:
-        #     self.gamepad.x().onFalse(SEQ_shoot(self.ss_shooter, self.ss_feeder))
 
         if self.ss_swerve_drive:
             self.gamepad.a().onTrue(self.ss_swerve_drive.drive_mode_padlocked())
@@ -99,13 +95,11 @@ class RobotContainer:
         SmartDashboard.putData("Commands/SEQ Shoot", self.seq_shoot)
         NamedCommands.registerCommand("SEQ Shoot", self.seq_shoot)
 
-        #self.deploy_intake = CMD_deploy_intake(self.ss_extend, self.ss_shooter)
-        #SmartDashboard.putData("Commands/Deploy Intake", self.deploy_intake)
-        #NamedCommands.registerCommand("Deploy Intake", self.deploy_intake)
-
         self.run_intake = self.ss_intake.run_power_percent_forward_dashboard()
         SmartDashboard.putData("Commands/Run Intake", self.run_intake)
         NamedCommands.registerCommand("Run Intake", self.run_intake)
+
+        self.auto_distance_shoot_command = CMD_AutoDistanceShoot(self.ss_shooter, self.ss_swerve_drive)
 
         self.unload = cmd.sequence(
             self.ss_feeder.hold_velocity(self.ss_feeder.get_dashboard_velocity_setpoint).withTimeout(1.0),
@@ -126,8 +120,6 @@ class RobotContainer:
             self.feeder2d = self.root2d.appendLigament("feeder", 4, 0, 6, Color8Bit(0, 255, 0))
         if self.ss_shooter:
             self.shooter2d = self.root2d.appendLigament("shooter", 4, 135, 6, Color8Bit(255, 0, 0))
-        #if self.ss_extend:
-        #    self.extend2d = self.root2d.appendLigament("extend", 2, 90, 3, Color8Bit(255, 255, 255))
         wpilib.SmartDashboard.putData("Mechanism", self.mech2d)
 
     def get_autonomous_command(self) -> commands2.Command:
@@ -180,10 +172,8 @@ class MyRobot(commands2.TimedCommandRobot):
             self.container.feeder2d.setLength(self.container.ss_feeder.velocity_actual/10)
         if self.container.ss_shooter:
             self.container.shooter2d.setLength(self.container.ss_shooter.velocity_actual/10)
-        #if self.container.ss_extend:
-        #    self.container.extend2d.setAngle(90 - self.container.ss_extend.position_actual*90/2)
-        calculated_shooter_speed = self.container.auto_distance_shoot_command.get_required_shooter_speed()
-        SmartDashboard.putNumber("SS_Telemetry/Shooter/Shooter Auto Distance Speed", calculated_shooter_speed)
+            calculated_shooter_speed = self.container.auto_distance_shoot_command.get_required_shooter_speed()
+            SmartDashboard.putNumber("SS_Telemetry/Shooter/Shooter Auto Distance Speed", calculated_shooter_speed)
 
 
     def teleopInit(self) -> None:
