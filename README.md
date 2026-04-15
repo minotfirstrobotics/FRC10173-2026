@@ -1,16 +1,7 @@
 # To Do List:
-* determine why bot drifts toward target in simulation
-* Get photonvision apriltagging - app configured and rio coded
-* Get photonvision streaming
-* calculate range to target
-* determine field area and target certain locations
 * Determine logging strategies (SignalLogger.enable_auto_logging(True), hoot, etc )
-* dropdown selector on dashboard for drive mode
-* dropdown selector on dashboard for CANDle animations
-* battery voltage mapped to CANDle brightness
+* dropdown selector/display on dashboard for current drive mode
 * move_to_position_and_wait in SS_kraken
-* 7.44 x - 182 (inverted)
-* 0.131 * inches + 24.9 = rps
 
 # Dependencies:
 * pip install robotpy

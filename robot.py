@@ -1,4 +1,5 @@
 import wpilib
+import wpinet
 import commands2
 from commands2 import cmd
 from commands2.button import Trigger
@@ -139,6 +140,8 @@ class MyRobot(commands2.TimedCommandRobot):
         Instantiate our RobotContainer.  This will perform all our button bindings, and put our
         autonomous chooser on the dashboard.
         """
+        wpinet.WebServer.getInstance().start(5800, wpilib.getDeployDirectory()) 
+        # Start the WPILib web dashboard server on port 5800 for sharing/merging dashboards
         self.autonomousCommand = None
         self.container = RobotContainer()
         self.localMatchTimer = Timer()
@@ -190,16 +193,10 @@ class MyRobot(commands2.TimedCommandRobot):
         self.localMatchTimer.reset()
         self.localMatchTimer.start()
         self.shift_timer = ShiftTimer(self.localMatchTimer)
-        if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
-            if self.container.ss_candle_light_right:
-                self.container.ss_candle_light_right.set_all_leds_RGBW(255, 0, 0)
-            if self.container.ss_candle_light_left:
-                self.container.ss_candle_light_left.set_all_leds_RGBW(255, 0, 0)
-        elif DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
-            if self.container.ss_candle_light_right:
-                self.container.ss_candle_light_right.set_all_leds_RGBW(0, 0, 255)
-            if self.container.ss_candle_light_left:
-                self.container.ss_candle_light_left.set_all_leds_RGBW(0, 0, 255)
+        if self.container.ss_candle_light_right:
+                self.container.ss_candle_light_right.set_all_leds_RGBW()
+        if self.container.ss_candle_light_left:
+                self.container.ss_candle_light_left.set_all_leds_RGBW()
 
     def teleopPeriodic(self) -> None:
         """This function is called periodically during operator control"""
