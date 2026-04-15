@@ -2,6 +2,7 @@
 * Determine logging strategies (SignalLogger.enable_auto_logging(True), hoot, etc )
 * dropdown selector/display on dashboard for current drive mode
 * move_to_position_and_wait in SS_kraken
+* make telemetry fuctions for periodic updates, dashboard listeners, and reduced put/get processing time
 
 # Dependencies:
 * pip install robotpy

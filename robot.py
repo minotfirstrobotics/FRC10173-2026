@@ -24,25 +24,26 @@ class RobotContainer:
         self.ss_shooter = None or SS_Kraken(3, self.canbus, "Shooter", inverted=True, max_rps=100, velocity_setpoint=40, kp=0.08, ki=0.0, kd=0.0, kv=0.012, ks=0.0)
         self.ss_feeder = None or SS_Kraken(1, self.canbus, "Feeder", kp=1.0, velocity_setpoint=10, percent_power_setpoint=0.5)
         self.ss_intake = None or SS_Kraken(4, self.canbus, "Intake", max_rps=120, percent_power_setpoint=0.9)
-        #self.ss_extend = None or SS_Kraken(6, self.canbus, "Extension", inverted=True, brake_mode=True, kp=5, ki=0.5, vmax=.5, amax=.5, jerk=2.5)
-        self.ss_candle_light_left = None or SS_CANdleLight(2, self.canbus, "Left")
-        self.ss_candle_light_right = None or SS_CANdleLight(5, self.canbus, "Right")
+        self.ss_extend = None #or SS_Kraken(6, self.canbus, "Extension", inverted=True, brake_mode=True, kp=5, ki=0.5, vmax=.5, amax=.5, jerk=2.5)
+        self.ss_candle_light_left = None or SS_CANdleLight(2, self.canbus, "Left", init_R=0, init_G=255, init_B=0) # Set front CANdle to green
+        self.ss_candle_light_right = None or SS_CANdleLight(5, self.canbus, "Right", init_R=255, init_G=165, init_B=0) # Set rear CANdle to orange
         self.ss_swerve_drive = None or SS_SwerveDrive(self.gamepad)
         self.ss_camera_pose_left = None or SS_CameraPose(self.ss_swerve_drive, "Left", 
                                                               cam_location_fwd=-0.3048, cam_location_left=0.3302, cam_location_up=0.4826, cam_rotation_yaw=3.14)
         self.ss_camera_pose_right = None or SS_CameraPose(self.ss_swerve_drive, "Right",
                                                                 cam_location_fwd=-0.3048, cam_location_left=-0.3048, cam_location_up=0.4064, cam_rotation_yaw=3.14)
 
-        self.auto_distance_shoot_command = CMD_AutoDistanceShoot(self.ss_shooter, self.ss_swerve_drive)
-        self.right_bumper_auto_distance_shoot_command = CMD_AutoDistanceShoot(self.ss_shooter, self.ss_swerve_drive)
-        self._build_complex_commands_and_autochooser()
-        self._setup_simulated_mechanism2d()
+        if self.ss_candle_light_right:
+            self.ss_candle_light_right.set_all_leds_RGBW(0, 255, 0) # Set front CANdle to green
+        if self.ss_candle_light_left:
+            self.ss_candle_light_left.set_all_leds_RGBW(255, 165, 0) # Set rear CANdle to orange
+
         self.defaultdrivemode = self.ss_swerve_drive.drive_mode_field_centered()
+        self._init_simulated_mechanism2d()
+        self._init_complex_commands_and_autochooser()
+        if self.gamepad: self._init_gamepad_bindings()
 
-        if self.gamepad: self.configure_gamepad_bindings()
-
-    def configure_gamepad_bindings(self):
-        self.ss_swerve_drive.setDefaultCommand(self.defaultdrivemode)
+    def _init_gamepad_bindings(self):
         if self.ss_shooter:
             self.gamepad.rightBumper().onTrue(
                 cmd.runOnce(lambda: self.ss_shooter._run_at_velocity_injected(self.ss_shooter.velocity_setpoint))
@@ -53,14 +54,11 @@ class RobotContainer:
         if self.ss_intake:
             self.gamepad.leftTrigger(threshold=.2).whileTrue(self.ss_intake.hold_dashboard_power_percent(-1.0))
             self.gamepad.rightTrigger(threshold=.2).whileTrue(self.ss_intake.hold_dashboard_power_percent(1.0))
-        #if self.ss_extend:
-        #    self.gamepad.y().onTrue(self.ss_extend.rotate_to_position(3))
-        #    self.gamepad.y().onFalse(self.ss_extend.stop_motor())
-        self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.ss_swerve_drive, self.gamepad)
-        self.gamepad.x().whileTrue(self.cmd_combo_shoot)
-
-
+        if self.ss_extend:
+            self.gamepad.y().onTrue(self.ss_extend.rotate_to_position(3))
+            self.gamepad.y().onFalse(self.ss_extend.stop_motor())
         if self.ss_swerve_drive:
+            self.ss_swerve_drive.setDefaultCommand(self.defaultdrivemode)
             self.gamepad.a().onTrue(self.ss_swerve_drive.drive_mode_padlocked())
             self.gamepad.a().onFalse(self.defaultdrivemode)
             self.gamepad.b().onTrue(self.ss_swerve_drive.drive_to_target())
@@ -83,9 +81,13 @@ class RobotContainer:
 
             self.gamepad.back().and_(self.gamepad.start()).onTrue(
                 cmd.runOnce(self.ss_swerve_drive.reset_field_oriented_perspective) )
+        if self.ss_shooter and self.ss_feeder and self.ss_swerve_drive and self.gamepad:
+            self.gamepad.x().whileTrue(self.cmd_combo_shoot)
 
-    def _build_complex_commands_and_autochooser(self):
-        self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.ss_swerve_drive)
+    def _init_complex_commands_and_autochooser(self):
+        self.auto_distance_shoot_command = CMD_AutoDistanceShoot(self.ss_shooter, self.ss_swerve_drive)
+
+        self.cmd_combo_shoot = CMD_ComboShoot(self.ss_shooter, self.ss_feeder, self.ss_swerve_drive, self.gamepad)
         SmartDashboard.putData("Commands/Combo Shoot", self.cmd_combo_shoot)
         NamedCommands.registerCommand("Combo Shoot", self.cmd_combo_shoot)
 
@@ -112,7 +114,7 @@ class RobotContainer:
         self.auto_chooser = AutoBuilder.buildAutoChooser("None") # must be defined after SS's and all registered commands
         SmartDashboard.putData("Auto Chooser", self.auto_chooser)
 
-    def _setup_simulated_mechanism2d(self):
+    def _init_simulated_mechanism2d(self):
         self.mech2d = wpilib.Mechanism2d(10, 10)  # Width, Height
         self.root2d = self.mech2d.getRoot("root", 5, 2)
         if self.ss_intake:
@@ -137,19 +139,16 @@ class MyRobot(commands2.TimedCommandRobot):
         This function is run when the robot is first started up and should be used for any
         initialization code.
 
+        Enable sharing/merging dashboards.
+
         Instantiate our RobotContainer.  This will perform all our button bindings, and put our
         autonomous chooser on the dashboard.
         """
-        wpinet.WebServer.getInstance().start(5800, wpilib.getDeployDirectory()) 
-        # Start the WPILib web dashboard server on port 5800 for sharing/merging dashboards
+        wpinet.WebServer.getInstance().start(5800, wpilib.getDeployDirectory()) # 
         self.autonomousCommand = None
         self.container = RobotContainer()
         self.localMatchTimer = Timer()
         # self._time_and_driver_replay = (HootAutoReplay().with_timestamp_replay().with_driver_replay() )
-        if self.container.ss_candle_light_right:
-            self.container.ss_candle_light_right.set_all_leds_RGBW(0, 255, 0) # Set front CANdle to green
-        if self.container.ss_candle_light_left:
-            self.container.ss_candle_light_left.set_all_leds_RGBW(255, 165, 0) # Set rear CANdle to orange
 
     def robotPeriodic(self) -> None:
         """
@@ -194,9 +193,9 @@ class MyRobot(commands2.TimedCommandRobot):
         self.localMatchTimer.start()
         self.shift_timer = ShiftTimer(self.localMatchTimer)
         if self.container.ss_candle_light_right:
-                self.container.ss_candle_light_right.set_all_leds_RGBW()
+                self.container.ss_candle_light_right.set_all_leds_RGBW() # set to alliance colors
         if self.container.ss_candle_light_left:
-                self.container.ss_candle_light_left.set_all_leds_RGBW()
+                self.container.ss_candle_light_left.set_all_leds_RGBW() # set to alliance colors
 
     def teleopPeriodic(self) -> None:
         """This function is called periodically during operator control"""

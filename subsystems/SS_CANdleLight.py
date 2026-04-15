@@ -8,7 +8,8 @@ from phoenix6.controls import FireAnimation, SingleFadeAnimation, TwinkleAnimati
 from phoenix6.controls import TwinkleOffAnimation, SolidColor, ColorFlowAnimation
 
 class SS_CANdleLight(commands2.Subsystem):
-    def __init__(self, CANdle_channel: int, canbus, dashboard_name: str) -> None:
+    def __init__(self, CANdle_channel: int, canbus, dashboard_name: str,
+                 init_R: int=0, init_G: int=0, init_B: int=0, init_W: int=0) -> None:
         self.supply_battery_voltage = 0.0
         self.number_of_leds_to_light = 8
         self.candle = CANdle(CANdle_channel, canbus)
@@ -36,6 +37,11 @@ class SS_CANdleLight(commands2.Subsystem):
             self.rgb_green = 255
             self.rgb_blue = 255
             alliance_color_solid = lambda: self.set_all_leds_RGBW(red=self.rgb_red, green=self.rgb_green, blue=self.rgb_blue)
+        self._init_dashboard_animation_chooser(alliance_color_solid) # set the dashboard chooser to not update until a new animation is selected
+
+        self.set_all_leds_RGBW(init_R, init_G, init_B, init_W)
+
+    def _init_dashboard_animation_chooser(self, alliance_color_solid):
         self._color_chooser = wpilib.SendableChooser()
         self._color_chooser.setDefaultOption("Alliance Color Solid", alliance_color_solid) # Choose a target based on alliance and position
         self._color_chooser.addOption("Fire", self.set_animation_fire)
