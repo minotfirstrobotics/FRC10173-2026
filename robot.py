@@ -43,6 +43,8 @@ class RobotContainer:
         self._init_complex_commands_and_autochooser()
         if self.gamepad: self._init_gamepad_bindings()
 
+        wpilib.SmartDashboard.putBoolean("Demo Mode", False)
+
     def _init_gamepad_bindings(self):
         if self.ss_shooter:
             self.gamepad.rightBumper().onTrue(
@@ -168,6 +170,11 @@ class MyRobot(commands2.TimedCommandRobot):
         SmartDashboard.putNumber("Match Time", self.localMatchTimer.get() if match_time_from_driver_station < 0 else match_time_from_driver_station)
         voltage = wpilib.RobotController.getBatteryVoltage()
         SmartDashboard.putNumber("Battery Voltage", voltage)
+        demo_mode = wpilib.SmartDashboard.getBoolean("Demo Mode", False)
+        if demo_mode:
+            self.ss_shooter.max_rps = 10
+            self.ss_swerve_drive.max_speed_factor = 0.01
+
         if self.container.ss_intake:
             self.container.intake2d.setLength(-self.container.ss_intake.velocity_actual/10)
         if self.container.ss_feeder:
