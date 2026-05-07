@@ -172,8 +172,8 @@ class MyRobot(commands2.TimedCommandRobot):
         SmartDashboard.putNumber("Battery Voltage", voltage)
         demo_mode = wpilib.SmartDashboard.getBoolean("Demo Mode", False)
         if demo_mode:
-            self.ss_shooter.max_rps = 10
-            self.ss_swerve_drive.max_speed_factor = 0.01
+            self.container.ss_shooter.max_rps = 10
+            self.container.ss_swerve_drive._max_speed_factor = 0.1
 
         if self.container.ss_intake:
             self.container.intake2d.setLength(-self.container.ss_intake.velocity_actual/10)
